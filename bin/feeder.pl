@@ -32,7 +32,7 @@ while (1) {
 
         if (!-d $the_dir) {
             mkdir($the_dir);
-            system("/bin/touch", "$the_dir/last_modified");
+            Mojo::Util::spurt("0", "$the_dir/last_modified");
         }
         else {
             my @stat = stat($the_dir);
@@ -53,7 +53,7 @@ while (1) {
 
         my $tx = $ua->head($$feed{url});
         if (my $res = $tx->success) { 
-            my $last_modified = $tx->res->headers->last_modified;
+            my $last_modified = $tx->res->headers->last_modified || "";
             my $prev_modified = Mojo::Util::slurp("$the_dir/last_modified");
 
             system("/bin/touch", $the_dir);

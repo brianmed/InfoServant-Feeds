@@ -49,6 +49,7 @@ sub show {
         # $self->app->log->debug("title: " . $obj->key("title"));
         push(@feeds, { id => $$feed{id}, name => $obj->key("title") || $$feed{name} });
     }
+    @feeds = sort({ $a->{name} cmp $b->{name} } @feeds);
 
     $self->render(feeds => \@feeds);
 }
