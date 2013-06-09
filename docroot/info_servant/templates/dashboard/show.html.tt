@@ -1,0 +1,173 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="jquery-1.10.1.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+	<script src="/viewer/tinymce/js/tinymce/tinymce.min.js"></script>
+</head>
+<body>
+
+    <script type="text/javascript"  src="jquery-latest.js"></script>
+    <div>
+
+  <div class="navbar navbar-inverse">
+    <div class="navbar-inner">
+      <div class="container" style="width: auto;">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <a class="brand" href="/">InfoServant: Your information, delivered.</a>
+        <div class="nav-collapse">
+          <ul class="nav pull-right">
+            <li><a href="mailto:support@infoservant.com">Contact</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/logout">Logout</a></li>
+          </ul>
+        </div><!-- /.nav-collapse -->
+      </div>
+    </div><!-- /navbar-inner -->
+  </div><!-- /navbar -->
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span4">
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list">
+              [% IF have_feeds %]
+              <li class="nav-header">Feeds</li>
+              [% FOREACH feed IN feeds %]
+              <li id="li_feed[% feed.id %]"><a href="javascript:void(0)" onClick="showFeed([% feed.id %]);">[% feed.name | html %]</a></li>
+              [% END %]
+              [% IF 0 %]
+              <li class="nav-header">Utils</li>
+              <li id="li_call_nbr"><a href="javascript:void(0)" onClick="loadHtml('call_nbr');">Make a call</a></li>
+              <li id="li_quick_conference"><a href="javascript:void(0)" onClick="loadHtml('quick_conference');">Quick Conference</a></li>
+              [% END %]
+              [% END %]
+              <li class="nav-header">Account</li>
+              <li id="li_profile"><a href="javascript:void(0)" onClick="loadHtml('profile');">Profile</a></li>
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span8">
+          <div id=errors class="alert alert-error hide">
+          </div>
+
+          <div id=success class="alert alert-success hide">
+          </div>
+
+          <div id=info class="alert alert-info hide">
+          </div>
+
+            <div id=htmlBody>
+            </div>
+	<script>
+
+	</script>
+</head>
+<body>
+        </div><!--/span-->
+      </div><!--/row-->
+
+  </div>
+
+  </div>
+
+        <script>
+        $.ajaxSetup ({  
+            cache: false,
+            async: false
+        });
+
+        function loadHtml (link, script) {
+            var id = '#li_' + link;
+            $(".active").removeClass("active");
+            $(id).addClass("active");
+
+            $("#htmlBody").load("/dashboard/html/" + link);
+            $.getScript("/dashboard/javascript/" + link);
+            if (script) {
+                script = unescape(script);
+                eval(script);
+            }
+        }
+
+        function showEntry (feed_nbr, entry_id) {
+            $("#htmlBody").load("/dashboard/feed/src/" + feed_nbr + "?entry_id=" + entry_id);
+            tinymce.init({selector:'textarea', readonly: 1, menubar: "false", plugins: "fullscreen", toolbar: "fullscreen"});
+        }
+
+        function showFeed (feed_nbr) {
+            var id = '#li_feed' + feed_nbr;
+
+            $("#feed_entries").remove();
+
+            if ("active" == $(id).attr("class")) {
+                $(".active").removeClass("active");
+                return;
+            }
+
+            $(".active").removeClass("active");
+            $(id).addClass("active");
+
+            $.ajax({
+                url: "/dashboard/feed/entries/" + feed_nbr,
+                success: function(data) { 
+                    $(id).append('<ol id=feed_entries>');
+                    for (var i=0; i<data.length; i++) {
+                        var entry = data[i];
+                        var link = "<li><a href='javascript:void(0)' onClick=\"showEntry(" + feed_nbr + ", '" + entry.entry_id + "');\">" + entry.title + "</a>";
+                        $('#feed_entries').append(link);
+                    }
+                    $(id).append('</ol>');
+                },
+            });
+
+            // $("#htmlBody").load("/dashboard/feed/src/" + feed_nbr);
+
+            // tinymce.init({selector:'textarea', readonly: 1, menubar: "false", plugins: "fullscreen", toolbar: "fullscreen"});
+
+                    /*
+                    var editor;
+                    CKEDITOR.replace('editor1');
+                    CKEDITOR.on( 'instanceReady', function( ev ) {
+                        editor = ev.editor;
+
+                        editor.setReadOnly( true );
+                    });
+                    */
+
+            /*
+            $.ajax({
+                url: "/dashboard/feed/link/" + feed_nbr,
+                success: function(data) { 
+                    var editor;
+                    CKEDITOR.on( 'instanceReady', function( ev ) {
+                        editor = ev.editor;
+
+                        editor.setReadOnly( true );
+                    });
+                },
+            });
+            */
+
+            // $("#iframeEntry").attr('src', "/dashboard/feed/src/" + feed_nbr);
+            /*
+            $.ajax({
+                url: "/dashboard/feed/url/" + feed_nbr,
+                success: function(data) { if(data.success) { } },
+            });
+            */
+        }
+
+        [% IF account_sid && stripe_code %]
+            loadHtml("voicemail");
+        [% ELSE %] 
+            loadHtml("profile");
+        [% END %]
+        </script>
+</body>
+</html>

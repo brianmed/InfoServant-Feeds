@@ -1,0 +1,23 @@
+
+function onSubmit(form)
+{
+    arguments.callee.count = ++arguments.callee.count || 1;
+
+    if (1 != arguments.callee.count) {
+        $("#info").html("Double click detected");
+
+        $("#info").fadeIn(1350)
+        setTimeout(function() {
+              $('#info').fadeOut(1350);
+        }, 8000);
+
+        return;
+    }
+
+    $("#htmlBody").load("/dashboard/html/profile?" + $(form).serialize());
+
+    arguments.callee.count = 0;
+
+    return false;
+}
+

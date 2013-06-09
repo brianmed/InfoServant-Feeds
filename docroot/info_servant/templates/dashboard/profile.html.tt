@@ -1,0 +1,144 @@
+[% IF reload %]
+    <script>
+        setTimeout(function() {
+            location.reload(true);
+        }, 1800);
+    </script>
+[% END %]
+
+[% UNLESS account_verified %]
+        [% IF success %]
+      <div id=success class="alert alert-success">
+        [% success %]
+      </div>
+      [% END %]
+
+        [% IF info %]
+      <div id=info class="alert alert-info">
+        [% info %]
+      </div>
+      [% END %]
+
+        [% IF errors %]
+      <div id=errors class="alert alert-error">
+        [% errors %]
+      </div>
+      [% END %]
+
+    <fieldset>
+      <legend>Profile</legend>
+
+    <form onsubmit="return onSubmit(this);" class="form-inline">
+        <button id="submitProfile" type="submit" class="btn btn-primary">Submit</button>
+        <input type="text" class="input-xlarge" name=verify_number value="[% verify_number %]" placeholder="Verification number">
+    </form>
+    </fieldset>
+[% END %]
+
+[% IF account_verified %]
+        [% IF success %]
+      <div id=success class="alert alert-success">
+        [% success %]
+      </div>
+      [% END %]
+
+        [% IF info %]
+      <div id=info class="alert alert-info">
+        [% info %]
+      </div>
+      [% END %]
+
+        [% IF errors %]
+      <div id=errors class="alert alert-error">
+        [% errors %]
+      </div>
+      [% END %]
+
+        <fieldset>
+          <legend>Profile</legend>
+
+            <form onsubmit="return onSubmit(this);" class="form-inline">
+                <button id="submitProfile" type="submit" class="btn btn-primary">Add</button>
+                <input type="text" class="input-xlarge" name=new_feed value="[% new_feed %]" placeholder="http://website.com/rss">
+                <p>Add new Feed.</p>
+            </form>
+
+        [% IF 0 %]
+            <form onsubmit="return onSubmit(this);" class="form-inline">
+            <input type="hidden" name=profile_group value="1">
+            <fieldset>
+          <label class="checkbox">
+          <input type="checkbox" name=email_rcpt_voicemail value=1 [% checked.email_rcpt_voicemail %]> Email when voicemail received.
+          </label>
+            <br>
+          <label class="checkbox">
+          <input type="checkbox" name=attach_message value=1 [% checked.attach_message %]> Attach message to email.
+          </label>
+            <br>
+              <button id="submit" type="submit" class="btn btn-primary">Update</button>
+            </fieldset>
+            </form>
+        [% END %]
+
+        </fieldset>
+[% END %]
+
+[% IF 0 %]
+[% IF stripe_code %]
+      <form onsubmit="return onSubmit(this);" class="form-inline">
+      <input type="hidden" name=cancel_account value="1">
+          <div class="control-group">
+            <div class="controls">
+                <button id="submit" type="submit" class="btn btn-primary">Cancel Account</button>
+            </div>
+          </div>
+    </form>
+[% ELSE %]
+      <form onsubmit="return onSubmit(this);" class="form-horizontal well">
+      <input type="hidden" name=process_cc value="1">
+        <fieldset>
+          <legend>Subscribe ($3.99/mo with 14 day trial)</legend>
+        </fieldset>
+          <div class="control-group">
+            <label class="control-label">Name on Card</label>
+            <div class="controls">
+              <input type=text class="input-xlarge" name=name value="[% name %]">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Credit Card</label>
+            <div class="controls">
+              <input type=text class="input-xlarge" name=number value="[% number %]">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Expiration: Month</label>
+            <div class="controls">
+              <input type=text class="input-xlarge" name=exp_month value="[% exp_month %]">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Expiration: Year</label>
+            <div class="controls">
+              <input type=text class="input-xlarge" name=exp_year value="[% exp_year %]">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">CVC</label>
+            <div class="controls">
+              <input type=text class="input-xlarge" name=cvc value="[% cvc %]">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <div class="controls">
+                <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </div>
+    </form>
+[% END %]
+[% END %]

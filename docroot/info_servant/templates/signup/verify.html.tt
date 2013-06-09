@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+</head>
+<body>
+
+    <script src="jquery-latest.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+
+  <div class="navbar navbar-inverse">
+    <div class="navbar-inner">
+      <div class="container" style="width: auto;">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <a class="brand" href="/">InfoServant: Your information, delivered.</a>
+        <div class="nav-collapse">
+          <ul class="nav pull-right">
+            <li><a href="mailto:support@infoservant.com">Contact</a></li>
+            <li class=active><a href="/verify">Verify</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="/login">Login</a></li>
+          </ul>
+        </div><!-- /.nav-collapse -->
+      </div>
+    </div><!-- /navbar-inner -->
+  </div><!-- /navbar -->
+
+  <div class="row">
+    <div class="span10 offset1">
+
+  [% IF errors %]
+      <div class="alert alert-error">
+        [% errors %]
+      </div>
+  [% END %]
+
+  [% IF success %]
+      <div class="alert alert-success">
+        [% success %]
+      </div>
+  [% END %]
+
+  [% IF info %]
+      <div class="alert alert-info">
+        [% info %]
+      </div>
+  [% END %]
+
+      <form action="/verify" class="form-horizontal well" method=post>
+        <fieldset>
+          <legend>Verify</legend>
+
+          <div class="control-group">
+            <div class="controls">
+              <input type="text" class="input-xlarge" id="email" name=email placeholder="Email" value=[% email %]>
+            </div>
+            <div class="controls">
+              <input type="text" class="input-xlarge" id="verify" name=verify placeholder="Verification code" value=[% verify %]>
+            </div>
+            <div class="controls">
+              <button type="submit" class="btn btn-primary">Verify</button>
+            </div>
+          </div>
+        <fieldset>
+      </form>
+
+    </div>
+  </div>
+</body>
+</html>
+
