@@ -14,7 +14,17 @@ function onSubmit(form)
         return;
     }
 
-    $("#htmlBody").load("/dashboard/html/profile?" + $(form).serialize());
+    var fd = new FormData(form);
+    $.ajax({
+        url: "/dashboard/html/profile",
+        type: "POST",
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function(data, textStatus, jqXHR) {
+            $("#htmlBody").html(data);
+        }
+    });
 
     arguments.callee.count = 0;
 

@@ -63,6 +63,22 @@
                 <p>Add new Feed.</p>
             </form>
 
+            <form onsubmit="return onSubmit(this);" class="form-inline" enctype="multipart/form-data" method="post">
+                <input type=hidden name=has_file value=1>
+                <button id="submitProfile" type="submit" class="btn btn-primary">Import Google Reader</button>
+                <input type="file" id=google_import name=google_import style="display:none">
+                <div class="input-append">
+                    <input type="text" class="input-xlarge" id=file_marker placeholder="subscriptions.xml">
+                    <a class="btn" onclick="$('input[id=google_import]').click();">Browse</a>
+                </div>
+                <script type="text/javascript">
+                $('input[id=google_import]').change(function() {
+                    $('#file_marker').val($(this).val());
+                });
+                </script>
+                <p>Import Google Reader Feeds.</p>
+            </form>
+
         [% IF 0 %]
             <form onsubmit="return onSubmit(this);" class="form-inline">
             <input type="hidden" name=profile_group value="1">

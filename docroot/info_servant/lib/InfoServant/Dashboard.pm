@@ -25,9 +25,10 @@ use SiteCode::Feed;
 use SiteCode::Feeds;
 use SiteCode::DBX;
 
-use HTML::Entities;
-
 use Mojo::Util;
+
+use HTML::Entities;
+use XML::Simple qw(:strict);
 
 sub show {
     my $self = shift;
@@ -54,6 +55,8 @@ sub show {
 
 sub profile {
     my $self = shift;
+
+    $self->app->log->debug("InfoServant::Dashboard::profile:" . $self->param("google_import"));
 
     if ($self->param("new_feed")) {
         my $new_feed = $self->param("new_feed");
@@ -109,6 +112,38 @@ sub profile {
                 $self->stash(error => "Unable to verify.");
             }
         }
+    }
+    elsif (ref($self->param("google_import"))) {
+        my $filename = "/tmp/google_import.$$.txt";
+        my $import = $self->param('google_import');
+        $import->move_to($filename);
+        my $ref = XMLin($filename, KeyAttr => { outline => 'xmlUrl' }, ForceArray => [ 'body', 'outline' ]);
+
+        my $outline = $ref->{body}[0]{outline};
+
+        my $account = SiteCode::Account->new(id => $self->session->{account_id});
+        my $count = 0;
+        foreach my $new_feed (sort keys %{ $outline }) {
+            if (SiteCode::Feed->exists(name => $new_feed, account => $account)) {
+                next;
+            }
+
+            SiteCode::Feed->addFeed(
+                account => $account,
+                url => $new_feed,
+                route => $self,
+            );
+            if ($@) {
+                my $err = $@;
+                $self->app->log->debug("InfoServant::Dashboard::profile::new_feed: $err");
+            }
+            else {
+                ++$count;
+                $self->stash(reload => 1);
+            }
+        }
+
+        $self->stash(info => "Imported $count feeds.");
     }
 }
 
@@ -184,6 +219,7 @@ sub retrieve_html {
     }
 
     my $page = $self->param("page");
+    $self->app->log->debug("page: $page");
 
     if ("profile" eq $page) {
         $self->profile();

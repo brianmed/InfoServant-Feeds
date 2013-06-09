@@ -32,6 +32,7 @@ while (1) {
 
         if (!-d $the_dir) {
             mkdir($the_dir);
+            system("/bin/touch", "$the_dir/last_modified");
         }
         else {
             my @stat = stat($the_dir);
@@ -43,15 +44,44 @@ while (1) {
             }
         }
 
+        my $ua = Mojo::UserAgent->new;
+        $ua->max_redirects(10);
+
+        openlog("feeder", 'cons,pid', 'user');
+        syslog('info', 'ua->head :: %s :: %s', $$, $$feed{url});
+        closelog();
+
+        my $tx = $ua->head($$feed{url});
+        if (my $res = $tx->success) { 
+            my $last_modified = $tx->res->headers->last_modified;
+            my $prev_modified = Mojo::Util::slurp("$the_dir/last_modified");
+
+            system("/bin/touch", $the_dir);
+
+            if ($last_modified eq $prev_modified) {
+                next;
+            }
+
+            Mojo::Util::spurt($last_modified, "$the_dir/last_modified");
+        }
+        else {
+            my ($err, $code) = $tx->error;
+            my $string =  $code ? "$code response: $err" : "Connection error: $err";
+
+            openlog("feeder", 'cons,pid', 'user');
+            syslog('info', "head error(%s) :: %s :: %s", $$feed{url}, $$, $string);
+            closelog();
+
+            system("/bin/touch", $the_dir);
+
+            next;
+        }
+
         openlog("feeder", 'cons,pid', 'user');
         syslog('info', 'ua->get :: %s :: %s', $$, $$feed{url});
         closelog();
 
-        my $ua = Mojo::UserAgent->new;
-        $ua->max_redirects(10);
-
-        my $tx = $ua->get($$feed{url});
-
+        $tx = $ua->get($$feed{url});
         if (my $res = $tx->success) { 
             Mojo::Util::spurt($res->body, "$the_dir/the.feed");
 
@@ -63,7 +93,7 @@ while (1) {
             my $string =  $code ? "$code response: $err" : "Connection error: $err";
 
             openlog("feeder", 'cons,pid', 'user');
-            syslog('info', "error(%s) :: %s :: %s", $$feed{url}, $$, $string);
+            syslog('info', "get error(%s) :: %s :: %s", $$feed{url}, $$, $string);
             closelog();
         }
 
