@@ -25,6 +25,7 @@ use Carp;
 
 has 'dbdsn' => ( isa => 'Str', is => 'ro', default => 'dbi:Pg:dbname=scotch_egg' );
 has 'dbh' => ( isa => 'DBI::db', is => 'ro', lazy => 1, builder => '_build_dbh' );
+has 'route' => ( isa => 'Mojolicious::Controller', is => 'ro' );
 
 sub _build_dbh {
     my $self = shift;
@@ -59,7 +60,10 @@ sub success {
     my @vars = @_;
 
     my $ret = $self->dbh()->do($sql, $attrs, @vars);
-    if ($ret) {
+    if (0 && $self->route()) {
+        $self->route->app->log->debug("ret: $ret");
+    }
+    if ($ret && 0 != $ret) {  # 0E0
         return(1);
     }
 

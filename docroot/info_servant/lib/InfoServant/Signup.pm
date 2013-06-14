@@ -76,6 +76,11 @@ sub add {
     my $vemail = $self->param("vemail");
     my $password = $self->param("password");
 
+    $self->stash(username => $self->param("username"));
+    $self->stash(email => $self->param("email"));
+    $self->stash(vemail => $self->param("vemail"));
+    $self->stash(password => $self->param("password"));
+
     $self->app->log->debug("InfoServant::Signup::add");
 
     if ($email ne $vemail) {
@@ -89,6 +94,7 @@ sub add {
             username => $username,
             email => $email,
             password => $password,
+            route => $self,
         );
 
         $account->sendVerifyEmail();

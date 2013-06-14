@@ -17,6 +17,7 @@ use Mojo::Util;
 use Mojo::UserAgent;
 
 my $data_dir = "/opt/infoservant.com/data/feed_files";
+Mojo::Util::spurt($$, "/tmp/feeder.pl.pid");
 
 while (1) {
     my $dbx = SiteCode::DBX->new();

@@ -113,9 +113,10 @@ sub addUser
     my $account;
 
     eval {
-        my $dbx = SiteCode::DBX->new();
+        my $dbx = SiteCode::DBX->new(route => $ops{route});
 
         my $exists = $dbx->success("SELECT 1 FROM account WHERE username = ? AND email = ? AND password = ?", undef, $username, lc $email, $password);
+        $ops{route}->app->log->debug("exists: $exists: username: $username: email: $email: password: $password");
         if ($exists) {
             my $verified = $self->key("verified");
             if ($verified) {
@@ -169,7 +170,8 @@ sub key
         FROM 
             user_key, user_value 
         WHERE user_key = ?
-    ), undef, $key);
+            AND account_id = ?
+    ), undef, $key, $self->id());
 
     my $ret = $row->{user_value};
     return($ret);
