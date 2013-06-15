@@ -1,4 +1,4 @@
-#!/usr/bin/env perl
+#!/opt/perl
 #
 # InfoServant - Your information, delivered.
 # Copyright (C) 2013 Brian Medley
@@ -21,7 +21,7 @@
 use strict;
 use warnings;
 
-# $DB::deep = 500;
+$DB::deep = 500;
 
 use FindBin;
 BEGIN { unshift @INC, "$FindBin::Bin/../lib" }

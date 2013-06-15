@@ -57,8 +57,6 @@ sub show {
 sub profile {
     my $self = shift;
 
-    $self->app->log->debug("InfoServant::Dashboard::profile:" . $self->param("google_import"));
-
     if ($self->param("new_feed")) {
         my $new_feed = $self->param("new_feed");
 
@@ -202,7 +200,7 @@ sub retrieve_feed_src {
     my $link = $feed->link(entry_id => $entry_id);
     my $title = $feed->title(entry_id => $entry_id);
 
-    my $html = sprintf(qq(
+    $html = sprintf(qq(
             <a href="$link" target=article>$title</a>
             <textarea id="editor1" name="editor1" cols="100" rows="40">
             %s

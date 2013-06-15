@@ -55,8 +55,8 @@
         <fieldset>
           <form class="well form-search" action="/login" method=post>
           <legend>Login</legend>
-          <input type="text" class="input-large" placeholder="Username or email" name=login value=[% login %]>
-          <input type="password" class="input-large" placeholder="Password" name=password value=[% password %]>
+          <input type="text" class="input-large" placeholder="Username or email" name=login value=[% login | html%]>
+          <input type="password" class="input-large" placeholder="Password" name=password value=[% password | html%]>
           <button type="submit" class="btn">Go</button>
           </form>
         </fieldset>

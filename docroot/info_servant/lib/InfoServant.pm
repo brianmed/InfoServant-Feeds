@@ -37,6 +37,7 @@ sub startup {
     $self->plugin(tt_renderer => {template_options => {CACHE_SIZE => 0}});
     $self->plugin('ParamCondition');
     $self->plugin('RenderFile');
+    $self->plugin('SaveRequest');
     
     $self->renderer->default_handler('tt');
 
@@ -58,7 +59,7 @@ sub startup {
     $r->any('/verify')->to(controller => 'Signup', action => 'verify');
 
     $r->any('/dashboard')->to(controller => 'Dashboard', action => 'show');
-    $r->any('/dashboard/html/:page')->to(controller => 'Dashboard', action => 'retrieve_html');
+    $r->any('/dashboard/html/:page')->over(save => "state")->to(controller => 'Dashboard', action => 'retrieve_html');
     $r->any('/dashboard/javascript/:page')->to(controller => 'Dashboard', action => 'retrieve_js');
     $r->get('/dashboard/feed/src/:feed_nbr')->to(controller => 'Dashboard', action => 'retrieve_feed_src');
     $r->get('/dashboard/feed/link/:feed_nbr')->to(controller => 'Dashboard', action => 'retrieve_feed_link');
