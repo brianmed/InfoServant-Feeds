@@ -33,7 +33,7 @@
 
     <div class="container-fluid">
       <div class="row-fluid">
-        <div class="span4">
+        <div class="span5">
           <div class="well sidebar-nav">
             <ul class="nav nav-list">
               [% IF have_feeds %]
@@ -52,7 +52,7 @@
             </ul>
           </div><!--/.well -->
         </div><!--/span-->
-        <div class="span8">
+        <div class="span7">
           <div id=errors class="alert alert-error hide">
           </div>
 

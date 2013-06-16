@@ -28,6 +28,7 @@ use SiteCode::DBX;
 use Mojo::Util;
 
 use HTML::Entities;
+use Regexp::Common qw(URI);
 use XML::Simple qw(:strict);
 
 sub show {
@@ -63,6 +64,8 @@ sub profile {
         my $feed = undef;
 
         eval {
+            die("Does not look like a http URI\n") if $new_feed !~ $RE{URI}{HTTP};
+
             my $account = SiteCode::Account->new(id => $self->session->{account_id});
 
             if (SiteCode::Feed->exists(name => $new_feed, account => $account)) {
@@ -79,6 +82,9 @@ sub profile {
             my $err = $@;
             if ("Feed exists already.\n" eq $err) {
                 $self->stash(errors => "Feed exists already");
+            }
+            elsif ("Does not look like a http URI\n" eq $err) {
+                $self->stash(errors => "Feed may not be properly formatted");
             }
             else {
                 $self->app->log->debug("InfoServant::Dashboard::profile::new_feed: $err");
