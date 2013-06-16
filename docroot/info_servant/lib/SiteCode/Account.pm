@@ -109,14 +109,25 @@ sub addUser
 
     my $time = time();
     my $md5 = Digest::MD5::md5_hex($time);
+    my $password_md5 = Digest::MD5::md5_hex($password);
 
     my $account;
 
     eval {
         my $dbx = SiteCode::DBX->new(route => $ops{route});
 
+        my $taken = $dbx->success("SELECT 1 FROM account WHERE UPPER(username) = ?", undef, uc $username);
+        if ($taken) {
+            die "Username already taken.\n";
+        }
+
+        $taken = $dbx->success("SELECT 1 FROM account WHERE email = ?", undef, lc $email);
+        if ($taken) {
+            die "Email already taken.\n";
+        }
+
         my $exists = $dbx->success("SELECT 1 FROM account WHERE username = ? AND email = ? AND password = ?", undef, $username, lc $email, $password);
-        $ops{route}->app->log->debug("exists: $exists: username: $username: email: $email: password: $password");
+        # $ops{route}->app->log->debug("exists: $exists: username: $username: email: $email: password: $password");
         if ($exists) {
             my $verified = $self->key("verified");
             if ($verified) {
@@ -129,10 +140,10 @@ sub addUser
             }
         }
 
-        $dbx->do("INSERT INTO account (username, email, password) VALUES (?, ?, ?)", undef, $username, lc $email, $password);
+        $dbx->do("INSERT INTO account (username, email, password) VALUES (?, ?, ?)", undef, $username, lc $email, $password_md5);
 
         my $id = $dbx->col("SELECT id FROM account WHERE username = ? AND email = ?", undef, $username, lc $email);
-        $account = SiteCode::Account->new(id => $id, password => $password);
+        $account = SiteCode::Account->new(id => $id, password => $password_md5);
         $account->key("verified", $md5);
     };
     if ($@) {
@@ -171,6 +182,8 @@ sub key
             user_key, user_value 
         WHERE user_key = ?
             AND account_id = ?
+            AND user_key.account_id = account_id
+            AND user_key.id = user_value.user_key_id
     ), undef, $key, $self->id());
 
     my $ret = $row->{user_value};

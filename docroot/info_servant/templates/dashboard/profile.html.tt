@@ -29,7 +29,7 @@
       <legend>Profile</legend>
 
     <form onsubmit="return onSubmit(this);" class="form-inline">
-        <button id="submitProfile" type="submit" class="btn btn-primary">Submit</button>
+        <button id="submitProfile" type="submit" class="btn btn-primary">Verify</button>
         <input type="text" class="input-xlarge" name=verify_number value="[% verify_number %]" placeholder="Verification number">
     </form>
     </fieldset>

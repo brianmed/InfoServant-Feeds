@@ -20,6 +20,7 @@ package InfoServant::Index;
 
 use Mojo::Base 'Mojolicious::Controller';
 
+use Digest::MD5;
 use SiteCode::Account;
 
 sub slash {
@@ -38,10 +39,9 @@ sub login {
     my $self = shift;
 
     my $login = $self->param("login");
-    my $password = $self->param("password");
+    my $password = Digest::MD5::md5_hex($self->param("password"));
 
     $self->stash(login => $login);
-    $self->stash(password => $password);
 
     if ($self->param("added")) {
         $self->stash(success => "Successfully added: please login.");

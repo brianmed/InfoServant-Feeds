@@ -110,7 +110,7 @@ sub profile {
                     $self->stash(error => "Already verified");
                 }
                 elsif ("VERIFIED" eq $status) {
-                    $self->info(error => "Sucessfully verified: thank you.");
+                    $self->stash(info => "Sucessfully verified: thank you.");
                 }
             }
             else {

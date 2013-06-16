@@ -61,7 +61,6 @@ sub restart {
     $self->stash(username => $username);
     $self->stash(email => $email);
     $self->stash(vemail => $vemail);
-    $self->stash(password => $password);
 
     $self->render("signup/start");
 }
@@ -79,7 +78,6 @@ sub add {
     $self->stash(username => $self->param("username"));
     $self->stash(email => $self->param("email"));
     $self->stash(vemail => $self->param("vemail"));
-    $self->stash(password => $self->param("password"));
 
     $self->app->log->debug("InfoServant::Signup::add");
 

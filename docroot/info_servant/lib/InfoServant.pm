@@ -36,7 +36,6 @@ sub startup {
     $self->plugin(AccessLog => {log => '/opt/infoservant.com/docroot/info_servant/log/access.log'});
     $self->plugin(tt_renderer => {template_options => {CACHE_SIZE => 0}});
     $self->plugin('ParamCondition');
-    $self->plugin('RenderFile');
     $self->plugin('SaveRequest');
     
     $self->renderer->default_handler('tt');
