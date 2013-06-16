@@ -22,15 +22,32 @@ use Moose;
 use namespace::autoclean;
 use DBI;
 use Carp;
+use DBIx::Connector
 
 has 'dbdsn' => ( isa => 'Str', is => 'ro', default => 'dbi:Pg:dbname=scotch_egg' );
 has 'dbh' => ( isa => 'DBI::db', is => 'ro', lazy => 1, builder => '_build_dbh' );
 has 'route' => ( isa => 'Mojolicious::Controller', is => 'ro' );
+has 'dbix' => ( isa => 'DBIx::Connector', is => 'ro', lazy => 1, builder => '_build_dbix' );
 
 sub _build_dbh {
     my $self = shift;
 
-    return DBI->connect($self->dbdsn(), "kevin", "the_trinity", { RaiseError => 1, PrintError => 0, AutoCommit => 1, pg_server_prepare => 0 });
+    my $dbix = $self->dbix();
+
+    return($dbix->dbh());
+}
+
+sub _build_dbix {
+    my $self = shift;
+
+    my $conn = DBIx::Connector->new($self->dbdsn, "kevin", "the_trinity", {
+        RaiseError => 1,
+        PrintError => 0,
+        AutoCommit => 1,
+        pg_server_prepare => 0
+    });
+
+    return($conn);
 }
 
 sub do {

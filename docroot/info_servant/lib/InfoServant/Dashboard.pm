@@ -168,7 +168,7 @@ sub retrieve_feed_entries {
     my $data = [];
     foreach my $entry (@{ $entries }) {
         # $self->app->log->debug("title: $$entry{entry}{title}");
-        push(@{ $data }, { title => $$entry{entry}{title}, feed_id => $feed->id(), entry_id => Mojo::Util::url_escape($$entry{entry}{guid}) });
+        push(@{ $data }, { title => $entry->title(), feed_id => $feed->id(), entry_id => Mojo::Util::url_escape($entry->id()) });
     }
 
     return($self->render(json => $data));

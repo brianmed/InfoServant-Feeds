@@ -119,9 +119,9 @@ sub title {
     my $parse = XML::Feed->parse("$the_dir/the.feed");
 
     my $entry = undef;
-    my $guid = Mojo::Util::url_unescape($opt{entry_id});
+    my $entry_id = Mojo::Util::url_unescape($opt{entry_id});
     foreach my $e ( $parse->entries() ) {
-        if ($guid eq $$e{entry}{guid}) {
+        if ($entry_id eq $e->id()) {
             $entry = $e;
             last;
         }
@@ -143,9 +143,9 @@ sub link {
     my $parse = XML::Feed->parse("$the_dir/the.feed");
 
     my $entry = undef;
-    my $guid = Mojo::Util::url_unescape($opt{entry_id});
+    my $entry_id = Mojo::Util::url_unescape($opt{entry_id});
     foreach my $e ( $parse->entries() ) {
-        if ($guid eq $$e{entry}{guid}) {
+        if ($entry_id eq $e->id()) {
             $entry = $e;
             last;
         }
@@ -167,11 +167,9 @@ sub html {
     my $parse = XML::Feed->parse("$the_dir/the.feed");
 
     my $entry = undef;
-    my $guid = Mojo::Util::url_unescape($opt{entry_id});
-    $self->route->app->log->debug("guid: $guid");
+    my $entry_id = Mojo::Util::url_unescape($opt{entry_id});
     foreach my $e ( $parse->entries() ) {
-        $self->route->app->log->debug("guid: $$e{entry}{guid}");
-        if ($guid eq $$e{entry}{guid}) {
+        if ($entry_id eq $e->id()) {
             $entry = $e;
             last;
         }
