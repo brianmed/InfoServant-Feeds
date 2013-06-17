@@ -42,8 +42,9 @@
   <div class="row">
     <div class="span4 offset1">
         <table class="table">
-            <tr><th>Features</th><th>&nbsp;</th></tr>
+            <tr><th>Current Features</th><th>&nbsp;</th></tr>
             <tr><td>Web RSS/Atom</td><td><i class="icon-ok-sign"></i></td></tr>
+            <tr><th>Planned Features</th><th>&nbsp;</th></tr>
             <tr><td>Mobile RSS/Atom</td><td><i class="icon-ok-sign"></i></td></tr>
             <tr><td>WebMarks</td><td><i class="icon-ok-sign"></i></td></tr>
             <tr><td>Web Snippets</td><td><i class="icon-ok-sign"></i></td></tr>
