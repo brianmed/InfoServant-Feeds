@@ -71,10 +71,10 @@ sub login {
     my $account;
     eval {
         if ($login =~ m/@/) {
-            $account = SiteCode::Account->new(email => $login, password => $password);
+            $account = SiteCode::Account->new(email => $login, password => $password, route => $self);
         }
         else {
-            $account = SiteCode::Account->new(username => $login, password => $password);
+            $account = SiteCode::Account->new(username => $login, password => $password, route => $self);
         }
     };
     if ($@) {

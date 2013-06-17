@@ -34,7 +34,7 @@ sub startup {
     $ENV{MOJO_MAX_MESSAGE_SIZE} = 10485760;
 
     $self->plugin(AccessLog => {log => '/opt/infoservant.com/docroot/info_servant/log/access.log'});
-    $self->plugin(tt_renderer => {template_options => {CACHE_SIZE => 0}});
+    $self->plugin(tt_renderer => {template_options => {CACHE_SIZE => 0, COMPILE_EXT => undef, COMPILE_DIR => undef}});
     $self->plugin('ParamCondition');
     $self->plugin('SaveRequest');
     

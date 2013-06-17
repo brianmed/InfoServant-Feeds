@@ -40,11 +40,18 @@ has 'id' => ( isa => 'Int', is => 'rw' );
 has 'email' => ( isa => 'Email', is => 'rw' );
 has 'username' => ( isa => 'Str', is => 'rw' );
 has 'password' => ( isa => 'Str', is => 'rw' );
+has 'route' => ( isa => 'Mojolicious::Controller', is => 'ro' );
 
-sub _lookup_id {
+sub _lookup_id_with_email {
     my $self = shift;
 
     return($self->dbx()->col("SELECT id FROM account WHERE email = ?", undef, $self->email()));
+}
+
+sub _lookup_id_with_username {
+    my $self = shift;
+
+    return($self->dbx()->col("SELECT id FROM account WHERE username = ?", undef, $self->username()));
 }
 
 sub _lookup_email {
@@ -57,6 +64,12 @@ sub _lookup_password {
     my $self = shift;
 
     return($self->dbx()->col("SELECT password FROM account WHERE id = ?", undef, $self->id()));
+}
+
+sub _lookup_username {
+    my $self = shift;
+
+    return($self->dbx()->col("SELECT username FROM account WHERE id = ?", undef, $self->id()));
 }
 
 sub _verify_id_and_email {
@@ -72,9 +85,15 @@ sub BUILD {
         if ($self->id()) {
             $self->email($self->_lookup_email());
             $self->password($self->_lookup_password());
+            $self->username($self->_lookup_username());
         }
         elsif ($self->email() && !$self->id()) {
-            $self->id($self->_lookup_id());
+            $self->id($self->_lookup_id_with_email());
+            $self->username($self->_lookup_username());
+        }
+        elsif ($self->username() && !$self->id()) {
+            $self->id($self->_lookup_id_with_username());
+            $self->email($self->_lookup_email());
         }
     };
     if ($@) {
