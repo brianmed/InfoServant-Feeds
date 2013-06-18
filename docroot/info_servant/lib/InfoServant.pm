@@ -49,7 +49,7 @@ sub startup {
     $r->get('/')->to(controller => 'Index', action => 'slash');
 
     $r->get('/login')->to(controller => 'Index', action => 'login');
-    $r->post('/login')->over(params => [qw(login password)])->to(controller => 'Index', action => 'login');
+    $r->post('/login')->over(params => [qw(login password)])->over(save => "state")->to(controller => 'Index', action => 'login');
 
     $r->post('/signup')->over(params => {email => qr/\w/, vemail => qr/\w/, password => qr/\w/})->to(controller => 'Signup', action => 'add');
     $r->post('/signup')->to(controller => 'Signup', action => 'restart');
@@ -57,9 +57,9 @@ sub startup {
     $r->any('/verify/#email/#verify')->to(controller => 'Signup', action => 'verify');
     $r->any('/verify')->to(controller => 'Signup', action => 'verify');
 
-    $r->any('/dashboard')->to(controller => 'Dashboard', action => 'show');
+    $r->any('/dashboard')->over(save => "state")->to(controller => 'Dashboard', action => 'show');
     $r->any('/dashboard/html/:page')->to(controller => 'Dashboard', action => 'retrieve_html');
-    # $r->any('/dashboard/html/:page')->over(save => "state")->to(controller => 'Dashboard', action => 'retrieve_html');
+    $r->any('/dashboard/html/:page')->over(save => "state")->to(controller => 'Dashboard', action => 'retrieve_html');
     $r->any('/dashboard/javascript/:page')->to(controller => 'Dashboard', action => 'retrieve_js');
     $r->get('/dashboard/feed/src/:feed_nbr')->to(controller => 'Dashboard', action => 'retrieve_feed_src');
     $r->get('/dashboard/feed/link/:feed_nbr')->to(controller => 'Dashboard', action => 'retrieve_feed_link');

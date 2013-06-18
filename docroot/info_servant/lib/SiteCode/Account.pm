@@ -18,25 +18,34 @@
 
 package SiteCode::Account;
 
-use Moose;
-use namespace::autoclean;
+use Typed;
 
+use SiteCode::Modern;
 use SiteCode::DBX;
-use Email::Valid;
-use Moose::Util::TypeConstraints;
-use Digest::MD5;
-use Email::Sender::Simple qw(sendmail);
-use Email::Sender::Transport::SMTP::TLS;
+# use Email::Valid;
+# use Moose::Util::TypeConstraints;
+# use Digest::MD5;
+# use Email::Sender::Simple qw(sendmail);
+# use Email::Sender::Transport::SMTP::TLS;
 
-use SiteCode::Site;
+# use SiteCode::Site;
 
-subtype 'Email'
-    => as 'Str'
-    => where { Email::Valid->address($_) }
-    => message { $_ ? "$_ is not a valid email address" : "No value given for address validation" };
+# subtype 'Email'
+#     => as 'Str'
+#     => where { Email::Valid->address($_) }
+#     => message { $_ ? "$_ is not a valid email address" : "No value given for address validation" };
+# 
 
 has 'dbx' => ( isa => 'SiteCode::DBX', is => 'ro', default => sub { SiteCode::DBX->new() } );
 has 'id' => ( isa => 'Int', is => 'rw' );
+
+say(__PACKAGE__->dbx());
+say(__PACKAGE__->id());
+say(__PACKAGE__->dbx("dbx"));
+say(__PACKAGE__->id("id"));
+say(__PACKAGE__->dbx());
+say(__PACKAGE__->id());
+
 has 'email' => ( isa => 'Email', is => 'rw' );
 has 'password' => ( isa => 'Str', is => 'rw' );
 has 'route' => ( isa => 'Mojolicious::Controller', is => 'ro' );
@@ -264,6 +273,6 @@ sub verified {
     }
 }
 
-__PACKAGE__->meta->make_immutable;
+# __PACKAGE__->meta->make_immutable;
 
 1;
