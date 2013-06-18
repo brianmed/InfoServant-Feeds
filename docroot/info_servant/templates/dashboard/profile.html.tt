@@ -58,10 +58,17 @@
           <legend>Profile</legend>
 
             <form onsubmit="return onSubmit(this);" class="form-inline">
-                <button id="submitProfile" type="submit" class="btn btn-primary">Add</button>
+                <button id="btnAdd" type="submit" data-loading-text="Loading..." class="btn btn-primary" onclick="btnAddClick()">Add</button>
                 <input type="text" class="input-xlarge" name=new_feed value="[% new_feed %]" placeholder="http://website.com/rss">
                 <p>Add new Feed.</p>
             </form>
+
+            <script type="text/javascript">
+                $('#btnAdd').click(function () {
+                    var btn = $(this)
+                    btn.button('loading')
+                });
+            </script>
 
             <form onsubmit="return onSubmit(this);" class="form-inline" enctype="multipart/form-data" method="post">
                 <input type=hidden name=has_file value=1>
