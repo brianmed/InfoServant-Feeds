@@ -1,0 +1,3 @@
+BEGIN;
+ALTER TABLE account DROP COLUMN username;
+COMMIT;

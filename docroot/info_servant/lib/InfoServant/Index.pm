@@ -70,12 +70,7 @@ sub login {
 
     my $account;
     eval {
-        if ($login =~ m/@/) {
-            $account = SiteCode::Account->new(email => $login, password => $password, route => $self);
-        }
-        else {
-            $account = SiteCode::Account->new(username => $login, password => $password, route => $self);
-        }
+        $account = SiteCode::Account->new(email => $login, password => $password, route => $self);
     };
     if ($@) {
         my $err = $@;
@@ -96,7 +91,6 @@ sub login {
         return($self->render());
     }
     else {
-        $self->session(account_username => $account->username());
         $self->session(account_id => $account->id());
         $self->session(account_email => $account->email());
         my $url = $self->url_for('/dashboard');

@@ -51,7 +51,7 @@ sub startup {
     $r->get('/login')->to(controller => 'Index', action => 'login');
     $r->post('/login')->over(params => [qw(login password)])->to(controller => 'Index', action => 'login');
 
-    $r->post('/signup')->over(params => {username => qr/\w/, email => qr/\w/, vemail => qr/\w/, password => qr/\w/})->to(controller => 'Signup', action => 'add');
+    $r->post('/signup')->over(params => {email => qr/\w/, vemail => qr/\w/, password => qr/\w/})->to(controller => 'Signup', action => 'add');
     $r->post('/signup')->to(controller => 'Signup', action => 'restart');
     $r->get('/signup')->to(controller => 'Signup', action => 'start');
     $r->any('/verify/#email/#verify')->to(controller => 'Signup', action => 'verify');

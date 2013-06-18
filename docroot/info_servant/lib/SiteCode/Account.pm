@@ -38,7 +38,6 @@ subtype 'Email'
 has 'dbx' => ( isa => 'SiteCode::DBX', is => 'ro', default => sub { SiteCode::DBX->new() } );
 has 'id' => ( isa => 'Int', is => 'rw' );
 has 'email' => ( isa => 'Email', is => 'rw' );
-has 'username' => ( isa => 'Str', is => 'rw' );
 has 'password' => ( isa => 'Str', is => 'rw' );
 has 'route' => ( isa => 'Mojolicious::Controller', is => 'ro' );
 
@@ -46,12 +45,6 @@ sub _lookup_id_with_email {
     my $self = shift;
 
     return($self->dbx()->col("SELECT id FROM account WHERE email = ?", undef, $self->email()));
-}
-
-sub _lookup_id_with_username {
-    my $self = shift;
-
-    return($self->dbx()->col("SELECT id FROM account WHERE username = ?", undef, $self->username()));
 }
 
 sub _lookup_email {
@@ -64,12 +57,6 @@ sub _lookup_password {
     my $self = shift;
 
     return($self->dbx()->col("SELECT password FROM account WHERE id = ?", undef, $self->id()));
-}
-
-sub _lookup_username {
-    my $self = shift;
-
-    return($self->dbx()->col("SELECT username FROM account WHERE id = ?", undef, $self->id()));
 }
 
 sub _verify_id_and_email {
@@ -85,15 +72,9 @@ sub BUILD {
         if ($self->id()) {
             $self->email($self->_lookup_email());
             $self->password($self->_lookup_password());
-            $self->username($self->_lookup_username());
         }
         elsif ($self->email() && !$self->id()) {
             $self->id($self->_lookup_id_with_email());
-            $self->username($self->_lookup_username());
-        }
-        elsif ($self->username() && !$self->id()) {
-            $self->id($self->_lookup_id_with_username());
-            $self->email($self->_lookup_email());
         }
     };
     if ($@) {
@@ -122,7 +103,6 @@ sub addUser
     my $self = shift;
     my %ops = @_;
 
-    my $username = $ops{username};
     my $email = $ops{email};
     my $password = $ops{password};
 
@@ -135,18 +115,12 @@ sub addUser
     eval {
         my $dbx = SiteCode::DBX->new(route => $ops{route});
 
-        my $taken = $dbx->success("SELECT 1 FROM account WHERE UPPER(username) = ?", undef, uc $username);
-        if ($taken) {
-            die "Username already taken.\n";
-        }
-
-        $taken = $dbx->success("SELECT 1 FROM account WHERE email = ?", undef, lc $email);
+        my $taken = $dbx->success("SELECT 1 FROM account WHERE email = ?", undef, lc $email);
         if ($taken) {
             die "Email already taken.\n";
         }
 
-        my $exists = $dbx->success("SELECT 1 FROM account WHERE username = ? AND email = ? AND password = ?", undef, $username, lc $email, $password);
-        # $ops{route}->app->log->debug("exists: $exists: username: $username: email: $email: password: $password");
+        my $exists = $dbx->success("SELECT 1 FROM account WHERE email = ? AND password = ?", undef, lc $email, $password);
         if ($exists) {
             my $verified = $self->key("verified");
             if ($verified) {
@@ -159,9 +133,9 @@ sub addUser
             }
         }
 
-        $dbx->do("INSERT INTO account (username, email, password) VALUES (?, ?, ?)", undef, $username, lc $email, $password_md5);
+        $dbx->do("INSERT INTO account (email, password) VALUES (?, ?)", undef, lc $email, $password_md5);
 
-        my $id = $dbx->col("SELECT id FROM account WHERE username = ? AND email = ?", undef, $username, lc $email);
+        my $id = $dbx->col("SELECT id FROM account WHERE email = ?", undef, lc $email);
         $account = SiteCode::Account->new(id => $id, password => $password_md5);
         $account->key("verified", $md5);
     };
@@ -258,9 +232,6 @@ sub exists {
 
     if ($opt{email}) {
         return(SiteCode::DBX->new()->col("SELECT id FROM account WHERE email = ?", undef, lc $opt{email}));
-    }
-    elsif ($opt{username}) {
-        return(SiteCode::DBX->new()->col("SELECT id FROM account WHERE username = ?", undef, uc $opt{username}));
     }
 }
 

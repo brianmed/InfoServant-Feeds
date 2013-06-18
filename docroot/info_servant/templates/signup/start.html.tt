@@ -55,9 +55,6 @@
 
           <div class="control-group">
             <div class="controls">
-              <input type="text" class="input-xlarge" id="name" name=username placeholder="Username" value=[% username %]>
-            </div>
-            <div class="controls">
               <input type="text" class="input-xlarge" id="email" name=email placeholder="Email" value=[% email %]>
             </div>
             <div class="controls">

@@ -33,16 +33,11 @@ sub start {
 sub restart {
     my $self = shift;
 
-    my $username = $self->param("username");
     my $email = $self->param("email");
     my $vemail = $self->param("vemail");
     my $password = $self->param("password");
 
     my $errors = "";
-    if (!$username) {
-        $errors .= $errors ? "<br>" : "";
-        $errors .= "Please enter a username";
-    }
     if (!$email) {
         $errors .= $errors ? "<br>" : "";
         $errors .= "Please enter an email";
@@ -58,7 +53,6 @@ sub restart {
 
     $self->stash(errors => $errors);
 
-    $self->stash(username => $username);
     $self->stash(email => $email);
     $self->stash(vemail => $vemail);
 
@@ -70,12 +64,10 @@ sub add {
 
     my ($account, $url);
 
-    my $username = $self->param("username");
     my $email = $self->param("email");
     my $vemail = $self->param("vemail");
     my $password = $self->param("password");
 
-    $self->stash(username => $self->param("username"));
     $self->stash(email => $self->param("email"));
     $self->stash(vemail => $self->param("vemail"));
 
@@ -89,7 +81,6 @@ sub add {
 
     eval {
         $account = SiteCode::Account->addUser(
-            username => $username,
             email => $email,
             password => $password,
             route => $self,
@@ -115,7 +106,7 @@ sub add {
     }
     else {
         $self->stash(success => "Successfully added user: please login.");
-        $url = $self->url_for('/login')->query(login => $account->username, added => 1);
+        $url = $self->url_for('/login')->query(login => $account->email, added => 1);
         return $self->redirect_to($url);
     }
 
