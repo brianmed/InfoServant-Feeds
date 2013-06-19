@@ -21,30 +21,20 @@ package SiteCode::Account;
 use Typed;
 
 use SiteCode::Modern;
+
+use Email::Valid;
+use Digest::MD5;
+
 use SiteCode::DBX;
-# use Email::Valid;
-# use Moose::Util::TypeConstraints;
-# use Digest::MD5;
-# use Email::Sender::Simple qw(sendmail);
-# use Email::Sender::Transport::SMTP::TLS;
+use SiteCode::Site;
 
-# use SiteCode::Site;
+subtype 'Email'
+    => as 'Str'
+    => where { Email::Valid->address($_) }
+    => message { $_ ? "$_ is not a valid email address" : "No value given for address validation" };
 
-# subtype 'Email'
-#     => as 'Str'
-#     => where { Email::Valid->address($_) }
-#     => message { $_ ? "$_ is not a valid email address" : "No value given for address validation" };
-# 
-
-has 'dbx' => ( isa => 'SiteCode::DBX', is => 'ro', default => sub { SiteCode::DBX->new() } );
 has 'id' => ( isa => 'Int', is => 'rw' );
-
-say(__PACKAGE__->dbx());
-say(__PACKAGE__->id());
-say(__PACKAGE__->dbx("dbx"));
-say(__PACKAGE__->id("id"));
-say(__PACKAGE__->dbx());
-say(__PACKAGE__->id());
+has 'dbx' => ( isa => 'SiteCode::DBX', is => 'ro', lazy => 1, default => sub { SiteCode::DBX->new() } );
 
 has 'email' => ( isa => 'Email', is => 'rw' );
 has 'password' => ( isa => 'Str', is => 'rw' );
@@ -87,6 +77,7 @@ sub BUILD {
         }
     };
     if ($@) {
+        $self->route->app->log->debug("InfoServant::Index::login: $@");
         die("Invalid credentials.\n");
     }
 
@@ -200,6 +191,12 @@ sub sendVerifyEmail
     my $email = $self->email;
     my $md5 = $self->key("verified");
 
+    require Email::Simple;
+    require Email::Sender::Simple;
+    require Email::Sender::Transport::SMTP::TLS;
+
+    Email::Sender::Simple->import("sendmail");
+
     my $mail = Email::Simple->create(
         header => [
             To      => $email,
@@ -264,15 +261,16 @@ sub verify {
 sub verified {
     my $self = shift;
 
-    my $verify = $self->key("verified");
-    if ("SUCCESS" eq $verify) {
+    my $verified = $self->key("verified");
+    if ($self->route) {
+        $self->route->app->log->debug("verified: $verified");
+    }
+    if ("SUCCESS" eq $verified) {
         return(1);
     }
     else {
         return(0);
     }
 }
-
-# __PACKAGE__->meta->make_immutable;
 
 1;

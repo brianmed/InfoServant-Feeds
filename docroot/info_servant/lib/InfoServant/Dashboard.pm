@@ -98,7 +98,7 @@ sub profile {
         }
     }
     elsif ($self->param("verify_number")) {
-        my $account = SiteCode::Account->new(id => $self->session->{account_id});
+        my $account = SiteCode::Account->new(id => $self->session->{account_id}, route => $self);
 
         if ($account->verified()) {
             $self->stash(error => "Already verified");
