@@ -51,6 +51,7 @@ sub addFeed {
         my $id = $dbx->last_insert_id(undef,undef,undef,undef,{sequence=>'feed_id_seq'});
         $feed = SiteCode::Feed->new(id => $id);
         $feed->key("url", $url);
+        $feed->key("html_url", $opt{html_url}) if $opt{html_url};
 
         eval {
             my $parse = XML::Feed->parse(URI->new($url));

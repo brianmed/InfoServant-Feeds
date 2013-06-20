@@ -29,7 +29,7 @@ use Mojo::Util;
 
 use HTML::Entities;
 use Regexp::Common qw(URI);
-use XML::Simple qw(:strict);
+use XML::OPML::LibXML;
 
 sub show {
     my $self = shift;
@@ -122,20 +122,30 @@ sub profile {
         my $filename = "/tmp/google_import.$$.txt";
         my $import = $self->param('google_import');
         $import->move_to($filename);
-        my $ref = XMLin($filename, KeyAttr => { outline => 'xmlUrl' }, ForceArray => [ 'body', 'outline' ]);
-
-        my $outline = $ref->{body}[0]{outline};
 
         my $account = SiteCode::Account->new(id => $self->session->{account_id});
         my $count = 0;
-        foreach my $new_feed (sort keys %{ $outline }) {
-            if (SiteCode::Feed->exists(name => $new_feed, account => $account)) {
+        my $skipped = 0;
+
+        my $process = sub {
+            my $outline = shift;
+
+            if ($outline->is_container) {
+                return;
+            }
+            
+            my $xml_url = $outline->xml_url;
+            my $html_url = $outline->html_url;
+
+            if (SiteCode::Feed->exists(name => $xml_url, account => $account)) {
+                ++$skipped;
                 next;
             }
 
             SiteCode::Feed->addFeed(
                 account => $account,
-                url => $new_feed,
+                url => $xml_url,
+                html_url => $html_url,
                 route => $self,
             );
             if ($@) {
@@ -146,9 +156,24 @@ sub profile {
                 ++$count;
                 $self->stash(reload => 1);
             }
-        }
+        };
 
-        $self->stash(info => "Imported $count feeds.");
+        if (-s $filename) {
+            my $parser = XML::OPML::LibXML->new;
+            my $doc    = $parser->parse_file($filename);
+
+            $doc->walkdown($process);
+
+            if ($skipped) {
+                $self->stash(info => "Imported $count feeds.<br>There were $skipped feeds already present.");
+            }
+            else {
+                $self->stash(info => "Imported $count feeds.");
+            }
+        }
+        else {
+            $self->stash(errors => "No file detected.");
+        }
     }
 }
 

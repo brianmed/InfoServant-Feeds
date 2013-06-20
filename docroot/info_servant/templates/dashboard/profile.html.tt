@@ -72,7 +72,7 @@
 
             <form onsubmit="return onSubmit(this);" class="form-inline" enctype="multipart/form-data" method="post">
                 <input type=hidden name=has_file value=1>
-                <button id="submitProfile" type="submit" class="btn btn-primary">Import Google Reader</button>
+                <button id="btnReader" type="submit" data-loading-text="Processing..." class="btn btn-primary">Import Google Reader</button>
                 <input type="file" id=google_import name=google_import style="display:none">
                 <div class="input-append">
                     <input type="text" class="input-xlarge" id=file_marker placeholder="subscriptions.xml">
@@ -81,6 +81,10 @@
                 <script type="text/javascript">
                 $('input[id=google_import]').change(function() {
                     $('#file_marker').val($(this).val());
+                });
+                $('#btnReader').click(function () {
+                    var btn = $(this)
+                    btn.button('loading')
                 });
                 </script>
                 <p>Import Google Reader Feeds.</p>
