@@ -18,9 +18,10 @@
 
 package SiteCode::DBX;
 
-use Typed;
-
 use SiteCode::Modern;
+
+use Moose;
+use namespace::autoclean;
 
 use DBI;
 use Carp;
@@ -176,5 +177,7 @@ sub DEMOLISH {
 
     # $self->dbh()->disconnect();
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;

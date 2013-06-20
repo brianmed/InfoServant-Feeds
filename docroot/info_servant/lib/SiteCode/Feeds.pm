@@ -1,5 +1,7 @@
 package SiteCode::Feeds;
 
+use SiteCode::Modern;
+
 use Moose;
 use namespace::autoclean;
 

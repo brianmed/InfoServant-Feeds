@@ -18,9 +18,11 @@
 
 package SiteCode::Account;
 
-use Typed;
-
 use SiteCode::Modern;
+
+use Moose;
+use namespace::autoclean;
+use Moose::Util::TypeConstraints;
 
 use Email::Valid;
 use Digest::MD5;
@@ -272,5 +274,7 @@ sub verified {
         return(0);
     }
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;

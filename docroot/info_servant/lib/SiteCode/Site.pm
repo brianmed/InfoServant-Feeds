@@ -18,7 +18,9 @@
 
 package SiteCode::Site;
 
-use Typed;
+use Moose;
+use namespace::autoclean;
+
 use SiteCode::DBX;
 
 sub config
@@ -44,5 +46,7 @@ sub config
 
     return(\%site);
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;

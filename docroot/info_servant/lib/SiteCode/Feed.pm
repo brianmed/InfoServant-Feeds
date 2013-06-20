@@ -18,6 +18,8 @@
 
 package SiteCode::Feed;
 
+use SiteCode::Modern;
+
 use Moose;
 use namespace::autoclean;
 
