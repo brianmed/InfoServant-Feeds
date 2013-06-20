@@ -52,15 +52,6 @@
           </div><!--/.well -->
         </div><!--/span-->
         <div class="span7">
-          <div id=errors class="alert alert-error hide">
-          </div>
-
-          <div id=success class="alert alert-success hide">
-          </div>
-
-          <div id=info class="alert alert-info hide">
-          </div>
-
             <div id=htmlBody>
             </div>
 	<script>

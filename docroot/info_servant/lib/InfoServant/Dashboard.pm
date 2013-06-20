@@ -139,7 +139,7 @@ sub profile {
 
             if (SiteCode::Feed->exists(name => $xml_url, account => $account)) {
                 ++$skipped;
-                next;
+                return;
             }
 
             SiteCode::Feed->addFeed(
@@ -151,10 +151,11 @@ sub profile {
             if ($@) {
                 my $err = $@;
                 $self->app->log->debug("InfoServant::Dashboard::profile::new_feed: $err");
+                ++$skipped;
             }
             else {
+                $self->app->log->debug("InfoServant::Dashboard::profile::new_feed: $xml_url");
                 ++$count;
-                $self->stash(reload => 1);
             }
         };
 
@@ -165,7 +166,7 @@ sub profile {
             $doc->walkdown($process);
 
             if ($skipped) {
-                $self->stash(info => "Imported $count feeds.<br>There were $skipped feeds already present.");
+                $self->stash(info => "Imported $count feeds.<br>There were $skipped feeds skipped.");
             }
             else {
                 $self->stash(info => "Imported $count feeds.");
