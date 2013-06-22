@@ -2,7 +2,7 @@
 
 use lib qw(/opt/infoservant.com/docroot/info_servant/lib);
 
-use Modern::Perl;
+use SiteCode::Modern;
 
 use autodie;
 
