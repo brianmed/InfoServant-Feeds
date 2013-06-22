@@ -1,38 +1,40 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <script src="jquery-1.10.1.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
+    <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <script src="jquery-1.10.1.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
 	<script src="/viewer/tinymce/js/tinymce/tinymce.min.js"></script>
 </head>
 <body>
 
-    <div>
-
   <div class="navbar navbar-inverse">
     <div class="navbar-inner">
-      <div class="container" style="width: auto;">
-        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </a>
-        <a class="brand" href="/">InfoServant: Your information, delivered.</a>
-        <div class="nav-collapse">
-          <ul class="nav pull-right">
-            <li><a href="mailto:support@infoservant.com">Contact</a></li>
-            <li class="divider-vertical"></li>
+      <div class="container">
+        <a class="brand visible-desktop hidden-phone hidden-tablet" href="/">InfoServant</a>
+          <ul class="nav pull-right visible-desktop hidden-phone hidden-tablet">
             <li><a href="/logout">Logout</a></li>
+            <li><a href="mailto:support@infoservant.com">Contact</a></li>
           </ul>
-        </div><!-- /.nav-collapse -->
+          <ul class="nav hidden-desktop visible-phone visible-tablet">
+            <li><a href="/logout">Logout</a></li>
+            <li><a href="mailto:support@infoservant.com">Contact</a></li>
+          </ul>
       </div>
     </div><!-- /navbar-inner -->
   </div><!-- /navbar -->
 
     <div class="container-fluid">
       <div class="row-fluid">
+        [% IF have_feeds %]
         <div class="span5">
+        [% ELSE %]
+        <div class="span5 visible-desktop hidden-phone hidden-tablet">
+        [% END %]
           <div class="well sidebar-nav">
             <ul class="nav nav-list">
               [% IF have_feeds %]
@@ -40,30 +42,19 @@
               [% FOREACH feed IN feeds %]
               <li id="li_feed[% feed.id %]"><a href="javascript:void(0)" onClick="showFeed([% feed.id %]);">[% feed.name | html %]</a></li>
               [% END %]
-              [% IF 0 %]
-              <li class="nav-header">Utils</li>
-              <li id="li_call_nbr"><a href="javascript:void(0)" onClick="loadHtml('call_nbr');">Make a call</a></li>
-              <li id="li_quick_conference"><a href="javascript:void(0)" onClick="loadHtml('quick_conference');">Quick Conference</a></li>
               [% END %]
-              [% END %]
-              <li class="nav-header">Account</li>
+              [% UNLESS h.is_mobile %]
+              <li class="nav-header ">Account</li>
               <li id="li_profile"><a href="javascript:void(0)" onClick="loadHtml('profile');">Profile</a></li>
+              [% END %]
             </ul>
           </div><!--/.well -->
         </div><!--/span-->
         <div class="span7">
             <div id=htmlBody>
             </div>
-	<script>
-
-	</script>
-</head>
-<body>
         </div><!--/span-->
       </div><!--/row-->
-
-  </div>
-
   </div>
 
         <script>

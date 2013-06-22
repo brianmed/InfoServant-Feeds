@@ -21,7 +21,7 @@ package InfoServant;
 use Mojo::Base 'Mojolicious';
 
 use SiteCode::Site;
-# use HTTP::BrowserDetect;
+use HTTP::BrowserDetect;
 
 sub is_mobile {
     my $self = shift;
@@ -45,8 +45,8 @@ sub startup {
 
     $self->config(hypnotoad => {listen => ['http://64.91.226.192:80', 'https://64.91.226.192:443'], workers => 15, user => "bpm", group => "bpm", inactivity_timeout => 15, heartbeat_timeout => 15, heartbeat_interval => 15, accepts => 50});
 
-    # $self->helper(mobile => \&mobile);
-    # $self->helper(is_mobile => \&is_mobile);
+    $self->helper(mobile => \&mobile);
+    $self->helper(is_mobile => \&is_mobile);
 
     # Increase limit to 10MB
     $ENV{MOJO_MAX_MESSAGE_SIZE} = 10485760;

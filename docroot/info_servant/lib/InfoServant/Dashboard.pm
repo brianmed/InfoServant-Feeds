@@ -167,9 +167,11 @@ sub profile {
 
             if ($skipped) {
                 $self->stash(info => "Imported $count feeds.<br>There were $skipped feeds skipped.");
+                $self->stash(reload => 1);
             }
             else {
                 $self->stash(info => "Imported $count feeds.");
+                $self->stash(reload => 1);
             }
         }
         else {

@@ -25,14 +25,18 @@
       </div>
       [% END %]
 
+    <form onsubmit="return onSubmit(this);" class="form-inline">
     <fieldset>
       <legend>Profile</legend>
-
-    <form onsubmit="return onSubmit(this);" class="form-inline">
+        <br class="hidden-desktop visible-phone visible-tablet">
         <button id="submitProfile" type="submit" class="btn btn-primary">Verify</button>
+        [% IF h.is_mobile %]
+        <input type="text" class="input-medium" name=verify_number value="[% verify_number %]" placeholder="Verification number">
+        [% ELSE %]
         <input type="text" class="input-xlarge" name=verify_number value="[% verify_number %]" placeholder="Verification number">
-    </form>
+        [% END %]
     </fieldset>
+    </form>
 [% END %]
 
 [% IF account_verified %]
@@ -54,6 +58,7 @@
       </div>
       [% END %]
 
+    [% IF info || errors %]
     <script>
         [% IF info %]
         $("#info").fadeIn(1350)
@@ -69,14 +74,20 @@
         }, 8000);
         [% END %]
     </script>
-
-        <fieldset>
-          <legend>Profile</legend>
+    [% END %]
 
             <form onsubmit="return onSubmit(this);" class="form-inline">
-                <button id="btnAdd" type="submit" data-loading-text="Loading..." class="btn btn-primary" onclick="btnAddClick()">Add</button>
-                <input type="text" class="input-xlarge" name=new_feed value="[% new_feed %]" placeholder="http://website.com/rss">
-                <p>Add new Feed.</p>
+                <fieldset>
+                  <legend>Profile</legend>
+                    <br class="hidden-desktop visible-phone visible-tablet">
+
+                    <button id="btnAdd" type="submit" data-loading-text="Loading..." class="btn btn-primary" onclick="btnAddClick()">Add</button>
+                    [% IF h.is_mobile %]
+                    <input type="text" class="input-medium" name=new_feed value="[% new_feed %]" placeholder="http://website.com/rss">
+                    [% ELSE %]
+                    <input type="text" class="input-xlarge" name=new_feed value="[% new_feed %]" placeholder="http://website.com/rss">
+                    [% END %]
+                </fieldset>
             </form>
 
             <script type="text/javascript">
@@ -86,14 +97,18 @@
                 });
             </script>
 
+            [% UNLESS h.is_mobile %]
             <form onsubmit="return onSubmit(this);" class="form-inline" enctype="multipart/form-data" method="post">
                 <input type=hidden name=has_file value=1>
-                <button id="btnReader" type="submit" data-loading-text="Processing..." class="btn btn-primary">Import Google Reader</button>
+
+                <button id="btnReader" type="submit" data-loading-text="Processing..." class="btn btn-primary">Import</button>
+
                 <input type="file" id=google_import name=google_import style="display:none">
-                <div class="input-append">
-                    <input type="text" class="input-xlarge" id=file_marker placeholder="subscriptions.xml">
-                    <a class="btn" onclick="$('input[id=google_import]').click();">Browse</a>
-                </div>
+
+                    <div class="input-append">
+                        <input type="text" class="input-large" id=file_marker placeholder="subscriptions.xml">
+                        <a class="btn" onclick="$('input[id=google_import]').click();">Browse</a>
+                    </div>
                 <script type="text/javascript">
                 $('input[id=google_import]').change(function() {
                     $('#file_marker').val($(this).val());
@@ -103,27 +118,8 @@
                     btn.button('loading')
                 });
                 </script>
-                <p>Import Google Reader Feeds.</p>
             </form>
-
-        [% IF 0 %]
-            <form onsubmit="return onSubmit(this);" class="form-inline">
-            <input type="hidden" name=profile_group value="1">
-            <fieldset>
-          <label class="checkbox">
-          <input type="checkbox" name=email_rcpt_voicemail value=1 [% checked.email_rcpt_voicemail %]> Email when voicemail received.
-          </label>
-            <br>
-          <label class="checkbox">
-          <input type="checkbox" name=attach_message value=1 [% checked.attach_message %]> Attach message to email.
-          </label>
-            <br>
-              <button id="submit" type="submit" class="btn btn-primary">Update</button>
-            </fieldset>
-            </form>
-        [% END %]
-
-        </fieldset>
+            [% END %]
 [% END %]
 
 [% IF 0 %]
