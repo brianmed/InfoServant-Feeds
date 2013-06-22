@@ -44,7 +44,7 @@ sub login {
     $self->stash(login => $login);
 
     if ($self->param("added")) {
-        $self->stash(success => "Successfully added: please login.");
+        $self->stash(success => "Added: please see verificaiton email.");
         return($self->render());
     }
 

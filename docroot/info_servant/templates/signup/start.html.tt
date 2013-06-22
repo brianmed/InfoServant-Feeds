@@ -1,35 +1,35 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-	<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
+    <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
     <script src="jquery-1.10.1.js"></script>
-    <script src="bootstrap/js/bootstrap.min.js"></script>
 </head>
 <body>
 
   <div class="navbar navbar-inverse">
     <div class="navbar-inner">
-      <div class="container" style="width: auto;">
-        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </a>
-        <a class="brand" href="/">InfoServant: Your information, delivered.</a>
-        <div class="nav-collapse">
-          <ul class="nav pull-right">
-            <li><a href="mailto:support@infoservant.com">Contact</a></li>
-            <li class=active><a href="/signup">Signup</a></li>
-            <li class="divider-vertical"></li>
+      <div class="container">
+        <a class="brand visible-desktop hidden-phone hidden-tablet" href="/">InfoServant</a>
+          <ul class="nav pull-right visible-desktop hidden-phone hidden-tablet">
             <li><a href="/login">Login</a></li>
+            <li class=active><a href="/signup">Signup</a></li>
+            <li><a href="mailto:support@infoservant.com">Contact</a></li>
           </ul>
-        </div><!-- /.nav-collapse -->
+          <ul class="nav hidden-desktop visible-phone visible-tablet">
+            <li><a href="/login">Login</a></li>
+            <li class=active><a href="/signup">Signup</a></li>
+            <li><a href="mailto:support@infoservant.com">Contact</a></li>
+          </ul>
       </div>
     </div><!-- /navbar-inner -->
   </div><!-- /navbar -->
 
   <div class="row">
-    <div class="span10 offset1">
+    <div class="span11 offset1">
 
   [% IF errors %]
       <div class="alert alert-error">
