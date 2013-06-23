@@ -239,12 +239,27 @@ sub retrieve_feed_src {
     my $link = $feed->link(entry_id => $entry_id, account_id => $account->id);
     my $title = $feed->title(entry_id => $entry_id, account_id => $account->id);
 
-    $html = sprintf(qq(
-            <a href="$link" target=article>$title</a>
-            <textarea id="editor1" name="editor1" cols="100" rows="40">
-            %s
-            </textarea>
-    ), Mojo::Util::xml_escape($html));
+    if ($self->is_mobile) {
+        $html = sprintf(qq(
+                <div id=content>
+                <button class="btn btn-primary" onClick="\$('#content').remove(); \$('#menu').show();">Back</button>
+                <br>
+                <hr>
+                <a href="$link" target=article>$title</a>
+                <p>
+                %s
+                </p>
+                </div>
+        ), $html);
+    }
+    else {
+        $html = sprintf(qq(
+                <a href="$link" target=article>$title</a>
+                <textarea id="editor1" name="editor1" cols="100" rows="40">
+                %s
+                </textarea>
+        ), Mojo::Util::xml_escape($html));
+    }
     # $self->app->log->debug("html: $html");
     return($self->render(text => $html));
 }

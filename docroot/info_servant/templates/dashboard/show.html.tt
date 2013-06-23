@@ -8,7 +8,9 @@
 
     <script src="jquery-1.10.1.min.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
+    [% UNLESS h.is_mobile %]
 	<script src="/viewer/tinymce/js/tinymce/tinymce.min.js"></script>
+    [% END %]
 </head>
 <body>
 
@@ -30,10 +32,10 @@
 
     <div class="container-fluid">
       <div class="row-fluid">
-        [% IF have_feeds %]
-        <div class="span5">
+        [% IF have_entries %]
+        <div id=menu class="span5">
         [% ELSE %]
-        <div class="span5 visible-desktop hidden-phone hidden-tablet">
+        <div id=menu class="span5 visible-desktop hidden-phone hidden-tablet">
         [% END %]
           <div class="well sidebar-nav">
             <ul class="nav nav-list">
@@ -86,7 +88,12 @@
 
         function showEntry (feed_nbr, entry_id) {
             $("#htmlBody").load("/dashboard/feed/src/" + feed_nbr + "?entry_id=" + entry_id);
+
+            [% IF h.is_mobile %]
+            $("#menu").hide();
+            [% ELSE %]
             tinymce.init({selector:'textarea', readonly: 1, menubar: "false", plugins: "fullscreen", toolbar: "fullscreen"});
+            [% END %]
         }
 
         function showFeed (feed_nbr) {
