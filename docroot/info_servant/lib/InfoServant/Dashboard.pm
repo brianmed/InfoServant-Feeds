@@ -43,21 +43,21 @@ sub show {
     my $have_feeds = SiteCode::Feeds->haveFeeds(account => $account);
     # $self->stash(have_feeds => $have_feeds);
 
-    my @top_100 = ();
+    my @top = ();
 
     my $feeds = SiteCode::Feeds->new(account => $account);
     my @feeds = ();
-    foreach my $l (@{ $feeds->latest() }) {
+    foreach my $l (@{ $feeds->latest(limit => 30) }) {
         my $obj = SiteCode::Feed->new(id => $$l{feed_id}, route => $self);
         my $entry = $obj->entry($$l{entry_id}, $account->id());
 
-        push(@top_100, { entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $$entry{title}, feed_id => $obj->id() });
+        push(@top, { entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $$entry{title}, feed_id => $obj->id() });
     }
-    if (@top_100) {
+    if (@top) {
         $self->stash(have_entries => 1);
     }
 
-    $self->render(entries => \@top_100);
+    $self->render(entries => \@top);
 }
 
 sub profile {
@@ -310,11 +310,7 @@ sub retrieve_js {
 sub logout {
     my $self = shift;
 
-    my @keys = keys %{ $self->session };
-
-    foreach my $k (@keys) {
-        delete($self->session->{$k});
-    }
+    $self->session(expires => 1);
 
     my $url = $self->url_for('/');
     return($self->redirect_to($url));

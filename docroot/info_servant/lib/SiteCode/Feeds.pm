@@ -29,7 +29,7 @@ sub latest {
         FROM feed, entry where feed.account_id = ? 
             and feed.name = entry.feed_name 
         order by entry.issued desc
-        LIMIT 100
+        LIMIT $opt{limit}
     ), undef, $self->account()->id());
 
     return($data);

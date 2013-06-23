@@ -33,6 +33,11 @@ sub slash {
         return($self->redirect_to($url));
     }
 
+    if ($self->session->{account_id}) {
+        my $url = $self->url_for('/dashboard');
+        return($self->redirect_to($url));
+    }
+
     $self->render();
 }
 
@@ -98,6 +103,7 @@ sub login {
     else {
         $self->session(account_id => $account->id());
         $self->session(account_email => $account->email());
+        $self->session(expiration => 604800);
         my $url = $self->url_for('/dashboard');
         return($self->redirect_to($url));
     }

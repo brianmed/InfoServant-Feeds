@@ -58,13 +58,9 @@
               <li id="li_profile"><a href="javascript:void(0)" onClick="loadHtml('profile');">Profile</a></li>
               [% END %]
             </ul>
-          </div><!--/.well -->
-        </div><!--/span-->
-        <div class="span7">
-            <div id=htmlBody>
-            </div>
-        </div><!--/span-->
-      </div><!--/row-->
+          </div>
+        </div>
+      </div>
   </div>
 
         <script>
@@ -121,49 +117,7 @@
                     $(id).append('</ol>');
                 },
             });
-
-            // $("#htmlBody").load("/dashboard/feed/src/" + feed_nbr);
-
-            // tinymce.init({selector:'textarea', readonly: 1, menubar: "false", plugins: "fullscreen", toolbar: "fullscreen"});
-
-                    /*
-                    var editor;
-                    CKEDITOR.replace('editor1');
-                    CKEDITOR.on( 'instanceReady', function( ev ) {
-                        editor = ev.editor;
-
-                        editor.setReadOnly( true );
-                    });
-                    */
-
-            /*
-            $.ajax({
-                url: "/dashboard/feed/link/" + feed_nbr,
-                success: function(data) { 
-                    var editor;
-                    CKEDITOR.on( 'instanceReady', function( ev ) {
-                        editor = ev.editor;
-
-                        editor.setReadOnly( true );
-                    });
-                },
-            });
-            */
-
-            // $("#iframeEntry").attr('src', "/dashboard/feed/src/" + feed_nbr);
-            /*
-            $.ajax({
-                url: "/dashboard/feed/url/" + feed_nbr,
-                success: function(data) { if(data.success) { } },
-            });
-            */
         }
-
-        [% IF account_sid && stripe_code %]
-            loadHtml("voicemail");
-        [% ELSE %] 
-            loadHtml("profile");
-        [% END %]
         </script>
 </body>
 </html>
