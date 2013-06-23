@@ -37,12 +37,20 @@
         [% END %]
           <div class="well sidebar-nav">
             <ul class="nav nav-list">
+              [% IF have_entries %]
+              <li class="nav-header">Entries</li>
+              [% FOREACH entry IN entries %]
+              <li><a href='javascript:void(0)' onClick="showEntry([% entry.feed_id %],  '[% entry.entry_id %]');">[% entry.title | html %]</a></li>
+              [% END %]
+              [% END %]
+
               [% IF have_feeds %]
               <li class="nav-header">Feeds</li>
               [% FOREACH feed IN feeds %]
               <li id="li_feed[% feed.id %]"><a href="javascript:void(0)" onClick="showFeed([% feed.id %]);">[% feed.name | html %]</a></li>
               [% END %]
               [% END %]
+
               [% UNLESS h.is_mobile %]
               <li class="nav-header ">Account</li>
               <li id="li_profile"><a href="javascript:void(0)" onClick="loadHtml('profile');">Profile</a></li>

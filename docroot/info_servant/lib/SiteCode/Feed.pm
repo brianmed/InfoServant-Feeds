@@ -68,6 +68,19 @@ sub addFeed {
     return($feed);
 }
 
+sub entry {
+    my $self = shift;
+    my $entry_id = shift;
+    my $account_id = shift;
+
+    my $data = $self->dbx()->row(qq(
+        SELECT entry.*
+        FROM feed, entry where feed.account_id = ? 
+            and feed.name = entry.feed_name 
+            and entry.id = ?
+    ), undef, $account_id, $entry_id);
+}
+
 sub entries {
     my $self = shift;
 
@@ -76,13 +89,21 @@ sub entries {
     my $url_dir = Mojo::Util::url_escape($url);
     my $the_dir = $self->data_dir() . "/$url_dir";
 
-    my $parse = XML::Feed->parse("$the_dir/the.feed");
-
-    if (!defined $parse) {
+    $self->route->app->log->debug("entries: $the_dir/the.feed");
+    unless (-f "$the_dir/the.feed") {
         return([]);
     }
 
-    return([$parse->entries()]);
+    # Ode, to the SQL
+    my $parse;
+    eval {
+        $parse = XML::Feed->parse("$the_dir/the.feed");
+    };
+    if ($@) {
+        $self->route->app->log->debug("entries: $the_dir/the.feed: $@");
+        return([]);
+    }
+    $parse ? return([$parse->entries()]) : return([]);
 }
 
 sub latest_link {
@@ -113,73 +134,52 @@ sub latest_link {
 sub title {
     my $self = shift;
     my %opt = @_;
+    my $entry_id = $opt{entry_id};
+    my $account_id = $opt{account_id};
 
-    my $url = $self->key("url");
+    my $data = $self->dbx()->row(qq(
+        SELECT entry.title
+        FROM feed, entry where feed.account_id = ? 
+            and feed.name = entry.feed_name 
+            and entry.id = ?
+    ), undef, $account_id, $entry_id);
 
-    my $url_dir = Mojo::Util::url_escape($url);
-    my $the_dir = $self->data_dir() . "/$url_dir";
-
-    my $parse = XML::Feed->parse("$the_dir/the.feed");
-
-    my $entry = undef;
-    my $entry_id = Mojo::Util::url_unescape($opt{entry_id});
-    foreach my $e ( $parse->entries() ) {
-        if ($entry_id eq $e->id()) {
-            $entry = $e;
-            last;
-        }
-    }
-
-    return("") if !$entry;
-    return(decode_entities($entry->title));
+    return("") if !$data;
+    return(decode_entities($$data{title}));
 }
 
 sub link {
     my $self = shift;
     my %opt = @_;
+    my $entry_id = $opt{entry_id};
+    my $account_id = $opt{account_id};
 
-    my $url = $self->key("url");
+    my $data = $self->dbx()->row(qq(
+        SELECT entry.link
+        FROM feed, entry where feed.account_id = ? 
+            and feed.name = entry.feed_name 
+            and entry.id = ?
+    ), undef, $account_id, $entry_id);
 
-    my $url_dir = Mojo::Util::url_escape($url);
-    my $the_dir = $self->data_dir() . "/$url_dir";
-
-    my $parse = XML::Feed->parse("$the_dir/the.feed");
-
-    my $entry = undef;
-    my $entry_id = Mojo::Util::url_unescape($opt{entry_id});
-    foreach my $e ( $parse->entries() ) {
-        if ($entry_id eq $e->id()) {
-            $entry = $e;
-            last;
-        }
-    }
-
-    return("") if !$entry;
-    return(decode_entities($entry->link));
+    return("") if !$data;
+    return(decode_entities($$data{link}));
 }
 
 sub html {
     my $self = shift;
     my %opt = @_;
+    my $entry_id = $opt{entry_id};
+    my $account_id = $opt{account_id};
 
-    my $url = $self->key("url");
+    my $data = $self->dbx()->row(qq(
+        SELECT entry.html
+        FROM feed, entry where feed.account_id = ? 
+            and feed.name = entry.feed_name 
+            and entry.id = ?
+    ), undef, $account_id, $entry_id);
 
-    my $url_dir = Mojo::Util::url_escape($url);
-    my $the_dir = $self->data_dir() . "/$url_dir";
-
-    my $parse = XML::Feed->parse("$the_dir/the.feed");
-
-    my $entry = undef;
-    my $entry_id = Mojo::Util::url_unescape($opt{entry_id});
-    foreach my $e ( $parse->entries() ) {
-        if ($entry_id eq $e->id()) {
-            $entry = $e;
-            last;
-        }
-    }
-
-    return("") if !$entry;
-    return(decode_entities($entry->content->body));
+    return("") if !$data;
+    return(decode_entities($$data{html}));
 }
 
 sub latest_html {

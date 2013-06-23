@@ -17,6 +17,24 @@ sub haveFeeds {
     return(SiteCode::DBX->new()->col("SELECT count(id) FROM feed WHERE account_id = ?", undef, $opt{account}->id()));
 }
 
+sub latest {
+    my $self = shift;
+    my %opt = @_;
+
+    my $dbx = $self->dbx();
+
+    my $data = $dbx->array(qq(
+        SELECT
+            feed.id as feed_id, entry.id as entry_id, entry.issued
+        FROM feed, entry where feed.account_id = ? 
+            and feed.name = entry.feed_name 
+        order by entry.issued desc
+        LIMIT 100
+    ), undef, $self->account()->id());
+
+    return($data);
+}
+
 sub feeds {
     my $self = shift;
     my %opt = @_;

@@ -23,7 +23,7 @@ while (1) {
     my $dbx = SiteCode::DBX->new();
 
     my $feeds = $dbx->array(qq(
-        select distinct feed_value.feed_value as url from feed_key, feed_value where feed_key = 'url' and feed_key.id = feed_key_id
+        select distinct name as url from feed
     ));
 
     foreach my $feed (@{ $feeds }) {
@@ -99,9 +99,67 @@ while (1) {
         }
 
         system("/bin/touch", $the_dir);
+
+        my $parse;
+        eval {
+            $parse = XML::Feed->parse("$the_dir/the.feed");
+        };
+        if ($@) {
+            openlog("feeder", 'cons,pid', 'user');
+            syslog('info', "parse error(%s) :: %s :: %s", $$feed{url}, $$, $@);
+            closelog();
+        }
+        my $entries = $parse ? [$parse->entries()] : [];
+
+        if (@{ $entries}) {
+            openlog("feeder", 'cons,pid', 'user');
+            syslog('info', "DELETE FROM entry (%s) :: %s :: %s", $$feed{url}, $$, scalar(@{ $entries }));
+            closelog();
+
+            eval {
+                $dbx->do("DELETE FROM entry WHERE feed_name = ?", undef, $$feed{url});
+            };
+            if ($@) {
+                openlog("feeder", 'cons,pid', 'user');
+                syslog('info', "DELETE FROM entry error(%s) :: %s :: %s", $$feed{url}, $$, $@);
+                closelog();
+            }
+            else {
+                foreach my $entry (@{ $entries }) {
+                    eval {
+                        # Why there twice?
+                        my $exists = $dbx->col("SELECT id FROM entry WHERE feed_name = ? and entry_id = ?", undef, $$feed{url}, $entry->id());
+                        $dbx->do(
+                            "INSERT INTO entry (feed_name, issued, title, entry_id, link, html) VALUES (?, ?, ?, ?, ?, ?)", 
+                            undef, 
+                            $$feed{url},
+                            $entry->issued() || "CURRENT_TIMESTAMP", 
+                            $entry->title(), 
+                            $entry->id(), 
+                            $entry->link(), 
+                            substr($entry->content->body(), 0, 65535),
+                        ) unless $exists;
+                    };
+                    if ($@) {
+                        my $err = $@;
+                        openlog("feeder", 'cons,pid', 'user');
+                        syslog('info', "INSERT INTO entry error(%s) :: %s :: %s", $$feed{url}, $$, $err);
+                        closelog();
+                    }
+                }
+
+                openlog("feeder", 'cons,pid', 'user');
+                syslog('info', "INSERT INTO entry :: %s :: %s", $$feed{url}, scalar(@{ $entries }));
+                closelog();
+            }
+        }
     }
 
-    sleep(5);
+    openlog("feeder", 'cons,pid', 'user');
+    syslog('info', "COMPLETE full scan");
+    closelog();
+
+    sleep(45);
 }
 
 1;

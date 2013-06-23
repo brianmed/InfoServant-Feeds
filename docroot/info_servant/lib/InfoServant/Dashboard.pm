@@ -41,18 +41,23 @@ sub show {
 
     my $account = SiteCode::Account->new(id => $self->session->{account_id});
     my $have_feeds = SiteCode::Feeds->haveFeeds(account => $account);
-    $self->stash(have_feeds => $have_feeds);
+    # $self->stash(have_feeds => $have_feeds);
+
+    my @top_100 = ();
 
     my $feeds = SiteCode::Feeds->new(account => $account);
     my @feeds = ();
-    foreach my $feed (@{ $feeds->feeds() }) {
-        my $obj = SiteCode::Feed->new(id => $$feed{id});
-        # $self->app->log->debug("title: " . $obj->key("title"));
-        push(@feeds, { id => $$feed{id}, name => $obj->key("title") || $$feed{name} });
-    }
-    @feeds = sort({ $a->{name} cmp $b->{name} } @feeds);
+    foreach my $l (@{ $feeds->latest() }) {
+        my $obj = SiteCode::Feed->new(id => $$l{feed_id}, route => $self);
+        my $entry = $obj->entry($$l{entry_id}, $account->id());
 
-    $self->render(feeds => \@feeds);
+        push(@top_100, { entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $$entry{title}, feed_id => $obj->id() });
+    }
+    if (@top_100) {
+        $self->stash(have_entries => 1);
+    }
+
+    $self->render(entries => \@top_100);
 }
 
 sub profile {
@@ -230,9 +235,9 @@ sub retrieve_feed_src {
 
     my $account = SiteCode::Account->new(id => $self->session->{account_id});
     my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self);
-    my $html = $feed->html(entry_id => $entry_id);
-    my $link = $feed->link(entry_id => $entry_id);
-    my $title = $feed->title(entry_id => $entry_id);
+    my $html = $feed->html(entry_id => $entry_id, account_id => $account->id);
+    my $link = $feed->link(entry_id => $entry_id, account_id => $account->id);
+    my $title = $feed->title(entry_id => $entry_id, account_id => $account->id);
 
     $html = sprintf(qq(
             <a href="$link" target=article>$title</a>
