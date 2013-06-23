@@ -22,6 +22,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use Digest::MD5;
 use SiteCode::Account;
+use Email::Valid;
 
 sub slash {
     my $self = shift;
@@ -62,6 +63,10 @@ sub login {
     if (!$password) {
         # $self->stash(errors => "No password given.");
         return($self->render());
+    }
+
+    if (!Email::Valid->address($login)) {
+        $self->stash(errors => "Email address not valid.");
     }
 
     if ($self->stash('errors')) {
