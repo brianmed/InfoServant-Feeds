@@ -19,12 +19,10 @@
       <div class="container">
         <a class="brand visible-desktop hidden-phone hidden-tablet" href="/">InfoServant</a>
           <ul class="nav pull-right visible-desktop hidden-phone hidden-tablet">
-            <li id=nav_profile><a href="javascript:void(0)" onClick="showProfile();">Profile</a></li>
             <li><a href="/logout">Logout</a></li>
             <li><a href="mailto:support@infoservant.com">Contact</a></li>
           </ul>
           <ul class="nav hidden-desktop visible-phone visible-tablet">
-            <li id=nav_profile><a href="javascript:void(0)" onClick="showProfile();">Profile</a></li>
             <li><a href="/logout">Logout</a></li>
             <li><a href="mailto:support@infoservant.com">Contact</a></li>
           </ul>
@@ -111,11 +109,11 @@
             $("#feed_entries").remove();
 
             if ("active" == $(id).attr("class")) {
-                $(".active").removeClass("active");
+                $(id).removeClass("active");
                 return;
             }
 
-            $(".active").removeClass("active");
+            $("li.active").removeClass("active");
             $(id).addClass("active");
 
             $.ajax({

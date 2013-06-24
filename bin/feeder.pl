@@ -138,6 +138,8 @@ while (1) {
 
     info("COMPLETE full scan");
 
+    mem_usage();
+
     sleep(45);
 }
 
@@ -147,4 +149,17 @@ sub info {
     closelog();
 }
 
+sub mem_usage {
+    my $file = "/proc/$$/statm";
+    my $text = Mojo::Util::slurp($file);
+
+    my @fields = split(/\s+/, $text);
+
+    my $rss_pages = $fields[1];
+    if (18_000 < $rss_pages) {
+        info('exiting :: %s ', $rss_pages);
+
+        exit 0;
+    }
+}
 1;
