@@ -42,12 +42,12 @@ sub feeds {
     my $dbx = $self->dbx();
 
     my $feeds = $dbx->array(qq(
-        SELECT 
-            id, name
-        FROM 
-            feed
+        SELECT feed.id, coalesce(feed_value.feed_value, feed.name) as name
+        FROM feed 
+            LEFT JOIN feed_key ON (feed_key.feed_id = feed.id AND feed_key.feed_key = 'title') 
+            LEFT JOIN feed_value ON (feed_value.feed_key_id = feed_key.id)
         WHERE account_id = ?
-            ORDER BY name
+        ORDER BY 2
     ), undef, $self->account()->id());
 
     return($feeds);

@@ -81,7 +81,7 @@
                   <legend>Profile</legend>
                     <br class="hidden-desktop visible-phone visible-tablet">
 
-                    <button id="btnAdd" type="submit" data-loading-text="Loading..." class="btn btn-primary" onclick="btnAddClick()">Add</button>
+                    <button id="btnAdd" type="submit" data-loading-text="Loading..." class="btn btn-primary">Add</button>
                     [% IF h.is_mobile %]
                     <input type="text" class="input-medium" name=new_feed value="[% new_feed %]" placeholder="http://website.com/rss">
                     [% ELSE %]
@@ -90,7 +90,7 @@
                 </fieldset>
             </form>
 
-            <script type="text/javascript">
+            <script>
                 $('#btnAdd').click(function () {
                     var btn = $(this)
                     btn.button('loading')

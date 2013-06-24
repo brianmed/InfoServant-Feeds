@@ -40,42 +40,34 @@ sub show {
     }
 
     my $account = SiteCode::Account->new(id => $self->session("account_id"));
-    my $have_feeds = SiteCode::Feeds->haveFeeds(account => $account);
-    # $self->stash(have_feeds => $have_feeds);
 
-    if ($self->param("switch")) {
-        if ("feeds" eq $self->param("switch")) {
-            $self->session(show_view => "feeds");
-        }
-        else {
-            $self->session(show_view => "entries");
-        }
-    }
-    elsif (!$self->session("show_view")) {
-        $have_feeds ? $self->session(show_view => "entries") : $self->session(show_view => "profile");
-    }
-
-    my @top = ();
-
+    my @entries = ();
     my $feeds = SiteCode::Feeds->new(account => $account);
-    my @feeds = ();
     foreach my $l (@{ $feeds->latest(limit => 30) }) {
         my $obj = SiteCode::Feed->new(id => $$l{feed_id}, route => $self);
         my $entry = $obj->entry($$l{entry_id}, $account->id());
 
-        push(@top, { entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $$entry{title}, feed_id => $obj->id() });
+        push(@entries, { entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $$entry{title}, feed_id => $obj->id() });
     }
-    if (@top) {
+    if (@entries) {
         $self->stash(have_entries => 1);
     }
 
-    $self->render(entries => \@top);
+    my @feeds = ();
+    foreach my $f (@{ $feeds->feeds() }) {
+        push(@feeds, { id => $$f{id}, name => $$f{name}});
+    }
+    if (@feeds) {
+        $self->stash(have_feeds => 1);
+    }
+
+    $self->render(entries => \@entries, feeds => \@feeds);
 }
 
 sub profile {
     my $self = shift;
 
-    if ($self->param("new_feed")) {
+    if (defined $self->param("new_feed")) {
         my $new_feed = $self->param("new_feed");
 
         my $feed = undef;
@@ -97,6 +89,7 @@ sub profile {
         };
         if ($@) {
             my $err = $@;
+            $self->app->log->debug("InfoServant::Dashboard::profile::new_feed: $err");
             if ("Feed exists already.\n" eq $err) {
                 $self->stash(errors => "Feed exists already");
             }
@@ -104,7 +97,6 @@ sub profile {
                 $self->stash(errors => "Feed may not be properly formatted");
             }
             else {
-                $self->app->log->debug("InfoServant::Dashboard::profile::new_feed: $err");
                 $self->stash(errors => "Unable to add feed");
             }
         }
@@ -254,6 +246,7 @@ sub retrieve_feed_src {
     if ($self->is_mobile) {
         $html = sprintf(qq(
                 <div id=content>
+                <br>
                 <a href="$link" target=article><button class="btn btn-primary">Site</button></a>
                 <button class="btn btn-primary" onClick="\$('#content').remove();">Close</button>
                 <hr>

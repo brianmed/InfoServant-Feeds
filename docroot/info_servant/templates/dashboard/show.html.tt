@@ -19,42 +19,55 @@
       <div class="container">
         <a class="brand visible-desktop hidden-phone hidden-tablet" href="/">InfoServant</a>
           <ul class="nav pull-right visible-desktop hidden-phone hidden-tablet">
-            <li id=nav_feeds><a href="/dashboard?switch=feeds">Feeds</a></li>
             <li id=nav_profile><a href="javascript:void(0)" onClick="showProfile();">Profile</a></li>
             <li><a href="/logout">Logout</a></li>
             <li><a href="mailto:support@infoservant.com">Contact</a></li>
           </ul>
           <ul class="nav hidden-desktop visible-phone visible-tablet">
-            <li><a href="/dashboard?switch=feeds">Feeds</a></li>
             <li id=nav_profile><a href="javascript:void(0)" onClick="showProfile();">Profile</a></li>
             <li><a href="/logout">Logout</a></li>
+            <li><a href="mailto:support@infoservant.com">Contact</a></li>
           </ul>
       </div>
     </div><!-- /navbar-inner -->
   </div><!-- /navbar -->
 
-    <div class="container-fluid">
-      <div id=therow class="row-fluid">
-        <div id=menu class="span12">
-          <div class="sidebar-nav">
+
+    <div class="tabbable"> <!-- Only required for left/right tabs -->
+    <ul id="main_tab" class="nav nav-tabs">
+    <li class="active"><a href="#tab_entries" data-toggle="tab">Entries</a></li>
+    <li><a href="#tab_feeds" data-toggle="tab">Feeds</a></li>
+    <li><a href="#tab_profile" data-toggle="tab">Profile</a></li>
+    </ul>
+    <div class="tab-content">
+    <div class="tab-pane active" id="tab_entries">
+
             <ul class="nav nav-list">
               [% IF have_entries %]
-              <li class="nav-header">Entries</li>
               [% FOREACH entry IN entries %]
               <li><a href='javascript:void(0)' onClick="showEntry(this, [% entry.feed_id %],  '[% entry.entry_id %]');">[% entry.title | html %]</a></li>
               [% END %]
               [% END %]
+            </ul>
 
+    </div>
+    <div class="tab-pane" id="tab_feeds">
+
+            <ul class="nav nav-list">
               [% IF have_feeds %]
-              <li class="nav-header">Feeds</li>
               [% FOREACH feed IN feeds %]
               <li id="li_feed[% feed.id %]"><a href="javascript:void(0)" onClick="showFeed([% feed.id %]);">[% feed.name | html %]</a></li>
               [% END %]
               [% END %]
             </ul>
-          </div>
-        </div>
-      </div>
+
+    </div>
+    <div class="tab-pane" id="tab_profile">
+
+        <div class="well" id=profileBody></div>
+
+    </div>
+    </div>
   </div>
 
         <script>
@@ -77,12 +90,7 @@
         }
 
         function showProfile() {
-            $("#menu").hide();
-
-            $("#htmlBody").remove();
-            $('#therow').append("<div class=\"span12\" id=htmlBody></div>");
-
-            $("#htmlBody").load("/dashboard/html/profile");
+            $("#profileBody").load("/dashboard/html/profile");
             $.getScript("/dashboard/javascript/profile");
         }
 
@@ -92,9 +100,7 @@
 
             $("#htmlBody").load("/dashboard/feed/src/" + feed_nbr + "?entry_id=" + entry_id);
 
-            [% IF h.is_mobile %]
-            //$("#menu").hide();
-            [% ELSE %]
+            [% UNLESS h.is_mobile %]
             tinymce.init({selector:'textarea', readonly: 1, menubar: "false", plugins: "fullscreen", toolbar: "fullscreen"});
             [% END %]
         }
@@ -126,9 +132,12 @@
             });
         }
 
-        [% IF c.session("show_view") == "profile" %]
-        showProfile();
-        [% END %]
+        $('#main_tab a[href="#tab_profile"]').click(function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+
+            showProfile();
+        })
         </script>
 </body>
 </html>

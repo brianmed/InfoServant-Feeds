@@ -22,7 +22,7 @@ function onSubmit(form)
         processData: false,
         contentType: false,
         success: function(data, textStatus, jqXHR) {
-            $("#htmlBody").html(data);
+            $("#profileBody").html(data);
         }
     });
 
@@ -30,4 +30,3 @@ function onSubmit(form)
 
     return false;
 }
-
