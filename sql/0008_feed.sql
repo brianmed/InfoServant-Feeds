@@ -1,7 +1,7 @@
 BEGIN;
 CREATE TABLE feed(
   id serial not null PRIMARY KEY,
-  xml_url VARCHAR(128) NOT NULL UNIQUE,
+  name VARCHAR(128) NOT NULL UNIQUE,
   updated timestamp default CURRENT_TIMESTAMP,
   inserted timestamp default CURRENT_TIMESTAMP,
 );
