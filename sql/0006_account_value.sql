@@ -1,20 +1,20 @@
 BEGIN;
-CREATE TABLE user_value(
+CREATE TABLE account_value(
   id serial not null PRIMARY KEY,
-  user_key_id integer not null unique,
-  user_value VARCHAR(4096) not null,
+  account_key_id integer not null unique,
+  account_value VARCHAR(4096) not null,
   updated timestamp not null default CURRENT_TIMESTAMP,
   inserted timestamp not null default CURRENT_TIMESTAMP,
-  foreign key (user_key_id) references user_key (id)
+  foreign key (account_key_id) references account_key (id)
 );
 
-CREATE TRIGGER user_value_timestamp BEFORE INSERT OR UPDATE ON user_value
+CREATE TRIGGER account_value_timestamp BEFORE INSERT OR UPDATE ON account_value
 FOR EACH ROW EXECUTE PROCEDURE update_timestamp();
 
-GRANT SELECT ON TABLE user_value TO kevin;
-GRANT INSERT ON TABLE user_value TO kevin;
-GRANT UPDATE ON TABLE user_value TO kevin;
-GRANT DELETE ON TABLE user_value TO kevin;
+GRANT SELECT ON TABLE account_value TO kevin;
+GRANT INSERT ON TABLE account_value TO kevin;
+GRANT UPDATE ON TABLE account_value TO kevin;
+GRANT DELETE ON TABLE account_value TO kevin;
 
-GRANT USAGE, SELECT ON SEQUENCE user_value_id_seq TO kevin;
+GRANT USAGE, SELECT ON SEQUENCE account_value_id_seq TO kevin;
 COMMIT;
