@@ -46,16 +46,16 @@ sub addFeed {
     eval {
         my $dbx = SiteCode::DBX->new();
 
-        $dbx->do("INSERT INTO feed (account_id, name) VALUES (?, ?)", undef, $account->id(), $url);
+        $dbx->do("INSERT INTO feed (xml_url) VALUES (?)", undef, $account->id(), $url);
 
         my $id = $dbx->last_insert_id(undef,undef,undef,undef,{sequence=>'feed_id_seq'});
         $feed = SiteCode::Feed->new(id => $id);
-        $feed->key("url", $url);
-        $feed->key("html_url", $opt{html_url}) if $opt{html_url};
 
         eval {
             my $parse = XML::Feed->parse(URI->new($url));
             $feed->key("title", $parse->title());
+            $feed->key("base", $parse->base());
+            $feed->key("link", $parse->link());
         };
         if ($@) {
             $opt{route}->app->log->debug("addFeed: $@");

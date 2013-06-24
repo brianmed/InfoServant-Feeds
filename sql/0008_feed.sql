@@ -1,11 +1,9 @@
 BEGIN;
 CREATE TABLE feed(
   id serial not null PRIMARY KEY,
-  account_id integer not null,
-  name VARCHAR(128) NOT NULL UNIQUE,
+  xml_url VARCHAR(128) NOT NULL UNIQUE,
   updated timestamp default CURRENT_TIMESTAMP,
   inserted timestamp default CURRENT_TIMESTAMP,
-  foreign key (account_id) references account (id)
 );
 
 CREATE TRIGGER feed_timestamp BEFORE INSERT OR UPDATE ON feed

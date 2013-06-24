@@ -2,7 +2,6 @@ CREATE TABLE account(
   id serial not null PRIMARY KEY,
   email VARCHAR(128) NOT NULL UNIQUE,
   password VARCHAR(128) NOT NULL,
-  username VARCHAR(128) NOT NULL UNIQUE,
   updated timestamp default CURRENT_TIMESTAMP,
   inserted timestamp default CURRENT_TIMESTAMP
 );
