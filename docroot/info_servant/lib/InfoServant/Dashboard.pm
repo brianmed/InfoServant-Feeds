@@ -34,14 +34,26 @@ use XML::OPML::LibXML;
 sub show {
     my $self = shift;
 
-    if (!$self->session->{account_id}) {
+    if (!$self->session("account_id")) {
         my $url = $self->url_for('/');
         return($self->redirect_to($url));
     }
 
-    my $account = SiteCode::Account->new(id => $self->session->{account_id});
+    my $account = SiteCode::Account->new(id => $self->session("account_id"));
     my $have_feeds = SiteCode::Feeds->haveFeeds(account => $account);
     # $self->stash(have_feeds => $have_feeds);
+
+    if ($self->param("switch")) {
+        if ("feeds" eq $self->param("switch")) {
+            $self->session(show_view => "feeds");
+        }
+        else {
+            $self->session(show_view => "entries");
+        }
+    }
+    elsif (!$self->session("show_view")) {
+        $have_feeds ? $self->session(show_view => "entries") : $self->session(show_view => "profile");
+    }
 
     my @top = ();
 
@@ -71,7 +83,7 @@ sub profile {
         eval {
             die("Does not look like a http URI\n") if $new_feed !~ $RE{URI}{HTTP};
 
-            my $account = SiteCode::Account->new(id => $self->session->{account_id});
+            my $account = SiteCode::Account->new(id => $self->session("account_id"));
 
             if (SiteCode::Feed->exists(name => $new_feed, account => $account)) {
                 die("Feed exists already.\n");
@@ -103,7 +115,7 @@ sub profile {
         }
     }
     elsif ($self->param("verify_number")) {
-        my $account = SiteCode::Account->new(id => $self->session->{account_id}, route => $self);
+        my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
         if ($account->verified()) {
             $self->stash(error => "Already verified");
@@ -128,7 +140,7 @@ sub profile {
         my $import = $self->param('google_import');
         $import->move_to($filename);
 
-        my $account = SiteCode::Account->new(id => $self->session->{account_id});
+        my $account = SiteCode::Account->new(id => $self->session("account_id"));
         my $count = 0;
         my $skipped = 0;
 
@@ -188,13 +200,13 @@ sub profile {
 sub retrieve_feed_entries {
     my $self = shift;
 
-    if (!$self->session->{account_id}) {
+    if (!$self->session("account_id")) {
         return($self->render(text => "Session has expired.  <a href=http://infoservant.com/login>Login</a>."));
     }
 
     my $feed_nbr = $self->param("feed_nbr");
 
-    my $account = SiteCode::Account->new(id => $self->session->{account_id});
+    my $account = SiteCode::Account->new(id => $self->session("account_id"));
     my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self);
     my $entries = $feed->entries();
 
@@ -210,13 +222,13 @@ sub retrieve_feed_entries {
 sub retrieve_feed_link {
     my $self = shift;
 
-    if (!$self->session->{account_id}) {
+    if (!$self->session("account_id")) {
         return($self->render(text => "Session has expired.  <a href=http://infoservant.com/login>Login</a>."));
     }
 
     my $feed_nbr = $self->param("feed_nbr");
 
-    my $account = SiteCode::Account->new(id => $self->session->{account_id});
+    my $account = SiteCode::Account->new(id => $self->session("account_id"));
     my $feed = SiteCode::Feed->new(id => $feed_nbr);
     my $link = SiteCode::Feed->latest_link();
 
@@ -226,14 +238,14 @@ sub retrieve_feed_link {
 sub retrieve_feed_src {
     my $self = shift;
 
-    if (!$self->session->{account_id}) {
+    if (!$self->session("account_id")) {
         return($self->render(text => "Session has expired.  <a href=http://infoservant.com/login>Login</a>."));
     }
 
     my $feed_nbr = $self->param("feed_nbr");
     my $entry_id = $self->param("entry_id");
 
-    my $account = SiteCode::Account->new(id => $self->session->{account_id});
+    my $account = SiteCode::Account->new(id => $self->session("account_id"));
     my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self);
     my $html = $feed->html(entry_id => $entry_id, account_id => $account->id);
     my $link = $feed->link(entry_id => $entry_id, account_id => $account->id);
@@ -242,10 +254,9 @@ sub retrieve_feed_src {
     if ($self->is_mobile) {
         $html = sprintf(qq(
                 <div id=content>
-                <button class="btn btn-primary" onClick="\$('#content').remove(); \$('#menu').show();">Back</button>
-                <br>
+                <a href="$link" target=article><button class="btn btn-primary">Site</button></a>
+                <button class="btn btn-primary" onClick="\$('#content').remove();">Close</button>
                 <hr>
-                <a href="$link" target=article>$title</a>
                 <p>
                 %s
                 </p>
@@ -254,7 +265,8 @@ sub retrieve_feed_src {
     }
     else {
         $html = sprintf(qq(
-                <a href="$link" target=article>$title</a>
+                <a href="$link" target=article><button class="btn btn-primary">Site</button></a>
+                <button class="btn btn-primary" onClick="\$('#htmlBody').remove();">Close</button>
                 <textarea id="editor1" name="editor1" cols="100" rows="40">
                 %s
                 </textarea>
@@ -267,7 +279,7 @@ sub retrieve_feed_src {
 sub retrieve_html {
     my $self = shift;
 
-    if (!$self->session->{account_id}) {
+    if (!$self->session("account_id")) {
         return($self->render(text => "Session has expired.  <a href=http://infoservant.com/login>Login</a>."));
     }
 
@@ -278,7 +290,7 @@ sub retrieve_html {
         $self->profile();
     }
 
-    my $account = SiteCode::Account->new(id => $self->session->{account_id});
+    my $account = SiteCode::Account->new(id => $self->session("account_id"));
     $self->stash(account_verified => $account->verified());
 
     my $have_feeds = SiteCode::Feeds->haveFeeds(account => $account);
@@ -295,7 +307,7 @@ sub retrieve_html {
 sub retrieve_js {
     my $self = shift;
 
-    if (!$self->session->{account_id}) {
+    if (!$self->session("account_id")) {
         return($self->render_json(json => { success => 0, error => "Session has expired."}));
     }
 

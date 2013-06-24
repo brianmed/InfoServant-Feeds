@@ -48,9 +48,7 @@ while (1) {
         my $ua = Mojo::UserAgent->new;
         $ua->max_redirects(10);
 
-        openlog("feeder", 'cons,pid', 'user');
-        syslog('info', 'ua->head :: %s :: %s', $$, $$feed{url});
-        closelog();
+        info('ua->head :: %s', $$feed{url});
 
         my $tx = $ua->head($$feed{url});
         if (my $res = $tx->success) { 
@@ -69,33 +67,25 @@ while (1) {
             my ($err, $code) = $tx->error;
             my $string =  $code ? "$code response: $err" : "Connection error: $err";
 
-            openlog("feeder", 'cons,pid', 'user');
-            syslog('info', "head error(%s) :: %s :: %s", $$feed{url}, $$, $string);
-            closelog();
+            info("head error(%s) :: %s", $$feed{url}, $string);
 
             system("/bin/touch", $the_dir);
 
             next;
         }
 
-        openlog("feeder", 'cons,pid', 'user');
-        syslog('info', 'ua->get :: %s :: %s', $$, $$feed{url});
-        closelog();
+        info('ua->get :: %s', $$feed{url});
 
         $tx = $ua->get($$feed{url});
         if (my $res = $tx->success) { 
             Mojo::Util::spurt($res->body, "$the_dir/the.feed");
 
-            openlog("feeder", 'cons,pid', 'user');
-            syslog('info', "spurt(%s) :: %s :: %s", "$the_dir/the.feed", $$, $$feed{url});
-            closelog();
+            info("spurt(%s) :: %s", "$the_dir/the.feed", $$feed{url});
         } else {
             my ($err, $code) = $tx->error;
             my $string =  $code ? "$code response: $err" : "Connection error: $err";
 
-            openlog("feeder", 'cons,pid', 'user');
-            syslog('info', "get error(%s) :: %s :: %s", $$feed{url}, $$, $string);
-            closelog();
+            info("get error(%s) :: %s", $$feed{url}, $string);
         }
 
         system("/bin/touch", $the_dir);
@@ -105,24 +95,18 @@ while (1) {
             $parse = XML::Feed->parse("$the_dir/the.feed");
         };
         if ($@) {
-            openlog("feeder", 'cons,pid', 'user');
-            syslog('info', "parse error(%s) :: %s :: %s", $$feed{url}, $$, $@);
-            closelog();
+            info("parse error(%s) :: %s", $$feed{url}, $@);
         }
         my $entries = $parse ? [$parse->entries()] : [];
 
         if (@{ $entries}) {
-            openlog("feeder", 'cons,pid', 'user');
-            syslog('info', "DELETE FROM entry (%s) :: %s :: %s", $$feed{url}, $$, scalar(@{ $entries }));
-            closelog();
+            info("DELETE FROM entry (%s) :: %s", $$feed{url}, scalar(@{ $entries }));
 
             eval {
                 $dbx->do("DELETE FROM entry WHERE feed_name = ?", undef, $$feed{url});
             };
             if ($@) {
-                openlog("feeder", 'cons,pid', 'user');
-                syslog('info', "DELETE FROM entry error(%s) :: %s :: %s", $$feed{url}, $$, $@);
-                closelog();
+                info("DELETE FROM entry error(%s) :: %s", $$feed{url}, $@);
             }
             else {
                 foreach my $entry (@{ $entries }) {
@@ -130,9 +114,10 @@ while (1) {
                         # Why there twice?
                         my $exists = $dbx->col("SELECT id FROM entry WHERE feed_name = ? and entry_id = ?", undef, $$feed{url}, $entry->id());
                         $dbx->do(
-                            "INSERT INTO entry (feed_name, issued, title, entry_id, link, html) VALUES (?, ?, ?, ?, ?, ?)", 
+                            "INSERT INTO entry (feed_name, feed_title, issued, title, entry_id, link, html) VALUES (?, ?, ?, ?, ?, ?, ?)", 
                             undef, 
                             $$feed{url},
+                            $parse->title(),
                             $entry->issued() || "CURRENT_TIMESTAMP", 
                             $entry->title(), 
                             $entry->id(), 
@@ -142,24 +127,24 @@ while (1) {
                     };
                     if ($@) {
                         my $err = $@;
-                        openlog("feeder", 'cons,pid', 'user');
-                        syslog('info', "INSERT INTO entry error(%s) :: %s :: %s", $$feed{url}, $$, $err);
-                        closelog();
+                        info("INSERT INTO entry error(%s) :: %s", $$feed{url}, $err);
                     }
                 }
 
-                openlog("feeder", 'cons,pid', 'user');
-                syslog('info', "INSERT INTO entry :: %s :: %s", $$feed{url}, scalar(@{ $entries }));
-                closelog();
+                info("INSERT INTO entry :: %s :: %s", $$feed{url}, scalar(@{ $entries }));
             }
         }
     }
 
-    openlog("feeder", 'cons,pid', 'user');
-    syslog('info', "COMPLETE full scan");
-    closelog();
+    info("COMPLETE full scan");
 
     sleep(45);
+}
+
+sub info {
+    openlog("feeder", 'cons,pid', 'user');
+    syslog('info', @_);
+    closelog();
 }
 
 1;

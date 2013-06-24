@@ -19,30 +19,29 @@
       <div class="container">
         <a class="brand visible-desktop hidden-phone hidden-tablet" href="/">InfoServant</a>
           <ul class="nav pull-right visible-desktop hidden-phone hidden-tablet">
+            <li id=nav_feeds><a href="/dashboard?switch=feeds">Feeds</a></li>
+            <li id=nav_profile><a href="javascript:void(0)" onClick="showProfile();">Profile</a></li>
             <li><a href="/logout">Logout</a></li>
             <li><a href="mailto:support@infoservant.com">Contact</a></li>
           </ul>
           <ul class="nav hidden-desktop visible-phone visible-tablet">
+            <li><a href="/dashboard?switch=feeds">Feeds</a></li>
+            <li id=nav_profile><a href="javascript:void(0)" onClick="showProfile();">Profile</a></li>
             <li><a href="/logout">Logout</a></li>
-            <li><a href="mailto:support@infoservant.com">Contact</a></li>
           </ul>
       </div>
     </div><!-- /navbar-inner -->
   </div><!-- /navbar -->
 
     <div class="container-fluid">
-      <div class="row-fluid">
-        [% IF have_entries %]
-        <div id=menu class="span5">
-        [% ELSE %]
-        <div id=menu class="span5 visible-desktop hidden-phone hidden-tablet">
-        [% END %]
-          <div class="well sidebar-nav">
+      <div id=therow class="row-fluid">
+        <div id=menu class="span12">
+          <div class="sidebar-nav">
             <ul class="nav nav-list">
               [% IF have_entries %]
               <li class="nav-header">Entries</li>
               [% FOREACH entry IN entries %]
-              <li><a href='javascript:void(0)' onClick="showEntry([% entry.feed_id %],  '[% entry.entry_id %]');">[% entry.title | html %]</a></li>
+              <li><a href='javascript:void(0)' onClick="showEntry(this, [% entry.feed_id %],  '[% entry.entry_id %]');">[% entry.title | html %]</a></li>
               [% END %]
               [% END %]
 
@@ -51,11 +50,6 @@
               [% FOREACH feed IN feeds %]
               <li id="li_feed[% feed.id %]"><a href="javascript:void(0)" onClick="showFeed([% feed.id %]);">[% feed.name | html %]</a></li>
               [% END %]
-              [% END %]
-
-              [% UNLESS h.is_mobile %]
-              <li class="nav-header ">Account</li>
-              <li id="li_profile"><a href="javascript:void(0)" onClick="loadHtml('profile');">Profile</a></li>
               [% END %]
             </ul>
           </div>
@@ -69,7 +63,7 @@
             async: false
         });
 
-        function loadHtml (link, script) {
+        function loadHtml(link, script) {
             var id = '#li_' + link;
             $(".active").removeClass("active");
             $(id).addClass("active");
@@ -82,17 +76,30 @@
             }
         }
 
-        function showEntry (feed_nbr, entry_id) {
+        function showProfile() {
+            $("#menu").hide();
+
+            $("#htmlBody").remove();
+            $('#therow').append("<div class=\"span12\" id=htmlBody></div>");
+
+            $("#htmlBody").load("/dashboard/html/profile");
+            $.getScript("/dashboard/javascript/profile");
+        }
+
+        function showEntry(link, feed_nbr, entry_id) {
+            $("#htmlBody").remove();
+            $(link.parentElement).append("<div id=htmlBody></div>");
+
             $("#htmlBody").load("/dashboard/feed/src/" + feed_nbr + "?entry_id=" + entry_id);
 
             [% IF h.is_mobile %]
-            $("#menu").hide();
+            //$("#menu").hide();
             [% ELSE %]
             tinymce.init({selector:'textarea', readonly: 1, menubar: "false", plugins: "fullscreen", toolbar: "fullscreen"});
             [% END %]
         }
 
-        function showFeed (feed_nbr) {
+        function showFeed(feed_nbr) {
             var id = '#li_feed' + feed_nbr;
 
             $("#feed_entries").remove();
@@ -118,6 +125,10 @@
                 },
             });
         }
+
+        [% IF c.session("show_view") == "profile" %]
+        showProfile();
+        [% END %]
         </script>
 </body>
 </html>

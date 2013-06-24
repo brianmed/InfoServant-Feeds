@@ -1,6 +1,7 @@
 BEGIN;
 CREATE TABLE entry(
   id serial not null PRIMARY KEY,
+  feed_title VARCHAR(128) NOT NULL,
   feed_name VARCHAR(128) NOT NULL,
   issued timestamp not null,
   title VARCHAR(512) not null,
