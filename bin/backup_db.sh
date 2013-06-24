@@ -2,7 +2,7 @@
 
 set -e
 
-cd /opt/infoservant.com/sql
+cd /opt/infoservant.com/sql/backup
 
 FILE=scotch_egg.txt.$(date "+%FT%T")
 sudo -u postgres /usr/pgsql-9.2/bin/pg_dump scotch_egg -f $FILE
