@@ -7,6 +7,7 @@ use SiteCode::Modern;
 use autodie;
 
 use File::Slurp;
+use File::Path;
 use Sys::Syslog;
 
 use SiteCode::DBX;
@@ -17,13 +18,14 @@ use Mojo::Util;
 use Mojo::UserAgent;
 
 my $data_dir = "/opt/infoservant.com/data/feed_files";
+my $html_dir = "/opt/infoservant.com/data/html_files";
 Mojo::Util::spurt($$, "/tmp/feeder.pl.pid");
 
 while (1) {
     my $dbx = SiteCode::DBX->new();
 
     my $feeds = $dbx->array(qq(
-        select distinct name as url from feed
+        select id, name as url from feed
     ));
 
     foreach my $feed (@{ $feeds }) {
@@ -99,6 +101,7 @@ while (1) {
         }
         my $entries = $parse ? [$parse->entries()] : [];
 
+        my $feed_path = "$html_dir/$$feed{id}";
         if (@{ $entries}) {
             info("DELETE FROM entry (%s) :: %s", $$feed{url}, scalar(@{ $entries }));
 
@@ -108,23 +111,37 @@ while (1) {
             if ($@) {
                 info("DELETE FROM entry error(%s) :: %s", $$feed{url}, $@);
             }
+            eval {
+                if (-d $feed_path && $feed_path =~ m#^/opt/infoservant.com/data/html_files/\d+$#) {
+                    info("remove_tree (%s) :: %s", $$feed{url}, $feed_path);
+                    File::path::remove_tree($feed_path);
+                }
+                info("mkdir (%s) :: %s", $$feed{url}, $feed_path);
+                mkdir($feed_path) or die("mkdir :: $feed_path: $!");
+            };
+            if ($@) {
+                info("Feed path error: %s :: %s :: %s", $$feed{url}, $feed_path, $@);
+            }
             else {
                 foreach my $entry (@{ $entries }) {
                     eval {
-                        # Why there twice?
                         my $exists = $dbx->col("SELECT id FROM entry WHERE feed_name = ? and entry_id = ?", undef, $$feed{url}, $entry->id());
-                        $dbx->do(
-                            "INSERT INTO entry (feed_name, feed_title, issued, title, entry_id, link, html) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-                            undef, 
-                            $$feed{url},
-                            $parse->title(),
-                            $entry->issued() || "CURRENT_TIMESTAMP", 
-                            $entry->title(), 
-                            $entry->id(), 
-                            $entry->link(), 
-                            substr($entry->content->body(), 0, 65535),
-                        ) unless $exists;
-                    };
+                        unless ($exists) {
+                            $dbx->do(
+                                "INSERT INTO entry (feed_name, feed_title, issued, title, entry_id, link) VALUES (?, ?, ?, ?, ?, ?)", 
+                                undef, 
+                                $$feed{url},
+                                $parse->title(),
+                                $entry->issued() || "CURRENT_TIMESTAMP", 
+                                $entry->title(), 
+                                $entry->id(), 
+                                $entry->link(),
+                            );
+                            my $id = $dbx->last_insert_id(undef,undef,undef,undef,{sequence=>'entry_id_seq'});
+                            my $html_file = "$feed_path/$id.html";
+                            Mojo::Util::spurt($entry->content->body(), $html_file);
+                        }
+                        };
                     if ($@) {
                         my $err = $@;
                         info("INSERT INTO entry error(%s) :: %s", $$feed{url}, $err);
@@ -156,7 +173,7 @@ sub mem_usage {
     my @fields = split(/\s+/, $text);
 
     my $rss_pages = $fields[1];
-    if (18_000 < $rss_pages) {
+    if (30_000 < $rss_pages) {
         info('exiting :: %s ', $rss_pages);
 
         exit 0;

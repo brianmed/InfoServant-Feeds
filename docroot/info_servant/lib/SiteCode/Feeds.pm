@@ -14,7 +14,7 @@ sub haveFeeds {
     my $self = shift;
     my %opt = @_;
 
-    return(SiteCode::DBX->new()->col("SELECT count(id) FROM feed WHERE account_id = ?", undef, $opt{account}->id()));
+    return(SiteCode::DBX->new()->col("SELECT count(id) FROM feedme WHERE account_id = ?", undef, $opt{account}->id()));
 }
 
 sub latest {
@@ -26,8 +26,9 @@ sub latest {
     my $data = $dbx->array(qq(
         SELECT
             feed.id as feed_id, entry.id as entry_id, entry.issued
-        FROM feed, entry where feed.account_id = ? 
+        FROM feedme, feed, entry where feedme.account_id = ? 
             and feed.name = entry.feed_name 
+            and feedme.feed_id = feed.id
         order by entry.issued desc
         LIMIT $opt{limit}
     ), undef, $self->account()->id());
@@ -43,10 +44,10 @@ sub feeds {
 
     my $feeds = $dbx->array(qq(
         SELECT feed.id, coalesce(feed_value.feed_value, feed.name) as name
-        FROM feed 
+        FROM feedme, feed 
             LEFT JOIN feed_key ON (feed_key.feed_id = feed.id AND feed_key.feed_key = 'title') 
             LEFT JOIN feed_value ON (feed_value.feed_key_id = feed_key.id)
-        WHERE account_id = ?
+        WHERE feedme.account_id = ? and feed.id = feedme.feed_id
         ORDER BY 2
     ), undef, $self->account()->id());
 

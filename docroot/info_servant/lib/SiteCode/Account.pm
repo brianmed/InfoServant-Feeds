@@ -160,28 +160,28 @@ sub key
         my $defined = $self->key($key);
 
         if ($defined) {
-            my $id = $dbx->col("SELECT id FROM user_key WHERE account_id = ? AND user_key = ?", undef, $self->id(), $key);
-            $dbx->do("UPDATE user_value SET user_value = ? WHERE user_key_id = ?", undef, $value, $id);
+            my $id = $dbx->col("SELECT id FROM account_key WHERE account_id = ? AND account_key = ?", undef, $self->id(), $key);
+            $dbx->do("UPDATE account_value SET account_value = ? WHERE account_key_id = ?", undef, $value, $id);
         }
         else {
-            $dbx->do("INSERT INTO user_key (account_id, user_key) VALUES (?, ?)", undef, $self->id(), $key);
-            my $id = $dbx->col("SELECT id FROM user_key WHERE account_id = ? AND user_key = ?", undef, $self->id(), $key);
-            $dbx->do("INSERT INTO user_value (user_key_id, user_value) VALUES (?, ?)", undef, $id, $value);
+            $dbx->do("INSERT INTO account_key (account_id, account_key) VALUES (?, ?)", undef, $self->id(), $key);
+            my $id = $dbx->col("SELECT id FROM account_key WHERE account_id = ? AND account_key = ?", undef, $self->id(), $key);
+            $dbx->do("INSERT INTO account_value (account_key_id, account_value) VALUES (?, ?)", undef, $id, $value);
         }
     }
 
     my $row = $dbx->row(qq(
         SELECT 
-            user_key, user_value 
+            account_key, account_value 
         FROM 
-            user_key, user_value 
-        WHERE user_key = ?
+            account_key, account_value 
+        WHERE account_key = ?
             AND account_id = ?
-            AND user_key.account_id = account_id
-            AND user_key.id = user_value.user_key_id
+            AND account_key.account_id = account_id
+            AND account_key.id = account_value.account_key_id
     ), undef, $key, $self->id());
 
-    my $ret = $row->{user_value};
+    my $ret = $row->{account_value};
     return($ret);
 }
 
