@@ -17,6 +17,9 @@ use Mojo::Util;
 
 use Mojo::UserAgent;
 
+use SiteCode::Feed;
+use SiteCode::Feeds;
+
 my $data_dir = "/opt/infoservant.com/data/feed_files";
 my $html_dir = "/opt/infoservant.com/data/html_files";
 Mojo::Util::spurt($$, "/tmp/feeder.pl.pid");
