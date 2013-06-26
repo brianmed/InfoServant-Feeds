@@ -9,18 +9,21 @@
 [% UNLESS account_verified %]
         [% IF success %]
       <div id=success class="alert alert-success">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
         [% success %]
       </div>
       [% END %]
 
         [% IF info %]
       <div id=info class="alert alert-info">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
         [% info %]
       </div>
       [% END %]
 
         [% IF errors %]
       <div id=errors class="alert alert-error">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
         [% errors %]
       </div>
       [% END %]
@@ -42,39 +45,24 @@
 [% IF account_verified %]
         [% IF success %]
       <div id=success class="alert alert-success">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
         [% success %]
       </div>
       [% END %]
 
         [% IF info %]
       <div id=info class="alert alert-info">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
         [% info %]
       </div>
       [% END %]
 
         [% IF errors %]
       <div id=errors class="alert alert-error">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
         [% errors %]
       </div>
       [% END %]
-
-    [% IF info || errors %]
-    <script>
-        [% IF info %]
-        $("#info").fadeIn(1350)
-        setTimeout(function() {
-              $('#info').fadeOut(1350);
-        }, 8000);
-        [% END %]
-
-        [% IF errors %]
-        $("#errors").fadeIn(1350)
-        setTimeout(function() {
-              $('#errors').fadeOut(1350);
-        }, 8000);
-        [% END %]
-    </script>
-    [% END %]
 
             <form onsubmit="return onSubmit(this);" class="form-inline">
                 <fieldset>

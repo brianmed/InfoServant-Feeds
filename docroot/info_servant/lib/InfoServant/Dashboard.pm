@@ -77,13 +77,16 @@ sub profile {
 
             my $account = SiteCode::Account->new(id => $self->session("account_id"));
 
-            if (SiteCode::Feed->exists(name => $new_feed, account => $account)) {
+            my $exists = SiteCode::Feeds->new->exists(name => $new_feed, account => $account);
+            my $subscribed = $exists ? SiteCode::Feed->new(name => $new_feed, account => $account, route => $self)->subscribed : 0;
+
+            if ($exists && $subscribed) {
                 die("Feed exists already.\n");
             }
 
-            $feed = SiteCode::Feed->addFeed(
+            $feed = SiteCode::Feeds->new->addFeed(
                 account => $account,
-                url => $new_feed,
+                xml_uRl => $new_feed,
                 route => $self,
             );
         };
@@ -132,59 +135,93 @@ sub profile {
         my $import = $self->param('google_import');
         $import->move_to($filename);
 
-        my $account = SiteCode::Account->new(id => $self->session("account_id"));
+        unless (-s $filename) {
+            $self->stash(errors => "No file detected.");
+
+            return;
+        }
+
         my $count = 0;
         my $skipped = 0;
+        my $already = 0;
 
         my $process = sub {
             my $outline = shift;
 
+            state $tag;
+
             if ($outline->is_container) {
-                return;
+                $tag = $outline->text;
             }
             
+            my $account = SiteCode::Account->new(id => $self->session("account_id"));
+
             my $xml_url = $outline->xml_url;
             my $html_url = $outline->html_url;
 
-            if (SiteCode::Feed->exists(name => $xml_url, account => $account)) {
-                ++$skipped;
+            return unless $xml_url;
+
+            my $exists;
+            my $subscribed;
+
+            eval {
+                $exists = SiteCode::Feeds->new->exists(name => $xml_url, account => $account);
+                my $f = SiteCode::Feed->new(name => $xml_url, account => $account, route => $self);
+                $subscribed = $exists ? $f->subscribed() : 0;
+            };
+            if ($@) {
                 return;
             }
 
-            SiteCode::Feed->addFeed(
-                account => $account,
-                url => $xml_url,
-                html_url => $html_url,
-                route => $self,
-            );
+            if ($exists && $subscribed) {
+                ++$already;
+                return;
+            }
+
+            my $feed;
+            eval {
+                if ($exists) {
+                    $feed = SiteCode::Feed->new(name => $xml_url, route => $self, account => $account);
+                }
+                else {
+                    $feed = SiteCode::Feeds->new->addFeed(
+                        account => $account,
+                        url => $xml_url,
+                        html_url => $html_url,
+                        route => $self,
+                    );
+                }
+                if ($subscribed) {
+                    ++$already;
+                }
+                else {
+                    $feed->subscribe;
+                }
+            };
             if ($@) {
                 my $err = $@;
-                $self->app->log->debug("InfoServant::Dashboard::profile::new_feed: $err");
                 ++$skipped;
             }
             else {
-                $self->app->log->debug("InfoServant::Dashboard::profile::new_feed: $xml_url");
+                $feed->key("tag", $tag) if $tag;
                 ++$count;
             }
         };
 
-        if (-s $filename) {
+        eval {
             my $parser = XML::OPML::LibXML->new;
             my $doc    = $parser->parse_file($filename);
 
             $doc->walkdown($process);
 
-            if ($skipped) {
-                $self->stash(info => "Imported $count feeds.<br>There were $skipped feeds skipped.");
-                $self->stash(reload => 1);
-            }
-            else {
-                $self->stash(info => "Imported $count feeds.");
-                $self->stash(reload => 1);
-            }
-        }
-        else {
-            $self->stash(errors => "No file detected.");
+            my $msg = "Subcribed to $count feeds.";
+            $msg .= "<br>There were $already feeds already subscribed." if $already;
+            $msg .= "<br>There were $skipped feeds skipped." if $skipped;
+            $self->stash(success => $msg);
+            $self->stash(info => "The import will happen in the background.  Please give us 5 minutes.");
+        };
+        if ($@) {
+            $self->stash(errors => "Error processing file.");
         }
     }
 }

@@ -92,9 +92,13 @@ while (1) {
 
         system("/bin/touch", $the_dir);
 
+        my $feed = SiteCode::Feed->new(id => $$feed{id});
         my $parse;
         eval {
             $parse = XML::Feed->parse("$the_dir/the.feed");
+            $feed->key("title", $parse->title());
+            $feed->key("base", $parse->base());
+            $feed->key("link", $parse->link());
         };
         if ($@) {
             info("parse error(%s) :: %s", $$feed{url}, $@);
@@ -120,7 +124,7 @@ while (1) {
                 mkdir($feed_path) or die("mkdir :: $feed_path: $!");
             };
             if ($@) {
-                info("Feed path error: %s :: %s :: %s", $$feed{url}, $feed_path, $@);
+                info("Feed path error: %s :: %s :: %s :: %s", $$feed{url}, $feed_path, $@, $!);
             }
             else {
                 foreach my $entry (@{ $entries }) {
@@ -157,7 +161,7 @@ while (1) {
 
     mem_usage();
 
-    sleep(45);
+    sleep(10);
 }
 
 sub info {

@@ -6,15 +6,57 @@ use Moose;
 use namespace::autoclean;
 
 use SiteCode::DBX;
+use SiteCode::Feeds;
 
 has 'dbx' => ( isa => 'SiteCode::DBX', is => 'ro', default => sub { SiteCode::DBX->new() } );
 has 'account' => ( isa => 'SiteCode::Account', is => 'ro' );
+has 'route' => ( isa => 'Mojolicious::Controller', is => 'ro' );
+
+sub addFeed {
+    my $self = shift;
+    my %opt = @_;
+
+    my $account = $opt{account};
+    my $url = $opt{url};
+
+    my $feed;
+
+    eval {
+        my $dbx = SiteCode::DBX->new();
+
+        $dbx->do("INSERT INTO feed (name) VALUES (?)", undef, $url);
+
+        my $id = $dbx->last_insert_id(undef,undef,undef,undef,{sequence=>'feed_id_seq'});
+        $self->route->app->log->debug("SiteCode::Feeds::addFeed: $id");
+        $feed = SiteCode::Feed->new(id => $id, account => $account);
+        $feed->key("xml_url", $url);
+        $feed->subscribe();
+    };
+    if ($@) {
+        die($@);
+    }
+
+    return($feed);
+}
 
 sub haveFeeds {
     my $self = shift;
     my %opt = @_;
 
     return(SiteCode::DBX->new()->col("SELECT count(id) FROM feedme WHERE account_id = ?", undef, $opt{account}->id()));
+}
+
+sub exists {
+    my $class = shift;
+
+    my %opt = @_;
+
+    if ($opt{name}) {
+        return(SiteCode::DBX->new()->col("SELECT id FROM feed WHERE name = ?", undef, $opt{name}));
+    }
+    else {
+        return 0;
+    }
 }
 
 sub latest {

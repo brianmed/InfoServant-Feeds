@@ -29,44 +29,28 @@ use XML::Feed;
 use HTML::Entities;
 
 has 'dbx' => ( isa => 'SiteCode::DBX', is => 'ro', default => sub { SiteCode::DBX->new() } );
+has 'account' => ( isa => 'SiteCode::Account', is => 'ro' );
 has 'id' => ( isa => 'Int', is => 'rw' );
-has 'feed' => ( isa => 'Email', is => 'rw' );
+has 'name' => ( isa => 'Str', is => 'rw' );
 has 'route' => ( isa => 'Mojolicious::Controller', is => 'ro' );
 has 'data_dir' => ( isa => 'Str', is => 'ro', default => "/opt/infoservant.com/data/feed_files" );
 
-sub addFeed {
+sub subscribe {
     my $self = shift;
-    my %opt = @_;
 
-    my $account = $opt{account};
-    my $url = $opt{url};
+    my $dbx = SiteCode::DBX->new();
 
-    my $feed;
-
-    eval {
-        my $dbx = SiteCode::DBX->new();
-
-        $dbx->do("INSERT INTO feed (name) VALUES (?)", undef, $url);
-
-        my $id = $dbx->last_insert_id(undef,undef,undef,undef,{sequence=>'feed_id_seq'});
-        $feed = SiteCode::Feed->new(id => $id);
-
-        eval {
-            my $parse = XML::Feed->parse(URI->new($url));
-            $feed->key("xml_url", $url);
-            $feed->key("title", $parse->title());
-            $feed->key("base", $parse->base());
-            $feed->key("link", $parse->link());
-        };
-        if ($@) {
-            $opt{route}->app->log->debug("addFeed: $@");
-        }
-    };
-    if ($@) {
-        die($@);
+    unless ($self->subscribed) {
+        $dbx->do("INSERT INTO feedme (feed_id, account_id) VALUES (?, ?)", undef, $self->id, $self->account->id);
     }
+}
 
-    return($feed);
+sub subscribed {
+    my $self = shift;
+
+    my $dbx = SiteCode::DBX->new();
+
+    my $id = $dbx->col("SELECT id FROM feedme WHERE feed_id = ? and account_id = ?", undef, $self->id, $self->account->id);
 }
 
 sub entry {
@@ -76,9 +60,10 @@ sub entry {
 
     my $data = $self->dbx()->row(qq(
         SELECT entry.*
-        FROM feed, entry where feed.account_id = ? 
+        FROM feedme, feed, entry where feedme.account_id = ? 
             and feed.name = entry.feed_name 
             and entry.id = ?
+            and feedme.feed_id = feed.id
     ), undef, $account_id, $entry_id);
 }
 
@@ -90,7 +75,6 @@ sub entries {
     my $url_dir = Mojo::Util::url_escape($url);
     my $the_dir = $self->data_dir() . "/$url_dir";
 
-    $self->route->app->log->debug("entries: $the_dir/the.feed");
     unless (-f "$the_dir/the.feed") {
         return([]);
     }
@@ -140,9 +124,10 @@ sub title {
 
     my $data = $self->dbx()->row(qq(
         SELECT entry.title
-        FROM feed, entry where feed.account_id = ? 
+        FROM feedme, feed, entry where feedme.account_id = ? 
             and feed.name = entry.feed_name 
             and entry.id = ?
+            and feedme.feed_id = feed.id
     ), undef, $account_id, $entry_id);
 
     return("") if !$data;
@@ -157,9 +142,10 @@ sub link {
 
     my $data = $self->dbx()->row(qq(
         SELECT entry.link
-        FROM feed, entry where feed.account_id = ? 
+        FROM feedme, feed, entry where feedme.account_id = ? 
             and feed.name = entry.feed_name 
             and entry.id = ?
+            and feedme.feed_id = feed.id
     ), undef, $account_id, $entry_id);
 
     return("") if !$data;
@@ -174,9 +160,10 @@ sub html {
 
     my $data = $self->dbx()->row(qq(
         SELECT entry.html
-        FROM feed, entry where feed.account_id = ? 
+        FROM feedme, feed, entry where feedme.account_id = ? 
             and feed.name = entry.feed_name 
             and entry.id = ?
+            and feedme.feed_id = feed.id
     ), undef, $account_id, $entry_id);
 
     return("") if !$data;
@@ -203,18 +190,6 @@ sub latest_html {
     }
 
     return($entry->{entry}{description});
-}
-
-sub exists {
-    my $class = shift;
-
-    my %opt = @_;
-
-    if ($opt{name}) {
-        my $account_id = $opt{account}->id();
-
-        return(SiteCode::DBX->new()->col("SELECT id FROM feed WHERE name = ? and account_id = ?", undef, $opt{name}, $account_id));
-    }
 }
 
 sub key {
@@ -250,6 +225,21 @@ sub key {
 
     my $ret = $row->{feed_value};
     return($ret);
+}
+
+sub BUILD {
+    my $self = shift;
+
+    eval {
+        if ($self->name) {
+            unless ($self->id) {
+                $self->id($self->dbx()->col("SELECT id FROM feed WHERE name = ?", undef, $self->name));
+            }
+        }
+    };
+    if ($@) {
+        die("Invalid credentials.\n");
+    }
 }
 
 __PACKAGE__->meta->make_immutable;
