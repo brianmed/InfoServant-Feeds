@@ -95,13 +95,13 @@ while (1) {
 
         system("/bin/touch", $the_dir);
 
-        my $feed = SiteCode::Feed->new(id => $$feed{id});
         my $parse;
         eval {
             $parse = XML::Feed->parse("$the_dir/the.feed");
-            $feed->key("title", $parse->title());
-            $feed->key("base", $parse->base());
-            $feed->key("link", $parse->link());
+            my $obj = SiteCode::Feed->new(id => $$feed{id});
+            $obj->key("title", $parse->title());
+            $obj->key("base", $parse->base());
+            $obj->key("link", $parse->link());
         };
         if ($@) {
             info("parse error(%s) :: %s", $$feed{url}, $@);
@@ -110,7 +110,7 @@ while (1) {
 
         my $feed_path = "$html_dir/$$feed{id}";
         if (@{ $entries}) {
-            info("DELETE FROM entry (%s) :: %s", $$feed{url}, scalar(@{ $entries }));
+            info("DELETE FROM entry (%s) :: %s", $$feed{url}, scalar(@{ $entries }) || 0);
 
             eval {
                 $dbx->do("DELETE FROM entry WHERE feed_name = ?", undef, $$feed{url});
@@ -121,7 +121,7 @@ while (1) {
             eval {
                 if (-d $feed_path && $feed_path =~ m#^/opt/infoservant.com/data/html_files/\d+$#) {
                     info("remove_tree (%s) :: %s", $$feed{url}, $feed_path);
-                    File::path::remove_tree($feed_path);
+                    File::Path::remove_tree($feed_path);
                 }
                 info("mkdir (%s) :: %s", $$feed{url}, $feed_path);
                 mkdir($feed_path) or die("mkdir :: $feed_path: $!");
@@ -146,7 +146,7 @@ while (1) {
                             );
                             my $id = $dbx->last_insert_id(undef,undef,undef,undef,{sequence=>'entry_id_seq'});
                             my $html_file = "$feed_path/$id.html";
-                            Mojo::Util::spurt($entry->content->body(), $html_file);
+                            Mojo::Util::spurt(utf8::encode($entry->content->body()), $html_file);
                         }
                         };
                     if ($@) {

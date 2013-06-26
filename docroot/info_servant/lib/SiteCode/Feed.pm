@@ -27,6 +27,7 @@ use SiteCode::DBX;
 
 use XML::Feed;
 use HTML::Entities;
+use Mojo::Util;
 
 has 'dbx' => ( isa => 'SiteCode::DBX', is => 'ro', default => sub { SiteCode::DBX->new() } );
 has 'account' => ( isa => 'SiteCode::Account', is => 'ro' );
@@ -158,16 +159,9 @@ sub html {
     my $entry_id = $opt{entry_id};
     my $account_id = $opt{account_id};
 
-    my $data = $self->dbx()->row(qq(
-        SELECT entry.html
-        FROM feedme, feed, entry where feedme.account_id = ? 
-            and feed.name = entry.feed_name 
-            and entry.id = ?
-            and feedme.feed_id = feed.id
-    ), undef, $account_id, $entry_id);
+    my $html_file = "/opt/infoservant.com/data/html_files/" . $self->id . "/$entry_id.html";
 
-    return("") if !$data;
-    return(decode_entities($$data{html}));
+    return(Mojo::Util::slurp($html_file));
 }
 
 sub latest_html {
