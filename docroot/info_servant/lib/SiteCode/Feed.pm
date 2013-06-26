@@ -43,6 +43,7 @@ sub subscribe {
 
     unless ($self->subscribed) {
         $dbx->do("INSERT INTO feedme (feed_id, account_id) VALUES (?, ?)", undef, $self->id, $self->account->id);
+        $dbx->dbh->commit;
     }
 }
 
@@ -199,11 +200,13 @@ sub key {
         if ($defined) {
             my $id = $dbx->col("SELECT id FROM feed_key WHERE feed_id = ? AND feed_key = ?", undef, $self->id(), $key);
             $dbx->do("UPDATE feed_value SET feed_value = ? WHERE feed_key_id = ?", undef, $value, $id);
+            $dbx->dbh->commit;
         }
         else {
             $dbx->do("INSERT INTO feed_key (feed_id, feed_key) VALUES (?, ?)", undef, $self->id(), $key);
             my $feed_key_id = $dbx->last_insert_id(undef,undef,undef,undef,{sequence=>'feed_key_id_seq'});
             $dbx->do("INSERT INTO feed_value (feed_key_id, feed_value) VALUES (?, ?)", undef, $feed_key_id, $value);
+            $dbx->dbh->commit;
         }
     }
 

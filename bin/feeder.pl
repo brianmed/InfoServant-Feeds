@@ -32,23 +32,25 @@ while (1) {
     ));
 
     foreach my $feed (@{ $feeds }) {
+        $dbx->do("SELECT id FROM feed WHERE id = ? FOR UPDATE", undef, $$feed{id});
+
         my $url_dir = Mojo::Util::url_escape($$feed{url});
 
         my $the_dir = "$data_dir/$url_dir";
 
+        my $obj = SiteCode::Feed->new(id => $$feed{id});
+
         if (!-d $the_dir) {
             mkdir($the_dir);
-            Mojo::Util::spurt("0", "$the_dir/last_modified");
         }
-        else {
-            my @stat = stat($the_dir);
-            my $mtime = $stat[9];
 
-            my $diff = time() - $mtime;
-            if (900 > $diff) {
-                next;
-            }
+        my $last_check = $obj->key("last_check") || 0;
+        my $diff = time() - $last_check;
+        if (900 > $diff) {
+            $dbx->dbh->rollback();
+            next;
         }
+        $obj->key("last_check", time());
 
         my $ua = Mojo::UserAgent->new;
         $ua->max_redirects(10);
@@ -58,15 +60,14 @@ while (1) {
         my $tx = $ua->head($$feed{url});
         if (my $res = $tx->success) { 
             my $last_modified = $tx->res->headers->last_modified || "";
-            my $prev_modified = Mojo::Util::slurp("$the_dir/last_modified");
-
-            system("/bin/touch", $the_dir);
+            my $prev_modified = $obj->key("last_modified") || "";
 
             if ($last_modified eq $prev_modified) {
+                $dbx->dbh->rollback();
                 next;
             }
 
-            Mojo::Util::spurt($last_modified, "$the_dir/last_modified");
+            $obj->key("last_modified", $last_modified);
         }
         else {
             my ($err, $code) = $tx->error;
@@ -76,6 +77,7 @@ while (1) {
 
             system("/bin/touch", $the_dir);
 
+            $dbx->dbh->rollback();
             next;
         }
 
@@ -98,7 +100,6 @@ while (1) {
         my $parse;
         eval {
             $parse = XML::Feed->parse("$the_dir/the.feed");
-            my $obj = SiteCode::Feed->new(id => $$feed{id});
             $obj->key("title", $parse->title());
             $obj->key("base", $parse->base());
             $obj->key("link", $parse->link());
@@ -148,7 +149,7 @@ while (1) {
                             my $html_file = "$feed_path/$id.html";
                             Mojo::Util::spurt(utf8::encode($entry->content->body()), $html_file);
                         }
-                        };
+                    };
                     if ($@) {
                         my $err = $@;
                         info("INSERT INTO entry error(%s) :: %s", $$feed{url}, $err);
@@ -158,6 +159,8 @@ while (1) {
                 info("INSERT INTO entry :: %s :: %s", $$feed{url}, scalar(@{ $entries }));
             }
         }
+
+        $dbx->dbh->commit;
     }
 
     info("COMPLETE full scan");

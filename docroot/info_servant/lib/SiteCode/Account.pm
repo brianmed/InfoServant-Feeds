@@ -136,6 +136,7 @@ sub addUser
         }
 
         $dbx->do("INSERT INTO account (email, password) VALUES (?, ?)", undef, lc $email, $password_md5);
+        $dbx->dbh->commit;
 
         my $id = $dbx->col("SELECT id FROM account WHERE email = ?", undef, lc $email);
         $account = SiteCode::Account->new(id => $id, password => $password_md5);
@@ -162,11 +163,16 @@ sub key
         if ($defined) {
             my $id = $dbx->col("SELECT id FROM account_key WHERE account_id = ? AND account_key = ?", undef, $self->id(), $key);
             $dbx->do("UPDATE account_value SET account_value = ? WHERE account_key_id = ?", undef, $value, $id);
+
+            $dbx->dbh->commit;
         }
         else {
             $dbx->do("INSERT INTO account_key (account_id, account_key) VALUES (?, ?)", undef, $self->id(), $key);
             my $id = $dbx->col("SELECT id FROM account_key WHERE account_id = ? AND account_key = ?", undef, $self->id(), $key);
             $dbx->do("INSERT INTO account_value (account_key_id, account_value) VALUES (?, ?)", undef, $id, $value);
+
+            $dbx->dbh->commit;
+
         }
     }
 
