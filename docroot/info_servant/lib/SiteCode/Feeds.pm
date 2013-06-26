@@ -75,6 +75,7 @@ sub latest {
             and feedme.feed_id = feed.id
         order by entry.issued desc
         LIMIT $opt{limit}
+        OFFSET $opt{offset}
     ), undef, $self->account()->id());
 
     return($data);

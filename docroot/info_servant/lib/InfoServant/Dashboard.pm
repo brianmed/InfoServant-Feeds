@@ -43,7 +43,7 @@ sub show {
 
     my @entries = ();
     my $feeds = SiteCode::Feeds->new(account => $account);
-    foreach my $l (@{ $feeds->latest(limit => 30) }) {
+    foreach my $l (@{ $feeds->latest(limit => 30, offset => $self->param("offset") || 0) }) {
         my $obj = SiteCode::Feed->new(id => $$l{feed_id}, route => $self);
         my $entry = $obj->entry($$l{entry_id}, $account->id());
 
@@ -60,6 +60,8 @@ sub show {
     if (@feeds) {
         $self->stash(have_feeds => 1);
     }
+
+    $self->stash(offset => $self->param("offset")) if $self->param("offset");
 
     $self->render(entries => \@entries, feeds => \@feeds);
 }
