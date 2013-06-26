@@ -238,7 +238,7 @@ sub BUILD {
         }
     };
     if ($@) {
-        die("Invalid credentials.\n");
+        die("Error SiteCode::Feed::BUILD: $@.\n");
     }
 }
 

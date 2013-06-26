@@ -160,16 +160,16 @@ sub profile {
             my $html_url = $outline->html_url;
 
             return unless $xml_url;
-
+            
             my $exists;
             my $subscribed;
 
             eval {
                 $exists = SiteCode::Feeds->new->exists(name => $xml_url, account => $account);
-                my $f = SiteCode::Feed->new(name => $xml_url, account => $account, route => $self);
-                $subscribed = $exists ? $f->subscribed() : 0;
+                my $f = $exists ? SiteCode::Feed->new(name => $xml_url, account => $account, route => $self)->subscribed : 0;
             };
             if ($@) {
+                $self->app->log->debug("Error: google_import:process: $@");
                 return;
             }
 
@@ -200,6 +200,7 @@ sub profile {
             };
             if ($@) {
                 my $err = $@;
+                $self->app->log->debug("Error: google_import:add: $@");
                 ++$skipped;
             }
             else {

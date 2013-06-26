@@ -1,7 +1,7 @@
 BEGIN;
 CREATE TABLE feed(
   id serial not null PRIMARY KEY,
-  name VARCHAR(128) NOT NULL UNIQUE,
+  name VARCHAR(1024) NOT NULL UNIQUE,
   updated timestamp default CURRENT_TIMESTAMP,
   inserted timestamp default CURRENT_TIMESTAMP
 );
