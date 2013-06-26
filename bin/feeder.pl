@@ -51,6 +51,7 @@ while (1) {
             next;
         }
         $obj->key("last_check", time());
+        $dbx->dbh->commit;
 
         my $ua = Mojo::UserAgent->new;
         $ua->max_redirects(10);
@@ -63,7 +64,6 @@ while (1) {
             my $prev_modified = $obj->key("last_modified") || "";
 
             if ($last_modified eq $prev_modified) {
-                $dbx->dbh->rollback();
                 next;
             }
 
@@ -77,7 +77,6 @@ while (1) {
 
             system("/bin/touch", $the_dir);
 
-            $dbx->dbh->rollback();
             next;
         }
 
@@ -147,7 +146,8 @@ while (1) {
                             );
                             my $id = $dbx->last_insert_id(undef,undef,undef,undef,{sequence=>'entry_id_seq'});
                             my $html_file = "$feed_path/$id.html";
-                            Mojo::Util::spurt(utf8::encode($entry->content->body()), $html_file);
+                            # Mojo::Util::spurt(utf8::encode($entry->content->body()), $html_file);
+                            File::Slurp::write_file($html_file, {binmode => ':utf8', atomic => 1}, $entry->content->body() || "No content found.");
                         }
                     };
                     if ($@) {

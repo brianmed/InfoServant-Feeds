@@ -30,12 +30,11 @@ use Carp;
 has 'dbdsn' => ( isa => 'Str', is => 'ro', default => 'dbi:Pg:dbname=scotch_egg' );
 has 'dbh' => ( isa => 'DBI::db', is => 'ro', lazy => 1, builder => '_build_dbh' );
 has 'route' => ( isa => 'Mojolicious::Controller', is => 'ro' );
-# has 'dbix' => ( isa => 'DBIx::Connector', is => 'ro', lazy => 1, builder => '_build_dbix' );
 
 sub _build_dbh {
     my $self = shift;
 
-    my $dbh = DBI->connect($self->dbdsn, "kevin", "the_trinity", {
+    my $dbh = DBI->connect_cached($self->dbdsn, "kevin", "the_trinity", {
         RaiseError => 1,
         PrintError => 0,
         AutoCommit => 0,
