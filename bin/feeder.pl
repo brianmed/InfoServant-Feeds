@@ -19,6 +19,7 @@ use Mojo::UserAgent;
 
 use SiteCode::Feed;
 use SiteCode::Feeds;
+use DateTime;
 
 my $data_dir = "/opt/infoservant.com/data/feed_files";
 my $html_dir = "/opt/infoservant.com/data/html_files";
@@ -130,6 +131,7 @@ while (1) {
                 info("Feed path error: %s :: %s :: %s :: %s", $$feed{url}, $feed_path, $@, $!);
             }
             else {
+                $dbx->dbh->commit;
                 foreach my $entry (@{ $entries }) {
                     eval {
                         my $exists = $dbx->col("SELECT id FROM entry WHERE feed_name = ? and entry_id = ?", undef, $$feed{url}, $entry->id());
@@ -138,9 +140,9 @@ while (1) {
                                 "INSERT INTO entry (feed_name, feed_title, issued, title, entry_id, link) VALUES (?, ?, ?, ?, ?, ?)", 
                                 undef, 
                                 $$feed{url},
-                                $parse->title(),
-                                $entry->issued() || "CURRENT_TIMESTAMP", 
-                                $entry->title(), 
+                                $parse->title() || "",
+                                $entry->issued() || DateTime->now(),
+                                $entry->title() || "", 
                                 $entry->id(), 
                                 $entry->link(),
                             );
@@ -148,11 +150,13 @@ while (1) {
                             my $html_file = "$feed_path/$id.html";
                             # Mojo::Util::spurt(utf8::encode($entry->content->body()), $html_file);
                             File::Slurp::write_file($html_file, {binmode => ':utf8', atomic => 1}, $entry->content->body() || "No content found.");
+                            $dbx->dbh->commit;
                         }
                     };
                     if ($@) {
                         my $err = $@;
                         info("INSERT INTO entry error(%s) :: %s", $$feed{url}, $err);
+                        $dbx->dbh->rollback;
                     }
                 }
 
