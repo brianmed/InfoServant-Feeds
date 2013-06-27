@@ -1,54 +1,39 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfoServant</title>
 
-    <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
-    <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <script src="jquery-1.10.1.min.js"></script>
+    <link rel="stylesheet" href="/jmobile/jquery.mobile-1.3.1.min.css" />
+    <script src="/jquery-1.10.1.min.js"></script>
+    <script src="/jmobile/jquery.mobile-1.3.1.min.js"></script>
 </head>
 <body>
 
-  <div class="navbar navbar-inverse">
-    <div class="navbar-inner">
-      <div class="container">
-        <a class="brand visible-desktop hidden-phone hidden-tablet" href="/">InfoServant</a>
-          <ul class="nav pull-right visible-desktop hidden-phone hidden-tablet">
-            <li><a href="/login">Login</a></li>
-            <li><a href="/signup">Signup</a></li>
-            <li><a href="mailto:support@infoservant.com">Contact</a></li>
-          </ul>
-          <ul class="nav hidden-desktop visible-phone visible-tablet">
-            <li><a href="/login">Login</a></li>
-            <li><a href="/signup">Signup</a></li>
-            <li><a href="mailto:support@infoservant.com">Contact</a></li>
-          </ul>
-      </div>
-    </div><!-- /navbar-inner -->
-  </div><!-- /navbar -->
+<div data-role="page">
 
-  <div class="row">
-    <div class="span11 offset1">
-        <center>
-        <h1>Never miss another article.</h1>
-        <h3 class="visible-desktop hidden-phone hidden-tablet">Your information, delivered.</h3>
-        </center>
-    </div>
-  </div>
+    <div data-role="header">
+        <h1>InfoServant</h1>
+    </div><!-- /header -->
 
-  <div class="row">
-    <div class="span4 offset1">
-        <table class="table">
-            <tr><th>Features</th><th>&nbsp;</th></tr>
-            <tr><td>Web RSS/Atom Reader</td><td><i class="icon-ok-sign"></i></td></tr>
-            <tr><td>Mobile RSS/Atom Reader</td><td><i class="icon-ok-sign"></i></td></tr>
-            <!-- <tr><th>Planned Features</th><th>&nbsp;</th></tr> -->
-            <!-- <tr><td>WebMarks</td><td><i class="icon-ok-sign"></i></td></tr> -->
-            <!-- <tr><td>Web Snippets</td><td><i class="icon-ok-sign"></i></td></tr> -->
+    <div data-role="content">
+        <p><center><h1>Your information: delivered.</h1></center></p>
+            <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;RSS/Atom Reader<br>
+            <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;Optimized for Mobile
         </table>
-    </div>
-  </div>
+    </div><!-- /content -->
+
+    <div data-role="footer" data-id="foo1" data-position="fixed">
+    <div data-role="navbar">
+        <ul>
+            <li><a href="/login" data-rel="dialog">Login</a></li>
+            <li><a href="/signup">Signup</a></li>
+            <li><a href="d.html">Contact</a></li>
+        </ul>
+    </div><!-- /navbar -->
+</div><!-- /footer -->
+</div><!-- /page -->
+
 </body>
 </html>
-

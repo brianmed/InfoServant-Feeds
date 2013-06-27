@@ -239,13 +239,13 @@ sub retrieve_feed_entries {
     my $feed_nbr = $self->param("feed_nbr");
 
     my $account = SiteCode::Account->new(id => $self->session("account_id"));
-    my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self);
+    my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self, account => $account);
     my $entries = $feed->entries();
 
     my $data = [];
     foreach my $entry (@{ $entries }) {
         # $self->app->log->debug("title: $$entry{entry}{title}");
-        push(@{ $data }, { title => $entry->title(), feed_id => $feed->id(), entry_id => Mojo::Util::url_escape($entry->id()) });
+        push(@{ $data }, { title => $entry->{title}, feed_id => $feed->id(), entry_id => Mojo::Util::url_escape($entry->{entry_id}) });
     }
 
     return($self->render(json => $data));

@@ -72,25 +72,15 @@ sub entry {
 sub entries {
     my $self = shift;
 
-    my $url = $self->key("url");
+    my $data = $self->dbx()->array(qq(
+        SELECT entry.title, entry.entry_id
+        FROM feedme, feed, entry where feedme.account_id = ? 
+            and feed.name = entry.feed_name 
+            and feedme.feed_id = feed.id
+        ORDER BY entry.issued
+    ), undef, $self->account->id);
 
-    my $url_dir = Mojo::Util::url_escape($url);
-    my $the_dir = $self->data_dir() . "/$url_dir";
-
-    unless (-f "$the_dir/the.feed") {
-        return([]);
-    }
-
-    # Ode, to the SQL
-    my $parse;
-    eval {
-        $parse = XML::Feed->parse("$the_dir/the.feed");
-    };
-    if ($@) {
-        $self->route->app->log->debug("entries: $the_dir/the.feed: $@");
-        return([]);
-    }
-    $parse ? return([$parse->entries()]) : return([]);
+    return($data);
 }
 
 sub latest_link {
