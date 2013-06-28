@@ -45,12 +45,12 @@ sub login {
     my $self = shift;
 
     my $login = $self->param("login");
-    my $password = Digest::MD5::md5_hex($self->param("password"));
+    my $password = $self->param("password");
 
     $self->stash(login => $login);
 
     if ($self->param("added")) {
-        $self->stash(success => "Added: please see verificaiton email.");
+        $self->stash(success => "Please see verificaiton email.");
         return($self->render());
     }
 
@@ -60,15 +60,20 @@ sub login {
         return($self->render());
     }
 
+    if ("GET" eq $self->req->method) {
+        return($self->render());
+    }
+
     if (!$login) {
-        # $self->stash(errors => "No login given.");
+        $self->stash(errors => "No login given.");
         return($self->render());
     }
 
     if (!$password) {
-        # $self->stash(errors => "No password given.");
+        $self->stash(errors => "No password given.");
         return($self->render());
     }
+    $password = Digest::MD5::md5_hex($password);
 
     if (!Email::Valid->address($login)) {
         $self->stash(errors => "Email address not valid.");

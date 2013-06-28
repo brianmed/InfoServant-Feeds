@@ -29,7 +29,7 @@
         <ul>
             <li><a href="/login" data-rel="dialog">Login</a></li>
             <li><a href="/signup">Signup</a></li>
-            <li><a href="d.html">Contact</a></li>
+            <li><a href="mailto:support@infoservant.com">Contact</a></li>
         </ul>
     </div><!-- /navbar -->
 </div><!-- /footer -->

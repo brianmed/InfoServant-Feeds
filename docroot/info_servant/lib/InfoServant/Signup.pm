@@ -25,8 +25,6 @@ use SiteCode::Account;
 sub start {
     my $self = shift;
 
-    $self->app->log->debug("signup: start");
-
     $self->render();
 }
 
@@ -34,27 +32,25 @@ sub restart {
     my $self = shift;
 
     my $email = $self->param("email");
-    my $vemail = $self->param("vemail");
+    my $username = $self->param("username");
     my $password = $self->param("password");
 
     my $errors = "";
     if (!$email) {
-        $errors .= $errors ? "<br>" : "";
-        $errors .= "Please enter an email";
+        $errors = "Please enter an email.";
     }
-    if (!$vemail) {
-        $errors .= $errors ? "<br>" : "";
-        $errors .= "Please enter a verification email";
+    if (!$errors && !$username) {
+        $errors = "Please enter a username.";
     }
-    if (!$password) {
-        $errors .= $errors ? "<br>" : "";
-        $errors .= "Please enter a password";
+    if (!$errors && !$password) {
+        $errors = "Please enter a password.";
     }
 
     $self->stash(errors => $errors);
 
     $self->stash(email => $email);
-    $self->stash(vemail => $vemail);
+    $self->stash(username => $username);
+    $self->stash(password => $password);
 
     $self->render("signup/start");
 }
@@ -65,19 +61,12 @@ sub add {
     my ($account, $url);
 
     my $email = $self->param("email");
-    my $vemail = $self->param("vemail");
+    my $username = $self->param("username");
     my $password = $self->param("password");
 
     $self->stash(email => $self->param("email"));
-    $self->stash(vemail => $self->param("vemail"));
-
-    $self->app->log->debug("InfoServant::Signup::add");
-
-    if ($email ne $vemail) {
-        $self->stash(errors => "Email verification does not match.");
-
-        return $self->render("signup/start");
-    }
+    $self->stash(username => $self->param("username"));
+    $self->stash(password => $self->param("password"));
 
     eval {
         $account = SiteCode::Account->addUser(
@@ -105,7 +94,7 @@ sub add {
         }
     }
     else {
-        $self->stash(success => "Successfully added user: please login.");
+        $self->stash(success => "Please login.");
         $url = $self->url_for('/login')->query(login => $account->email, added => 1);
         return $self->redirect_to($url);
     }

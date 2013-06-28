@@ -1,3 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>InfoServant: Signup</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="/jquery-1.10.1.min.js"></script>
+    <link rel="stylesheet" href="/jmobile/jquery.mobile-1.3.1.min.css" />
+    <script src="/jmobile/jquery.mobile-1.3.1.min.js"></script>
+</head>
+<body>
+
+<div data-role="dialog">
+        <div data-role="header" data-theme="d">
+            <h1>Signup</h1>
+        </div>
+
+        <div data-role="content">
+            [% IF errors %]
+            <p><span> <a data-inline="true" data-iconpos="notext" data-icon="alert" data-role="button" class="ui-icon-alt ui-btn ui-shadow ui-btn-corner-all ui-btn-inline ui-btn-icon-notext ui-btn-up-e" href="index.html" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="e"><span class="ui-btn-inner"><span class="ui-btn-text">Alert</span><span class="ui-icon ui-icon-alert ui-icon-shadow"></span></span></a>
+            </span> [% errors %] </p>
+            [% END %]
+
+            [% IF success %]
+            <p><span> <a data-inline="true" data-iconpos="notext" data-icon="check" data-role="button" class="ui-icon-alt ui-btn ui-shadow ui-btn-corner-all ui-btn-inline ui-btn-icon-notext ui-btn-up-e" href="index.html" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="e"><span class="ui-btn-inner"><span class="ui-btn-text">Success</span><span class="ui-icon ui-icon-check ui-icon-shadow"></span></span></a>
+            </span> [% success %] </p>
+            [% END %]
+
+            <form action="/signup" method="post">
+                <input name="login" id="login" placeholder="Email" value="[% login | html %]" type="text" autocapitalize="off">
+                <input name="username" id="username" placeholder="Username" value="[% username | html %]" type="text" autocapitalize="off">
+                <input name="password" id="password" placeholder="Password" value="[% password | html %]" autocomplete="off" type="password">
+                <input value="Signup" data-theme="b" type="submit">
+            </form>
+            <a href="/" data-role="button" data-theme="b">Cancel</a>       
+        </div>
+</div>
+
+</body>
+</html>
+
+[% STOP %]
+
 <!DOCTYPE HTML>
 <html>
 <head>

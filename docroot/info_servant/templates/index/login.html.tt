@@ -20,15 +20,20 @@
         <div data-role="content">
             [% IF errors %]
             <p><span> <a data-inline="true" data-iconpos="notext" data-icon="alert" data-role="button" class="ui-icon-alt ui-btn ui-shadow ui-btn-corner-all ui-btn-inline ui-btn-icon-notext ui-btn-up-e" href="index.html" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="e"><span class="ui-btn-inner"><span class="ui-btn-text">Alert</span><span class="ui-icon ui-icon-alert ui-icon-shadow"></span></span></a>
-            </span> [% errors %]  </p>
+            </span> [% errors %] </p>
+            [% END %]
+
+            [% IF success %]
+            <p><span> <a data-inline="true" data-iconpos="notext" data-icon="check" data-role="button" class="ui-icon-alt ui-btn ui-shadow ui-btn-corner-all ui-btn-inline ui-btn-icon-notext ui-btn-up-e" href="index.html" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="e"><span class="ui-btn-inner"><span class="ui-btn-text">Success</span><span class="ui-icon ui-icon-check ui-icon-shadow"></span></span></a>
+            </span> [% success %] </p>
             [% END %]
 
             <form action="/login" method="post">
                 <input name="login" id="login" placeholder="Email" value="[% login | html %]" type="text">
                 <input name="password" id="password" placeholder="Password" value="[% password | html %]" autocomplete="off" type="password">
+                <input value="Login" data-theme="b" type="submit">
             </form>
-            <a href="dialog/index.html" data-role="button" data-rel="back" data-theme="b">Login</a>       
-            <a href="/" data-role="button" data-rel="back" data-theme="b">Cancel</a>       
+            <a href="/" data-role="button" data-theme="b">Cancel</a>       
         </div>
 </div>
 
