@@ -141,7 +141,7 @@ while (1) {
                                 undef, 
                                 $$feed{url},
                                 $parse->title() || "",
-                                $entry->issued() || DateTime->now(),
+                                $entry->issued() || DateTime->from_epoch(epoch => time() - 604800),
                                 $entry->title() || "", 
                                 $entry->id(), 
                                 $entry->link(),

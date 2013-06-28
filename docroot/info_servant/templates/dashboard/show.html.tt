@@ -50,6 +50,23 @@
         [% UNLESS have_entries %]
         Please upload an opml file or add a rss feed.
         [% END %]
+
+        [% IF have_entries %]
+            <ul data-role="listview" data-inset="true">
+                [% FOREACH entry IN entries %]
+                [% IF cur_date != entry.date %]
+                    [% SET cur_date = entry.date %]
+                    <li data-role="list-divider">[% cur_date %]</li>
+                [% END %]
+                <li><a href="index.html">
+                    <h2>[% entry.feed_title %]</h2>
+                    <p><strong>[% entry.title %]</strong></p>
+                    <!-- <p>Hey Stephen, if you're available at 10am tomorrow, we've got a meeting with the jQuery team.</p>-->
+                    <p class="ui-li-aside"><strong>[% entry.time %]</strong>[% entry.the_m %]</p>
+                </a></li>
+                [% END %]
+            </ul>
+        [% END %]
     </div><!-- /content -->
 
             <style>
@@ -138,8 +155,17 @@
     <div data-role="footer" data-id="foo1" data-position="fixed">
     <div data-role="navbar">
         <ul>
+            [% IF offset %]
+            [% SET page_prev = offset - 30 %]
+            <li><a href="/dashboard?offset=[% page_prev %]" data-rel="external" data-ajax=false>Prev</a></li>
+            [% END %]
             <li><a href="/logout" data-rel="external">Logout</a></li>
+            <li><a href="/dashboard" data-rel="external" data-ajax=false>Refresh</a></li>
             <li><a href="mailto:support@infoservant.com">Contact</a></li>
+            [% IF offset %]
+            [% SET page_prev = offset - 30 %]
+            <li><a href="/dashboard?offset=[% page_next %]" data-rel="external" data-ajax=false>Next</a></li>
+            [% END %]
         </ul>
     </div><!-- /navbar -->
 </div><!-- /footer -->

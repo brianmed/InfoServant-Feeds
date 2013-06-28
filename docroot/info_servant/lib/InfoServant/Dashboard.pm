@@ -31,6 +31,22 @@ use HTML::Entities;
 use Regexp::Common qw(URI);
 use XML::OPML::LibXML;
 use File::Temp;
+use Time::Local;
+
+sub dateify {
+    if ($_[0] =~ m/^(\d+)-(\d+)-(\d+)/) {
+        my $dt = DateTime->new(
+            year       => $1,
+            month      => $2,
+            day        => $3,
+        );
+
+        return($dt);
+    }
+    else {
+        return(DateTime->now());
+    }
+}
 
 sub show {
     my $self = shift;
@@ -38,11 +54,6 @@ sub show {
     if (!$self->session("account_id")) {
         my $url = $self->url_for('/');
         return($self->redirect_to($url));
-    }
-
-    if ($self->session("verify")) {
-        $self->stash(verify => $self->session("verify"));
-        delete($self->session->{verify});
     }
 
     my $account = SiteCode::Account->new(id => $self->session("account_id"));
@@ -57,9 +68,14 @@ sub show {
         my $obj = SiteCode::Feed->new(id => $$l{feed_id}, route => $self);
         my $entry = $obj->entry($$l{entry_id}, $account->id());
 
-        push(@entries, { entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $$entry{title}, feed_id => $obj->id() });
+        my $dt = dateify($$entry{issued});
+        my $date = $dt->strftime("%A, %B, %e, %Y");
+        my $time = $dt->strftime("%H:%M");
+        my $the_m = $dt->strftime("%p");
+
+        push(@entries, { date => $date, time => $time, the_m => $the_m, feed_title => $$entry{feed_title}, entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $$entry{title}, feed_id => $obj->id() });
     }
-    if (@entries) {
+    if (scalar @entries) {
         $self->stash(have_entries => 1);
     }
 
@@ -78,6 +94,11 @@ sub show {
 
 sub verify {
     my $self = shift;
+
+    if (!$self->session("account_id")) {
+        my $url = $self->url_for('/');
+        return($self->redirect_to($url));
+    }
 
     my $verify = $self->param("verify") || $self->session("verify");
 
@@ -114,6 +135,11 @@ sub verify {
 
 sub new_feed {
     my $self = shift;
+
+    if (!$self->session("account_id")) {
+        my $url = $self->url_for('/');
+        return($self->redirect_to($url));
+    }
 
     my $new_feed = $self->param("new_feed");
 
@@ -165,6 +191,11 @@ sub new_feed {
 
 sub opml_file {
     my $self = shift;
+
+    if (!$self->session("account_id")) {
+        my $url = $self->url_for('/');
+        return($self->redirect_to($url));
+    }
 
     my $tmp = File::Temp->new( TEMPLATE => "opml_import.$$.XXXXXX", UNLINK => 0, SUFFIX => '.opml', TMPDIR => 1 );
     my $filename = $tmp->filename;
