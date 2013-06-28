@@ -111,6 +111,152 @@ sub verify {
     $self->render("dashboard/dialog");
 }
 
+sub new_feed {
+    my $self = shift;
+
+    my $new_feed = $self->param("new_feed");
+
+    my $feed = undef;
+
+    eval {
+        die("Does not look like a http URI\n") if $new_feed !~ $RE{URI}{HTTP};
+
+        my $account = SiteCode::Account->new(id => $self->session("account_id"));
+
+        my $exists = SiteCode::Feeds->new->exists(name => $new_feed, account => $account);
+        my $subscribed = $exists ? SiteCode::Feed->new(name => $new_feed, account => $account, route => $self)->subscribed : 0;
+
+        if ($exists && $subscribed) {
+            die("Feed exists already.\n");
+        }
+
+        $feed = SiteCode::Feeds->new->addFeed(
+            account => $account,
+            xml_urL => $new_feed,
+            route => $self,
+        );
+    };
+    if ($@) {
+        my $err = $@;
+        $self->app->log->debug("InfoServant::Dashboard::new_feed: $err");
+        if ("Feed exists already.\n" eq $err) {
+            $self->stash(error => "Feed exists already");
+        }
+        elsif ("Does not look like a http URI\n" eq $err) {
+            $self->stash(error => "Feed may not be properly formatted");
+        }
+        else {
+            $self->stash(error => "Unable to add feed");
+        }
+    }
+    else {
+        my $string = $feed->key("title") || $feed->key("url");
+        $self->stash(success => "Added: $string");
+    }
+
+    $self->render("dashboard/dialog");
+}
+
+sub opml_file {
+    my $self = shift;
+
+    my $filename = "/tmp/google_import.$$.txt";
+    my $import = $self->param('opml_file');
+    $import->move_to($filename);
+
+    unless (-s $filename) {
+        $self->stash(error => "No file detected.");
+
+        return($self->render("dashboard/dialog"));
+    }
+
+    my $count = 0;
+    my $skipped = 0;
+    my $already = 0;
+    my $processed = 0;
+
+    my $process = sub {
+        my $outline = shift;
+
+        state $tag;
+
+        if ($outline->is_container) {
+            $tag = $outline->text;
+        }
+        
+        my $account = SiteCode::Account->new(id => $self->session("account_id"));
+
+        my $xml_url = $outline->xml_url;
+        my $html_url = $outline->html_url;
+
+        return unless $xml_url;
+        
+        my $exists;
+        my $subscribed;
+
+        eval {
+            $exists = SiteCode::Feeds->new->exists(name => $xml_url, account => $account);
+            my $f = $exists ? SiteCode::Feed->new(name => $xml_url, account => $account, route => $self)->subscribed : 0;
+        };
+        if ($@) {
+            $self->app->log->debug("Error: opml_import:process: $@");
+            return;
+        }
+
+        if ($exists && $subscribed) {
+            ++$already;
+            return;
+        }
+
+        my $feed;
+        eval {
+            if ($exists) {
+                $feed = SiteCode::Feed->new(name => $xml_url, route => $self, account => $account);
+            }
+            else {
+                $feed = SiteCode::Feeds->new->addFeed(
+                    account => $account,
+                    url => $xml_url,
+                    html_url => $html_url,
+                    route => $self,
+                );
+            }
+            if ($subscribed) {
+                ++$already;
+                ++$processed;
+            }
+            else {
+                $feed->subscribe;
+            }
+        };
+        if ($@) {
+            my $err = $@;
+            $self->app->log->debug("Error: opml_import:add: $@");
+            ++$skipped;
+        }
+        else {
+            $feed->key("tag", $tag) if $tag;
+            ++$count;
+            ++$processed;
+        }
+    };
+
+    eval {
+        my $parser = XML::OPML::LibXML->new;
+        my $doc    = $parser->parse_file($filename);
+
+        $doc->walkdown($process);
+
+        $self->stash(success => "Processed $processed feeds.");
+        $self->stash(info => "The import will happen in the background.");
+    };
+    if ($@) {
+        $self->stash(error => "Error processing file.");
+    }
+
+    $self->render("dashboard/dialog");
+}
+
 sub profile {
     my $self = shift;
 
@@ -133,7 +279,7 @@ sub profile {
 
             $feed = SiteCode::Feeds->new->addFeed(
                 account => $account,
-                xml_uRl => $new_feed,
+                xml_urL => $new_feed,
                 route => $self,
             );
         };

@@ -47,14 +47,9 @@
     </div><!-- /header -->
 
     <div data-role="content">
-        <h2>Panel: Menu + form</h2>
-
-        <p>This is a typical page that has two buttons in the header bar that open panels. The left button opens a left menu with the reveal display mode. The right button opens a form in a right overlay panel.</p>
-        
-        <p>Since the panel links are in the top bar, there really isn't a need for the fixed positioning feature on the panel since you will always be scrolled to the top of the page. The fixed positioning impacts animation smoothness so it's off in this demo (<code>data-position-fixed="false"</code>) and the panel will scroll with the page.</p>
-        
-        <p>To make this responsive, the left panel stays open and causes the page to re-flow at wider widths. This allows both the menu and page to be used together when more space is available. This behavior is controlled by CSS media queries. You can create a custom one for a specific breakpoint or use the breakpoint preset by adding the <code> class="ui-responsive-panel"</code> to the page container.</p>
-
+        [% UNLESS have_entries %]
+        Please upload an opml file or add a rss feed.
+        [% END %]
     </div><!-- /content -->
 
             <style>
@@ -128,30 +123,22 @@
 
                 <div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="profile-form" data-theme="b">
 
-                    <form class="userform">
-                        <h2>Create new user</h2>
-                        <label for="name">Name</label>
-                        <input type="text" name="name" id="name" value="" data-clear-btn="true" data-mini="true">
+                    <h2>Profile</h2>
 
-                        <label for="email">Email</label>
-                        <input type="email" name="email" id="status" value="" data-clear-btn="true" data-mini="true">
-
-                        <label for="password">Password:</label>
-                        <input type="password" name="password" id="password" value="" data-clear-btn="true" autocomplete="off" data-mini="true">
-
-                        <div class="switch">
-                        <label for="status">Status</label>
-                        <select name="status" id="slider" data-role="slider" data-mini="true">
-                            <option value="off">Inactive</option>
-                            <option value="on">Active</option>
-                        </select>
-                        </div>
-
-                        <div class="ui-grid-a">
-                            <div class="ui-block-a"><a href="#" data-rel="close" data-role="button" data-theme="c" data-mini="true">Cancel</a></div>
-                            <div class="ui-block-b"><a href="#" data-rel="close" data-role="button" data-theme="b" data-mini="true">Save</a></div>
-                        </div>
+                    <form class="userform" action="/dashboard" method=post>
+                        <input type="text" placeholder="http://website.com/rss" value="" name="new_feed" data-clear-btn="true" class="ui-input-text ui-body-c">
+                        <input value="Add" data-theme="b" type="submit">
                     </form>
+
+                    [% UNLESS c.is_mobile %]
+                    <form class="userform" action="/dashboard" method=post>
+                        <input data-clear-btn="true" name="opml_file" value="" type="file">
+
+                        <input value="Upload" data-theme="b" type="submit">
+                    </form>
+                    [% END %]
+
+                    <a href="#" data-rel="close" data-role="button" data-theme="c" data-mini="true">Cancel</a>
 
                     <!-- panel content goes here -->
                 </div><!-- /panel -->
