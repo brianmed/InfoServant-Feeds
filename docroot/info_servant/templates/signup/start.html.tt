@@ -33,7 +33,7 @@
                 <input name="password" id="password" placeholder="Password" value="[% password | html %]" autocapitalize="off" type="password">
                 <input value="Signup" data-theme="b" type="submit">
             </form>
-            <a href="/" data-role="button" data-theme="b">Cancel</a>       
+            <a href="/" data-role="button" data-theme="b" rel="external">Cancel</a>       
         </div>
 </div>
 

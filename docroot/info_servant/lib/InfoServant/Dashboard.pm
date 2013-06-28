@@ -39,7 +39,16 @@ sub show {
         return($self->redirect_to($url));
     }
 
+    if ($self->session("verify")) {
+        $self->stash(verify => $self->session("verify"));
+        delete($self->session->{verify});
+    }
+
     my $account = SiteCode::Account->new(id => $self->session("account_id"));
+    $self->stash(account_verified => $account->verified());
+
+    my $have_feeds = SiteCode::Feeds->haveFeeds(account => $account);
+    $self->stash(have_feeds => $have_feeds);
 
     my @entries = ();
     my $feeds = SiteCode::Feeds->new(account => $account);
@@ -69,16 +78,11 @@ sub show {
 sub verify {
     my $self = shift;
 
-    if (!$self->session("account_id")) {
-        my $url = $self->url_for('/');
-        return($self->redirect_to($url));
-    }
-
     my $verify = $self->param("verify") || $self->session("verify");
 
     unless ($verify) {
         $self->stash(error => "No verification number.");
-        $self->render("dashboard/dialog");
+        return($self->render("dashboard/dialog"));
     }
 
     my $account = SiteCode::Account->new(id => $self->session("account_id"));
