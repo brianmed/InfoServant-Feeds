@@ -29,8 +29,8 @@
             [% END %]
 
             <form action="/login" method="post">
-                <input name="login" id="login" placeholder="Email" value="[% login | html %]" type="text">
-                <input name="password" id="password" placeholder="Password" value="[% password | html %]" autocomplete="off" type="password">
+                <input name="login" id="login" placeholder="Login" value="[% login | html %]" type="text" autocapitalize="off">
+                <input name="password" id="password" placeholder="Password" value="[% password | html %]" autocapitalize="off" type="password">
                 <input value="Login" data-theme="b" type="submit">
             </form>
             <a href="/" data-role="button" data-theme="b">Cancel</a>       

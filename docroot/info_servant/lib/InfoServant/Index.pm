@@ -75,17 +75,18 @@ sub login {
     }
     $password = Digest::MD5::md5_hex($password);
 
-    if (!Email::Valid->address($login)) {
-        $self->stash(errors => "Email address not valid.");
-    }
-
     if ($self->stash('errors')) {
         return($self->render());
     }
 
     my $account;
     eval {
-        $account = SiteCode::Account->new(email => $login, password => $password, route => $self);
+        if (Email::Valid->address($login)) {
+            $account = SiteCode::Account->new(email => $login, password => $password, route => $self);
+        }
+        else {
+            $account = SiteCode::Account->new(username => $login, password => $password, route => $self);
+        }
     };
     if ($@) {
         my $err = $@;

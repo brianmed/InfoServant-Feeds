@@ -68,9 +68,22 @@ sub add {
     $self->stash(username => $self->param("username"));
     $self->stash(password => $self->param("password"));
 
+    if (Email::Valid->address($username)) {
+        $self->stash(errors => "Username looks like an email address.");
+
+        return $self->render("signup/start");
+    }
+
+    if (!Email::Valid->address($email)) {
+        $self->stash(errors => "Email address looks invalid.");
+
+        return $self->render("signup/start");
+    }
+
     eval {
         $account = SiteCode::Account->addUser(
             email => $email,
+            username => $username,
             password => $password,
             route => $self,
         );
@@ -98,13 +111,15 @@ sub add {
         $url = $self->url_for('/login')->query(login => $account->email, added => 1);
         return $self->redirect_to($url);
     }
-
-    $self->app->log->debug("add: last");
 }
 
 sub verify
 {
     my $self = shift;
+
+    if ("GET" eq $self->req->method) {
+        return($self->render());
+    }
 
     my $email = $self->stash("email") || $self->param("email");
     my $verify = $self->stash("verify") || $self->param("verify");
@@ -123,6 +138,9 @@ sub verify
     }
     elsif ($verify) {
         $self->stash(errors => "Please enter an email.");
+    }
+    else {
+        $self->stash(errors => "Please enter a verification code.");
     }
 
     $self->render();

@@ -39,6 +39,7 @@ has 'id' => ( isa => 'Int', is => 'rw' );
 has 'dbx' => ( isa => 'SiteCode::DBX', is => 'ro', lazy => 1, default => sub { SiteCode::DBX->new() } );
 
 has 'email' => ( isa => 'Email', is => 'rw' );
+has 'username' => ( isa => 'Str', is => 'rw' );
 has 'password' => ( isa => 'Str', is => 'rw' );
 has 'route' => ( isa => 'Mojolicious::Controller', is => 'ro' );
 
@@ -46,6 +47,12 @@ sub _lookup_id_with_email {
     my $self = shift;
 
     return($self->dbx()->col("SELECT id FROM account WHERE email = ?", undef, $self->email()));
+}
+
+sub _lookup_id_with_username {
+    my $self = shift;
+
+    return($self->dbx()->col("SELECT id FROM account WHERE username = ?", undef, $self->username()));
 }
 
 sub _lookup_email {
@@ -60,10 +67,16 @@ sub _lookup_password {
     return($self->dbx()->col("SELECT password FROM account WHERE id = ?", undef, $self->id()));
 }
 
+sub _lookup_username {
+    my $self = shift;
+
+    return($self->dbx()->col("SELECT username FROM account WHERE id = ?", undef, $self->id()));
+}
+
 sub _verify_id_and_email {
     my $self = shift;
 
-    return($self->dbx()->success("SELECT 1 FROM account WHERE id = ? AND email = ?", undef, $self->id(), $self->email()));
+    return($self->dbx()->success("SELECT 1 FROM account WHERE id = ? AND email = ? AND username = ?", undef, $self->id(), $self->email(), $self->username()));
 }
 
 sub BUILD {
@@ -73,9 +86,15 @@ sub BUILD {
         if ($self->id()) {
             $self->email($self->_lookup_email());
             $self->password($self->_lookup_password());
+            $self->username($self->_lookup_username());
         }
-        elsif ($self->email() && !$self->id()) {
+        elsif ($self->email() && !$self->username()) {
             $self->id($self->_lookup_id_with_email());
+            $self->username($self->_lookup_username());
+        }
+        elsif ($self->username() && !$self->email()) {
+            $self->id($self->_lookup_id_with_username());
+            $self->email($self->_lookup_email());
         }
     };
     if ($@) {
@@ -92,7 +111,7 @@ sub BUILD {
     }
 
     unless ($self->_verify_id_and_email()) {  # verify our looked up columns
-        die("The given id and email do not match.\n");
+        die("The given id, email, and username do not match.\n");
     }
 
     unless($self->chkPw($self->password())) {
@@ -106,6 +125,7 @@ sub addUser
     my %ops = @_;
 
     my $email = $ops{email};
+    my $username = $ops{username};
     my $password = $ops{password};
 
     my $time = time();
@@ -122,6 +142,11 @@ sub addUser
             die "Email already taken.\n";
         }
 
+        $taken = $dbx->success("SELECT 1 FROM account WHERE username = ?", undef, $username);
+        if ($taken) {
+            die "Username already taken.\n";
+        }
+
         my $exists = $dbx->success("SELECT 1 FROM account WHERE email = ? AND password = ?", undef, lc $email, $password);
         if ($exists) {
             my $verified = $self->key("verified");
@@ -135,7 +160,7 @@ sub addUser
             }
         }
 
-        $dbx->do("INSERT INTO account (email, password) VALUES (?, ?)", undef, lc $email, $password_md5);
+        $dbx->do("INSERT INTO account (email, username, password) VALUES (?, ?, ?)", undef, lc $email, $username, $password_md5);
         $dbx->dbh->commit;
 
         my $id = $dbx->col("SELECT id FROM account WHERE email = ?", undef, lc $email);
@@ -172,7 +197,6 @@ sub key
             $dbx->do("INSERT INTO account_value (account_key_id, account_value) VALUES (?, ?)", undef, $id, $value);
 
             $dbx->dbh->commit;
-
         }
     }
 
