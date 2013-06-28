@@ -35,18 +35,18 @@ sub restart {
     my $username = $self->param("username");
     my $password = $self->param("password");
 
-    my $errors = "";
+    my $error = "";
     if (!$email) {
-        $errors = "Please enter an email.";
+        $error = "Please enter an email.";
     }
-    if (!$errors && !$username) {
-        $errors = "Please enter a username.";
+    if (!$error && !$username) {
+        $error = "Please enter a username.";
     }
-    if (!$errors && !$password) {
-        $errors = "Please enter a password.";
+    if (!$error && !$password) {
+        $error = "Please enter a password.";
     }
 
-    $self->stash(errors => $errors);
+    $self->stash(error => $error);
 
     $self->stash(email => $email);
     $self->stash(username => $username);
@@ -69,13 +69,13 @@ sub add {
     $self->stash(password => $self->param("password"));
 
     if (Email::Valid->address($username)) {
-        $self->stash(errors => "Username looks like an email address.");
+        $self->stash(error => "Username looks like an email address.");
 
         return $self->render("signup/start");
     }
 
     if (!Email::Valid->address($email)) {
-        $self->stash(errors => "Email address looks invalid.");
+        $self->stash(error => "Email address looks invalid.");
 
         return $self->render("signup/start");
     }
@@ -96,12 +96,12 @@ sub add {
         my $err = $@;
         if ($err =~ m/line\s*\d+\D*\n\z/) {
             $self->app->log->debug("InfoServant::Signup::add: $err");
-            $self->stash(errors => "An unknown error occurred.");
+            $self->stash(error => "An unknown error occurred.");
 
             return $self->render("signup/start");
         }
         else {
-            $self->stash(errors => $err);
+            $self->stash(error => $err);
 
             return $self->render("signup/start");
         }
@@ -134,13 +134,13 @@ sub verify
         $self->redirect_to($url);
     }
     elsif ($email) {
-        $self->stash(errors => "Please enter a verification code.");
+        $self->stash(error => "Please enter a verification code.");
     }
     elsif ($verify) {
-        $self->stash(errors => "Please enter an email.");
+        $self->stash(error => "Please enter an email.");
     }
     else {
-        $self->stash(errors => "Please enter a verification code.");
+        $self->stash(error => "Please enter a verification code.");
     }
 
     $self->render();

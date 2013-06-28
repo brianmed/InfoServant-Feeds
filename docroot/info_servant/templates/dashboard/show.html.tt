@@ -11,6 +11,34 @@
 </head>
 <body>
 
+[% UNLESS account_verified %]
+<div data-role="page">
+
+    <div data-role="header">
+        <h1>InfoServant</h1>
+    </div><!-- /header -->
+
+    <div data-role="content">
+            <form action="/dashboard" method="post">
+                <input type=hidden name=method value=verify>
+                <input name="verify" id="verify" placeholder="Verificaiton Number" value="[% verify | html %]" type="text" autocapitalize="off">
+                <input value="Verify" data-theme="b" type="submit">
+            </form>
+    </div><!-- /content -->
+
+    <div data-role="footer" data-id="foo1" data-position="fixed">
+    <div data-role="navbar">
+        <ul>
+            <li><a href="/logout" data-rel="external">Logout</a></li>
+            <li><a href="/signup">Signup</a></li>
+            <li><a href="mailto:support@infoservant.com">Contact</a></li>
+        </ul>
+    </div><!-- /navbar -->
+</div><!-- /footer -->
+</div><!-- /page -->
+[% END %]
+
+[% IF account_verified %]
 <div data-role="page" class=ui-responsive-panel>
 
     <div data-role="header">
@@ -295,5 +323,7 @@
             showProfile();
         })
         </script>
+
+[% END %]
 </body>
 </html>

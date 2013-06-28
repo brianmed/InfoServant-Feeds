@@ -65,17 +65,17 @@ sub login {
     }
 
     if (!$login) {
-        $self->stash(errors => "No login given.");
+        $self->stash(error => "No login given.");
         return($self->render());
     }
 
     if (!$password) {
-        $self->stash(errors => "No password given.");
+        $self->stash(error => "No password given.");
         return($self->render());
     }
     $password = Digest::MD5::md5_hex($password);
 
-    if ($self->stash('errors')) {
+    if ($self->stash('error')) {
         return($self->render());
     }
 
@@ -92,18 +92,18 @@ sub login {
         my $err = $@;
         if ($err =~ m/line\s*\d+\D*\n\z/) {
             $self->app->log->debug("InfoServant::Index::login: $err");
-            $self->stash(errors => "An unknown error occurred.");
+            $self->stash(error => "An unknown error occurred.");
 
             return $self->render();
         }
         else {
-            $self->stash(errors => $err);
+            $self->stash(error => $err);
 
             return $self->render();
         }
     }
 
-    if ($self->stash('errors')) {
+    if ($self->stash('error')) {
         return($self->render());
     }
     else {

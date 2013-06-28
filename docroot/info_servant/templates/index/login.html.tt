@@ -18,9 +18,9 @@
         </div>
 
         <div data-role="content">
-            [% IF errors %]
+            [% IF error %]
             <p><span> <a data-inline="true" data-iconpos="notext" data-icon="alert" data-role="button" class="ui-icon-alt ui-btn ui-shadow ui-btn-corner-all ui-btn-inline ui-btn-icon-notext ui-btn-up-e" href="index.html" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="e"><span class="ui-btn-inner"><span class="ui-btn-text">Alert</span><span class="ui-icon ui-icon-alert ui-icon-shadow"></span></span></a>
-            </span> [% errors %] </p>
+            </span> [% error %] </p>
             [% END %]
 
             [% IF success %]

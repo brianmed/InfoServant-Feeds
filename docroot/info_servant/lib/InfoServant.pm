@@ -77,6 +77,7 @@ sub startup {
     $r->any('/verify')->to(controller => 'Signup', action => 'verify');
 
     # $r->any('/dashboard')->over(save => "state")->to(controller => 'Dashboard', action => 'show');
+    $r->any('/dashboard')->over(params => {method => qr/^verify$/})->to(controller => 'Dashboard', action => 'verify');
     $r->any('/dashboard')->to(controller => 'Dashboard', action => 'show');
     # $r->any('/dashboard/html/:page')->over(save => "state")->to(controller => 'Dashboard', action => 'retrieve_html');
     $r->any('/dashboard/html/:page')->to(controller => 'Dashboard', action => 'retrieve_html');

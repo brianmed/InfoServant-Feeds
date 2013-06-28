@@ -66,6 +66,47 @@ sub show {
     $self->render(entries => \@entries, feeds => \@feeds);
 }
 
+sub verify {
+    my $self = shift;
+
+    if (!$self->session("account_id")) {
+        my $url = $self->url_for('/');
+        return($self->redirect_to($url));
+    }
+
+    my $verify = $self->param("verify") || $self->session("verify");
+
+    unless ($verify) {
+        $self->stash(error => "No verification number.");
+        $self->render("dashboard/dialog");
+    }
+
+    my $account = SiteCode::Account->new(id => $self->session("account_id"));
+
+    if ($account->verified()) {
+        $self->stash(error => "Already verified.");
+        delete $self->session->{verify};
+    }
+    else {
+        my $status = $account->verify($verify);
+        if ($status) {
+            if ("ALREADY_VERIFIED" eq $status) {
+                $self->stash(error => "Already verified.");
+                delete $self->session->{verify};
+            }
+            elsif ("VERIFIED" eq $status) {
+                $self->stash(success => "Sucessfully verified.");
+                delete $self->session->{verify};
+            }
+        }
+        else {
+            $self->stash(error => "Unable to verify.");
+        }
+    }
+
+    $self->render("dashboard/dialog");
+}
+
 sub profile {
     my $self = shift;
 
@@ -96,13 +137,13 @@ sub profile {
             my $err = $@;
             $self->app->log->debug("InfoServant::Dashboard::profile::new_feed: $err");
             if ("Feed exists already.\n" eq $err) {
-                $self->stash(errors => "Feed exists already");
+                $self->stash(error => "Feed exists already");
             }
             elsif ("Does not look like a http URI\n" eq $err) {
-                $self->stash(errors => "Feed may not be properly formatted");
+                $self->stash(error => "Feed may not be properly formatted");
             }
             else {
-                $self->stash(errors => "Unable to add feed");
+                $self->stash(error => "Unable to add feed");
             }
         }
         else {
@@ -121,10 +162,11 @@ sub profile {
             my $status = $account->verify($self->param("verify_number"));
             if ($status) {
                 if ("ALREADY_VERIFIED" eq $status) {
-                    $self->stash(error => "Already verified");
+                    $self->stash(error => "Already verified.");
                 }
                 elsif ("VERIFIED" eq $status) {
-                    $self->stash(info => "Sucessfully verified: thank you.");
+                    $self->stash(info => "Sucessfully verified.");
+                    delete $self->session->{verify};
                 }
             }
             else {
@@ -138,7 +180,7 @@ sub profile {
         $import->move_to($filename);
 
         unless (-s $filename) {
-            $self->stash(errors => "No file detected.");
+            $self->stash(error => "No file detected.");
 
             return;
         }
@@ -224,7 +266,7 @@ sub profile {
             $self->stash(info => "The import will happen in the background.  Please give us 5 minutes.");
         };
         if ($@) {
-            $self->stash(errors => "Error processing file.");
+            $self->stash(error => "Error processing file.");
         }
     }
 }

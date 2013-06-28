@@ -21,10 +21,10 @@
       </div>
       [% END %]
 
-        [% IF errors %]
+        [% IF error %]
       <div id=errors class="alert alert-error">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        [% errors %]
+        [% error %]
       </div>
       [% END %]
 
@@ -57,10 +57,10 @@
       </div>
       [% END %]
 
-        [% IF errors %]
+        [% IF error %]
       <div id=errors class="alert alert-error">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
-        [% errors %]
+        [% error %]
       </div>
       [% END %]
 
