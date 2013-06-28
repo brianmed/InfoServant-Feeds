@@ -30,6 +30,7 @@ use Mojo::Util;
 use HTML::Entities;
 use Regexp::Common qw(URI);
 use XML::OPML::LibXML;
+use File::Temp;
 
 sub show {
     my $self = shift;
@@ -116,6 +117,11 @@ sub new_feed {
 
     my $new_feed = $self->param("new_feed");
 
+    unless ($new_feed) {
+        $self->stash(error => "No feed given.");
+        return($self->render("dashboard/dialog"));
+    }
+
     my $feed = undef;
 
     eval {
@@ -160,9 +166,14 @@ sub new_feed {
 sub opml_file {
     my $self = shift;
 
-    my $filename = "/tmp/google_import.$$.txt";
+    my $tmp = File::Temp->new( TEMPLATE => "opml_import.$$.XXXXXX", UNLINK => 0, SUFFIX => '.opml', TMPDIR => 1 );
+    my $filename = $tmp->filename;
     my $import = $self->param('opml_file');
-    $import->move_to($filename);
+    if ($import) {
+        $import->move_to($filename);
+    }
+
+    $self->app->log->debug("opml_import: $filename");
 
     unless (-s $filename) {
         $self->stash(error => "No file detected.");
@@ -195,7 +206,7 @@ sub opml_file {
         my $subscribed;
 
         eval {
-            $exists = SiteCode::Feeds->new->exists(name => $xml_url, account => $account);
+            $exists = SiteCode::Feeds->new->exists(name => $xml_url, account => $account, route => $self);
             my $f = $exists ? SiteCode::Feed->new(name => $xml_url, account => $account, route => $self)->subscribed : 0;
         };
         if ($@) {
@@ -248,9 +259,10 @@ sub opml_file {
         $doc->walkdown($process);
 
         $self->stash(success => "Processed $processed feeds.");
-        $self->stash(info => "The import will happen in the background.");
+        $self->stash(info => "The import will happen in the background.") if $processed;
     };
     if ($@) {
+        $self->app->log->debug("Error: opml_import:process: $@");
         $self->stash(error => "Error processing file.");
     }
 

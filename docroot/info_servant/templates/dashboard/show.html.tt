@@ -113,27 +113,19 @@
                     <!-- panel content goes here -->
                 </div><!-- /panel -->
 
-                <style>
-                    .userform { padding:.8em 1.2em; }
-                    .userform h2 { color:#555; margin:0.3em 0 .8em 0; padding-bottom:.5em; border-bottom:1px solid rgba(0,0,0,.1); }
-                    .userform label { display:block; margin-top:1.2em; }
-                    .switch .ui-slider-switch { width: 6.5em !important }
-                    .ui-grid-a { margin-top:1em; padding-top:.8em; margin-top:1.4em; border-top:1px solid rgba(0,0,0,.1); }
-                </style>
-
                 <div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="profile-form" data-theme="b">
-
                     <h2>Profile</h2>
 
-                    <form class="userform" action="/dashboard" method=post>
+                    <form action="/dashboard" method=post>
+                        <input type=hidden name=method value=new_feed>
                         <input type="text" placeholder="http://website.com/rss" value="" name="new_feed" data-clear-btn="true" class="ui-input-text ui-body-c">
                         <input value="Add" data-theme="b" type="submit">
                     </form>
 
                     [% UNLESS c.is_mobile %]
-                    <form class="userform" action="/dashboard" method=post>
-                        <input data-clear-btn="true" name="opml_file" value="" type="file">
-
+                    <form action="/dashboard" data-ajax="false" enctype="multipart/form-data" method="post">
+                        <input type=hidden name=method value=opml_file>
+                        <input data-clear-btn="true" name="opml_file" type="file">
                         <input value="Upload" data-theme="b" type="submit">
                     </form>
                     [% END %]
