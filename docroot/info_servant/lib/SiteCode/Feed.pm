@@ -36,6 +36,17 @@ has 'name' => ( isa => 'Str', is => 'rw' );
 has 'route' => ( isa => 'Mojolicious::Controller', is => 'ro' );
 has 'data_dir' => ( isa => 'Str', is => 'ro', default => "/opt/infoservant.com/data/feed_files" );
 
+sub unsubscribe {
+    my $self = shift;
+
+    my $dbx = SiteCode::DBX->new();
+
+    if ($self->subscribed) {
+        $dbx->do("DELETE FROM feedme WHERE feed_id = ? AND account_id = ?", undef, $self->id, $self->account->id);
+        $dbx->dbh->commit;
+    }
+}
+
 sub subscribe {
     my $self = shift;
 

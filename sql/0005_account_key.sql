@@ -5,7 +5,7 @@ CREATE TABLE account_key(
   account_key VARCHAR(512) not null,
   updated timestamp not null default CURRENT_TIMESTAMP,
   inserted timestamp not null default CURRENT_TIMESTAMP,
-  foreign key (account_id) references account (id),
+  foreign key (account_id) references account (id) on delete cascade,
   unique (account_id, account_key)
 );
 

@@ -5,7 +5,7 @@ CREATE TABLE feedme_value(
   feedme_value VARCHAR(4096) not null,
   updated timestamp not null default CURRENT_TIMESTAMP,
   inserted timestamp not null default CURRENT_TIMESTAMP,
-  foreign key (feedme_key_id) references feedme_key (id)
+  foreign key (feedme_key_id) references feedme_key (id) on delete cascade
 );
 
 CREATE TRIGGER feedme_value_timestamp BEFORE INSERT OR UPDATE ON feedme_value

@@ -67,16 +67,20 @@ sub latest {
 
     my $dbx = $self->dbx();
 
+    my $feed = $opt{feed} ? " AND feed.id = ?" : "";
+    my @vars = ($self->account()->id());
+    push(@vars, $opt{feed}) if $feed;
     my $data = $dbx->array(qq(
         SELECT
             feed.id as feed_id, entry.id as entry_id, entry.issued
         FROM feedme, feed, entry where feedme.account_id = ? 
             and feed.name = entry.feed_name 
             and feedme.feed_id = feed.id
+            $feed
         order by entry.issued desc
         LIMIT $opt{limit}
         OFFSET $opt{offset}
-    ), undef, $self->account()->id());
+    ), undef, @vars);
 
     return($data);
 }

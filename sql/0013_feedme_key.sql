@@ -5,7 +5,7 @@ CREATE TABLE feedme_key(
   feedme_key VARCHAR(512) not null,
   updated timestamp not null default CURRENT_TIMESTAMP,
   inserted timestamp not null default CURRENT_TIMESTAMP,
-  foreign key (feedme_id) references feed (id),
+  foreign key (feedme_id) references feed (id) on delete cascade,
   unique (feedme_id, feedme_key)
 );
 

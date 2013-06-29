@@ -1,3 +1,4 @@
+BEGIN;
 CREATE TABLE account(
   id serial not null PRIMARY KEY,
   email VARCHAR(128) NOT NULL UNIQUE,

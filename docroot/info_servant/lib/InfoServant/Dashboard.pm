@@ -56,15 +56,35 @@ sub show {
         return($self->redirect_to($url));
     }
 
-    my $account = SiteCode::Account->new(id => $self->session("account_id"));
+    my $account = undef;
+
+    eval {
+        $account = SiteCode::Account->new(id => $self->session("account_id"));
+    };
+    if ($@) {
+        $self->app->log->debug("InfoServant::Dashboard::show: $@");
+        $self->session(expires => 1);
+
+        my $url = $self->url_for('/');
+        return($self->redirect_to($url));
+    }
+
     $self->stash(account_verified => $account->verified());
 
     my $have_feeds = SiteCode::Feeds->haveFeeds(account => $account);
     $self->stash(have_feeds => $have_feeds);
 
+    if ($self->param("feed")) {
+        if (-1 == $self->param("feed")) {
+            delete $self->session->{cur_feed};
+        }
+        else {
+            $self->session(cur_feed => $self->param("feed"));
+       }
+    }
     my @entries = ();
     my $feeds = SiteCode::Feeds->new(account => $account);
-    foreach my $l (@{ $feeds->latest(limit => 30, offset => $self->param("offset") || 0) }) {
+    foreach my $l (@{ $feeds->latest(limit => 30, offset => $self->param("offset") || 0, feed => $self->session("cur_feed")) }) {
         my $obj = SiteCode::Feed->new(id => $$l{feed_id}, route => $self);
         my $entry = $obj->entry($$l{entry_id}, $account->id());
 
@@ -128,6 +148,41 @@ sub verify {
         else {
             $self->stash(error => "Unable to verify.");
         }
+    }
+
+    $self->render("dashboard/dialog");
+}
+
+sub unsubscribe {
+    my $self = shift;
+
+    if (!$self->session("account_id")) {
+        my $url = $self->url_for('/');
+        return($self->redirect_to($url));
+    }
+
+    my $cur_feed = $self->session("cur_feed");
+
+    unless ($cur_feed) {
+        $self->stash(error => "No feed given.");
+        return($self->render("dashboard/dialog"));
+    }
+
+    my $feed = undef;
+
+    eval {
+        my $account = SiteCode::Account->new(id => $self->session("account_id"));
+
+        SiteCode::Feed->new(id => $cur_feed, account => $account, route => $self)->unsubscribe;
+    };
+    if ($@) {
+        my $err = $@;
+        $self->app->log->debug("InfoServant::Dashboard::new_feed: $err");
+        $self->stash(error => "Unable to unsubscribe feed.");
+    }
+    else {
+        $self->stash(error => "Unsubscribed from feed.");
+        delete $self->session->{cur_feed};
     }
 
     $self->render("dashboard/dialog");
@@ -237,7 +292,7 @@ sub opml_file {
         my $subscribed;
 
         eval {
-            $exists = SiteCode::Feeds->new->exists(name => $xml_url, account => $account, route => $self);
+            $exists = SiteCode::Feeds->new(account => $account, route => $self)->exists(name => $xml_url);
             my $f = $exists ? SiteCode::Feed->new(name => $xml_url, account => $account, route => $self)->subscribed : 0;
         };
         if ($@) {
@@ -345,14 +400,14 @@ sub profile {
             $self->stash(reload => 1);
         }
     }
-    elsif ($self->param("verify_number")) {
+    elsif ($self->param("verify")) {
         my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
         if ($account->verified()) {
             $self->stash(error => "Already verified");
         }
         else {
-            my $status = $account->verify($self->param("verify_number"));
+            my $status = $account->verify($self->param("verify"));
             if ($status) {
                 if ("ALREADY_VERIFIED" eq $status) {
                     $self->stash(error => "Already verified.");
@@ -565,7 +620,7 @@ sub retrieve_html {
     $self->stash(have_feeds => $have_feeds);
 
     if ($self->session("verify")) {
-        $self->stash(verify_number => $self->session("verify"));
+        $self->stash(verify => $self->session("verify"));
         delete($self->session->{verify});
     }
 
