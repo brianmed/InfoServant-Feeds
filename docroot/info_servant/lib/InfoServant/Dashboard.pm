@@ -122,8 +122,7 @@ sub details {
     }
 
     my $entry_id = $self->param("entry_id");
-    my $feedme = SiteCode::DBX->new->col("SELECT feed_name FROM entry WHERE id = ?", undef, $entry_id);
-    my $feed_nbr = SiteCode::DBX->new->col("SELECT id FROM feed WHERE name = ?", undef, $feedme);
+    my $feed_nbr = $self->param("feed_id");
 
     my $account = SiteCode::Account->new(id => $self->session("account_id"));
     my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self);
@@ -131,7 +130,7 @@ sub details {
     my $link = $feed->link(entry_id => $entry_id, account_id => $account->id);
     my $title = $feed->title(entry_id => $entry_id, account_id => $account->id);
 
-    $self->stash(html => $html, link => $link, title => $title);
+    $self->stash(html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
 
     return($self->render());
 }
