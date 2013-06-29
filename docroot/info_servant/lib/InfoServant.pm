@@ -82,6 +82,7 @@ sub startup {
     $r->any('/dashboard')->over(params => {method => qr/^opml_file$/})->to(controller => 'Dashboard', action => 'opml_file');
     $r->any('/dashboard')->over(params => {method => qr/^unsubscribe$/})->to(controller => 'Dashboard', action => 'unsubscribe');
     $r->any('/dashboard')->to(controller => 'Dashboard', action => 'show');
+    $r->any('/dashboard/details')->to(controller => 'Dashboard', action => 'details');
     # $r->any('/dashboard/html/:page')->over(save => "state")->to(controller => 'Dashboard', action => 'retrieve_html');
     $r->any('/dashboard/html/:page')->to(controller => 'Dashboard', action => 'retrieve_html');
     $r->any('/dashboard/javascript/:page')->to(controller => 'Dashboard', action => 'retrieve_js');

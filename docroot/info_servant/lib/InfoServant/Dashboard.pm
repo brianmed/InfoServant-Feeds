@@ -34,11 +34,13 @@ use File::Temp;
 use Time::Local;
 
 sub dateify {
-    if ($_[0] =~ m/^(\d+)-(\d+)-(\d+)/) {
+    if ($_[0] =~ m/^(\d+)-(\d+)-(\d+)\s+(\d+).(\d+)/) {
         my $dt = DateTime->new(
-            year       => $1,
-            month      => $2,
-            day        => $3,
+            year => $1,
+            month => $2,
+            day => $3,
+            hour => $4,
+            minute => $5,
         );
 
         return($dt);
@@ -93,7 +95,7 @@ sub show {
         my $time = $dt->strftime("%H:%M");
         my $the_m = $dt->strftime("%p");
 
-        push(@entries, { date => $date, time => $time, the_m => $the_m, feed_title => $$entry{feed_title}, entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $$entry{title}, feed_id => $obj->id() });
+        push(@entries, { id => $$entry{id}, date => $date, time => $time, the_m => $the_m, feed_title => $$entry{feed_title}, entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $$entry{title}, feed_id => $obj->id() });
     }
     if (scalar @entries) {
         $self->stash(have_entries => 1);
@@ -110,6 +112,28 @@ sub show {
     $self->stash(offset => $self->param("offset")) if $self->param("offset");
 
     $self->render(entries => \@entries, feeds => \@feeds);
+}
+
+sub details {
+    my $self = shift;
+
+    if (!$self->session("account_id")) {
+        return($self->render(text => "Session has expired.  <a href=http://infoservant.com/login>Login</a>."));
+    }
+
+    my $entry_id = $self->param("entry_id");
+    my $feedme = SiteCode::DBX->new->col("SELECT feed_name FROM entry WHERE id = ?", undef, $entry_id);
+    my $feed_nbr = SiteCode::DBX->new->col("SELECT id FROM feed WHERE name = ?", undef, $feedme);
+
+    my $account = SiteCode::Account->new(id => $self->session("account_id"));
+    my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self);
+    my $html = $feed->html(entry_id => $entry_id, account_id => $account->id);
+    my $link = $feed->link(entry_id => $entry_id, account_id => $account->id);
+    my $title = $feed->title(entry_id => $entry_id, account_id => $account->id);
+
+    $self->stash(html => $html, link => $link, title => $title);
+
+    return($self->render());
 }
 
 sub verify {
@@ -535,7 +559,7 @@ sub retrieve_feed_entries {
     my $data = [];
     foreach my $entry (@{ $entries }) {
         # $self->app->log->debug("title: $$entry{entry}{title}");
-        push(@{ $data }, { title => $entry->{title}, feed_id => $feed->id(), entry_id => Mojo::Util::url_escape($entry->{entry_id}) });
+        push(@{ $data }, { title => $entry->{title}, id => $entry->id(), feed_id => $feed->id(), entry_id => Mojo::Util::url_escape($entry->{entry_id}) });
     }
 
     return($self->render(json => $data));

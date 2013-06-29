@@ -58,7 +58,7 @@
                         [% SET cur_date = entry.date %]
                         <li data-role="list-divider">[% cur_date %]</li>
                     [% END %]
-                <li><a href="index.html">
+                <li><a data-rel=external href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
                     <h2>[% entry.feed_title %]</h2>
                     <p><strong>[% entry.title %]</strong></p>
                     <!-- <p>Hey Stephen, if you're available at 10am tomorrow, we've got a meeting with the jQuery team.</p>-->
@@ -138,8 +138,7 @@
             [% IF have_entries %]
                 [% IF offset %]
                     [% SET page_prev = offset - 30 %]
-                [% END %]
-                [% IF page_prev %]
+
                     [% IF page_prev > 0 %]
                         <li><a style="pointer-events: none; cursor: default" href="/dashboard" data-rel="external" data-ajax=false>Prev</a></li>
                     [% ELSE %]
@@ -149,13 +148,11 @@
             [% END %]
             <li><a href="/logout" data-rel="external">Logout</a></li>
             <li><a href="/dashboard" data-rel="external" data-ajax=false>Refresh</a></li>
-            <li><a href="mailto:support@infoservant.com">Contact</a></li>
+            <!-- <li><a href="mailto:support@infoservant.com">Contact</a></li> -->
 
             [% IF have_entries %]
-                [% IF offset %]
                 [% SET page_next = offset + 30 %]
                 <li><a href="/dashboard?offset=[% page_next %]" data-rel="external" data-ajax=false>Next</a></li>
-                [% END %]
             [% END %]
         </ul>
     </div><!-- /navbar -->
