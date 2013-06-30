@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>InfoServant: Login</title>
+    <title>InfoServant: Reset</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -12,9 +12,8 @@
 <body>
 
 <div data-role="dialog">
-    
         <div data-role="header" data-theme="d">
-            <h1>Login</h1>
+            <h1>Reset</h1>
         </div>
 
         <div data-role="content">
@@ -28,23 +27,19 @@
             </span> [% success %] </p>
             [% END %]
 
-            <form action="/login" method="post">
-                <div class="ui-grid-solo">
-                    <div class="ui-block-a"><input name="login" id="login" placeholder="Login" value="[% login | html %]" type="text" autocapitalize="off"></div>
-                </div>
-                <div class="ui-grid-solo">
-                    <div class="ui-block-a"><input name="password" id="password" placeholder="Password" value="[% password | html %]" autocapitalize="off" type="password"></div>
-                </div>
+            [% IF info %]
+            <center>
+                <p><span> <a data-inline="true" data-iconpos="notext" data-icon="info" data-role="button" class="ui-icon-alt ui-btn ui-shadow ui-btn-corner-all ui-btn-inline ui-btn-icon-notext ui-btn-up-e" href="index.html" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="e"><span class="ui-btn-inner"><span class="ui-btn-text">Success</span><span class="ui-icon ui-icon-info ui-icon-shadow"></span></span></a>
+            </span> [% info %] </p>
+            </center>
+            [% END %]
 
-                <div class="ui-grid-a">
-                    <div class="ui-block-a"><label><input type="checkbox" name="hour_session" [% IF hour_session %] checked [% END %]/> Public terminal </label></div>
-                    <div class="ui-block-b"><a href="/reset" data-role="button" data-theme="b" rel="dialog">Reset Password</a></div>
-                </div>
-                <div class="ui-grid-solo">
-                    <div class="ui-block-a"><input value="Login" data-theme="b" type="submit"></div>
-                </div>
+            <form action="/reset" method="post">
+                <input name="email" id="email" placeholder="Email" value="[% email | html %]" type="text" autocapitalize="off">
+                <input name="username" id="username" placeholder="Username" value="[% username | html %]" type="text" autocapitalize="off">
+                <input value="Reset" data-theme="b" type="submit">
             </form>
-            <a href="/" data-role="button" data-theme="b">Cancel</a>       
+            <a href="/" data-role="button" data-theme="b" rel="external">Cancel</a>       
         </div>
 </div>
 

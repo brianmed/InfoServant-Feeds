@@ -21,6 +21,8 @@ package InfoServant::Signup;
 use Mojo::Base 'Mojolicious::Controller';
 
 use SiteCode::Account;
+use SiteCode::DBX;
+use Digest::MD5;
 
 sub start {
     my $self = shift;
@@ -154,6 +156,157 @@ sub verify
     else {
         $self->stash(error => "Please enter a verification code.");
     }
+
+    $self->render();
+}
+
+sub change {
+    my $self = shift;
+
+    my $email = $self->param("email");
+    my $username = $self->param("username");
+    my $verify = $self->param("verify");
+    my $password = $self->param("password");
+
+    $self->stash(email => $email);
+    $self->stash(username => $username);
+    $self->stash(verify => $verify);
+
+    if ("GET" eq $self->req->method) {
+        my $exists = SiteCode::DBX->new()->col("SELECT id FROM account WHERE email = ?", undef, lc $email);
+        if ($exists) {
+            my $account = SiteCode::Account->new(id => $exists, route => $self);
+            my $value = $account->key("reset");
+            if ($value eq $verify) {
+                $self->stash(username => $account->username);
+            }
+        }
+
+        return($self->render());
+    }
+
+    if (!$email) {
+        $self->stash(error => "No email address given.");
+        return($self->render());
+    }
+
+    unless (Email::Valid->address($email)) {
+        $self->stash(error => "Email address looks invalid.");
+    }
+
+    if (!$username) {
+        $self->stash(error => "No username given.");
+        return($self->render());
+    }
+
+    if (!$verify) {
+        $self->stash(error => "No verification given.");
+        return($self->render());
+    }
+
+    if (length($password) < 5) {
+        $self->stash(error => "Password less than 6 characters.");
+
+        return $self->render();
+    }
+
+    my $dbx = SiteCode::DBX->new();
+    my $exists = $dbx->col("SELECT id FROM account WHERE email = ? AND username = ?", undef, lc $email, $username);
+    if ($exists) {
+        my $account = SiteCode::Account->new(id => $exists, route => $self);
+
+        my $value = $account->key("reset");
+        if ($value eq $verify) {
+            my $password_md5 = Digest::MD5::md5_hex($password);
+            eval {
+                $dbx->do("UPDATE account SET password = ? WHERE id = ?", undef, $password_md5, $exists);
+                $account->key("reset", undef);
+                $dbx->dbh->commit;
+                $self->stash(success => "Password updated.");
+            };
+            if ($@) {
+                $self->app->log->debug("InfoServant::Signup::change: $@");
+                $dbx->dbh->rollback;
+            }
+        }
+    }
+
+    $self->stash(info => "Password not updated.") unless $self->stash("success");
+
+    $self->render();
+}
+
+sub reset {
+    my $self = shift;
+
+    if ("GET" eq $self->req->method) {
+        return($self->render());
+    }
+
+    my $email = $self->param("email");
+    my $username = $self->param("username");
+
+    $self->stash(email => $email);
+    $self->stash(username => $username);
+
+    if (!$email) {
+        $self->stash(error => "No email address given.");
+        return($self->render());
+    }
+    if (!$username) {
+        $self->stash(error => "No username given.");
+        return($self->render());
+    }
+
+    my $exists;
+    unless (Email::Valid->address($email)) {
+        $self->stash(error => "Email address looks invalid.");
+        return($self->render());
+    }
+    else {
+        $exists = SiteCode::DBX->new()->col("SELECT id FROM account WHERE email = ? AND username = ?", undef, lc $email, $username);
+    }
+
+    if ($exists) {
+        my $account = SiteCode::Account->new(id => $exists, route => $self);
+
+        my $time = time();
+        my $md5 = Digest::MD5::md5_hex($time);
+
+        $account->key("reset", $md5);
+
+        # Libraries?
+        require Email::Simple;
+        require Email::Sender::Simple;
+        require Email::Sender::Transport::SMTP::TLS;
+
+        Email::Sender::Simple->import("sendmail");
+
+        my $mail = Email::Simple->create(
+            header => [
+                To      => $email,
+                From    => 'reset@infoservant.com',
+                Subject => "Password Reset",
+            ],
+            body => "Thank you for using InfoServant.\nPlease follow the link below to change your password:\n\nhttp://infoservant.com/reset/$email/$md5\n",
+        );
+
+        my $dir = POSIX::strftime("/opt/infoservant.com/emails/%F", localtime(time));
+        mkdir $dir unless -d $dir;
+        my ($fh, $filename) = File::Temp::tempfile("forgotXXXXX", DIR => $dir, SUFFIX => '.txt', UNLINK => 0);
+        print($fh $mail->as_string);
+
+        my $site_config = SiteCode::Site->config();
+        my $transport = Email::Sender::Transport::SMTP::TLS->new({
+                host => $site_config->{smtp_host},
+                port => $site_config->{smtp_port},
+                username => $site_config->{smtp_user},
+                password => $site_config->{smtp_pass},
+        });
+        sendmail($mail, {transport => $transport });
+    }
+
+    $self->stash(success => "Sending reset form.");
 
     $self->render();
 }

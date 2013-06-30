@@ -77,6 +77,10 @@ sub startup {
     $r->any('/verify/#email/#verify')->to(controller => 'Signup', action => 'verify');
     $r->any('/verify')->to(controller => 'Signup', action => 'verify');
 
+    $r->any('/change')->to(controller => 'Signup', action => 'change');
+    $r->any('/reset/#email/#verify')->to(controller => 'Signup', action => 'change');
+    $r->any('/reset')->to(controller => 'Signup', action => 'reset');
+
     # $r->any('/dashboard')->over(save => "state")->to(controller => 'Dashboard', action => 'show');
     $r->any('/dashboard')->over(params => {method => qr/^verify$/})->to(controller => 'Dashboard', action => 'verify');
     $r->any('/dashboard')->over(params => {method => qr/^new_feed$/})->to(controller => 'Dashboard', action => 'new_feed');
