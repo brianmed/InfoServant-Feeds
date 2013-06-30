@@ -52,7 +52,7 @@
         [% END %]
 
         [% IF have_entries %]
-            <ul data-role="listview" data-inset="true">
+            <ul data-role="listview">
                 [% FOREACH entry IN entries %]
                     [% IF cur_date != entry.date %]
                         [% SET cur_date = entry.date %]
@@ -60,14 +60,12 @@
                     [% END %]
                 <li><a data-rel=external href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
                     [% IF c.session.cur_feed %]
-                        <h2>[% entry.title %]</h2>
-                        <p><strong>[% entry.html %]</strong></p>
+                        <p class="ui-li-desc" style="white-space: normal;"><strong>[% entry.title %]</strong></p>
                     [% ELSE %]
                         <h2>[% entry.feed_title %]</h2>
                         <p><strong>[% entry.title %]</strong></p>
                     [% END %]
-                    <!-- <p>Hey Stephen, if you're available at 10am tomorrow, we've got a meeting with the jQuery team.</p>-->
-                    <p class="ui-li-aside"><strong>[% entry.time %]</strong>[% entry.the_m %]</p>
+                    <!-- <p>More summary here</p> -->
                 </a></li>
                 [% END %]
             </ul>

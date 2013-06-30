@@ -110,9 +110,7 @@ sub show {
         $self->stash(have_feeds => 1);
     }
 
-    $self->app->log->debug("InfoServant::Dashboard::show:" . __LINE__);
     if ($self->session("cur_feed")) {
-        $self->app->log->debug("InfoServant::Dashboard::show:" . __LINE__);
         my $feed = SiteCode::Feed->new(id => $self->session("cur_feed"), route => $self);
         my $feed_title = $feed->key("title") || $feed->key("url");
         $self->stash(cur_title => $feed_title);
@@ -127,20 +125,34 @@ sub details {
     my $self = shift;
 
     if (!$self->session("account_id")) {
-        return($self->render(text => "Session has expired.  <a href=http://infoservant.com/login>Login</a>."));
+        my $url = $self->url_for('/');
+        return($self->redirect_to($url));
     }
 
     my $entry_id = $self->param("entry_id");
     my $feed_nbr = $self->param("feed_id");
 
     my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
-    my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self);
-    my $html = $feed->html(entry_id => $entry_id, account_id => $account->id);
-    my $link = $feed->link(entry_id => $entry_id, account_id => $account->id);
-    my $title = $feed->title(entry_id => $entry_id, account_id => $account->id);
-    my $feed_title = $feed->key("title") || $feed->key("url");
 
-    $self->stash(feed_title => $feed_title, html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
+    eval {
+        my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self);
+        my $html = $feed->html(entry_id => $entry_id, account_id => $account->id);
+        my $link = $feed->link(entry_id => $entry_id, account_id => $account->id);
+        my $title = $feed->title(entry_id => $entry_id, account_id => $account->id);
+        my $feed_title = $feed->key("title") || $feed->key("url");
+
+        $self->stash(feed_title => $feed_title, html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
+    };
+    if ($@) {
+        $self->app->log->debug("Error: details: $@");
+        my $html = qq(
+            The following url didn't work:<br>
+            https://infoservant.com/details?entry_id=$entry_id&feed_id=$feed_nbr
+        );
+        my $link = "https://infoservant.com/dashboard";
+        my $title = "Oops";
+        $self->stash(feed_title => "Error: $feed_nbr", html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
+    }
 
     return($self->render());
 }

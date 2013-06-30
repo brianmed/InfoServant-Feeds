@@ -80,6 +80,12 @@ sub add {
         return $self->render("signup/start");
     }
 
+    if (length($password) < 5) {
+        $self->stash(error => "Password less than 6 characters.");
+
+        return $self->render("signup/start");
+    }
+
     eval {
         $account = SiteCode::Account->addUser(
             email => $email,
