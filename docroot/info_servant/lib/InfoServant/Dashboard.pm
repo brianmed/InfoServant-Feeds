@@ -96,13 +96,7 @@ sub show {
         my $time = $dt->strftime("%H:%M");
         my $the_m = $dt->strftime("%p");
 
-        my %html = ();
-        if ($self->session("cur_feed")) {
-            my $html = $obj->html(entry_id => $$l{entry_id}, account_id => $account->id);
-            # $html{html} = $html; # substr($html, 0, 256);
-        }
-
-        push(@entries, { %html, id => $$entry{id}, date => $date, time => $time, the_m => $the_m, feed_title => $$entry{feed_title}, entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $$entry{title}, feed_id => $obj->id() });
+        push(@entries, { id => $$entry{id}, date => $date, time => $time, the_m => $the_m, feed_title => $$entry{feed_title}, entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $$entry{title}, feed_id => $obj->id() });
     }
     if (scalar @entries) {
         $self->stash(have_entries => 1);
