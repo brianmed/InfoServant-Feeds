@@ -82,11 +82,14 @@ sub show {
     $self->stash(account_purchased => defined $stripe_id);
 
     unless ($stripe_id) {
-        my $count = SiteCode::DBX->new()->col("select count(entry_read.id) from entry_read, feedme where feedme_id = feedme.id and account_id = ?", undef, $account->id);
+        my $count = SiteCode::DBX->new()->col("select count(entry_read.id) as count from entry_read, feedme where feedme_id = feedme.id and account_id = ?", undef, $account->id);
 
         if (150 < $count) {
             $self->stash(upgrade_message => 1);
             return($self->render);
+        }
+        else {
+            $self->stash(articles_left => (150 - $count));
         }
     }
 
@@ -509,11 +512,8 @@ sub opml_file {
                 $feed = SiteCode::Feed->new(name => $xml_url, route => $self, account => $account);
             }
             else {
-                $feed = SiteCode::Feeds->new->addFeed(
-                    account => $account,
+                $feed = SiteCode::Feeds->new(account => $account, route => $self)->addFeed(
                     url => $xml_url,
-                    html_url => $html_url,
-                    route => $self,
                 );
             }
             if ($subscribed) {
@@ -575,8 +575,8 @@ sub profile {
 
             $feed = SiteCode::Feeds->new->addFeed(
                 account => $account,
-                xml_urL => $new_feed,
                 route => $self,
+                xml_urL => $new_feed,
             );
         };
         if ($@) {

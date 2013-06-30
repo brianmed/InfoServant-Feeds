@@ -78,6 +78,7 @@
                 [% UNLESS account_purchased %]
                     <li><a data-rel=dialog href="/dashboard?method=purchase">
                         <h1>Upgrade</h1>
+                        <p class="ui-li-desc" style="white-space: normal;">You have [% articles_left %] articles left.  There is a 30 day trial.</p>
                     </a></li>
                 [% END %]
 
@@ -100,6 +101,7 @@
                 [% UNLESS account_purchased %]
                     <li><a data-rel=dialog href="/dashboard?method=purchase">
                         <h1>Upgrade</h1>
+                        <p class="ui-li-desc" style="white-space: normal;">You have [% articles_left %] articles left.  There is a 30 day trial.</p>
                     </a></li>
                 [% END %]
             </ul>
