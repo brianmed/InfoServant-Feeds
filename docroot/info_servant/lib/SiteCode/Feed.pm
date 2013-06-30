@@ -72,13 +72,15 @@ sub markRead {
 
     my $dbx = SiteCode::DBX->new();
 
-    # Bad design?
     eval {
         my $entry = $dbx->row("SELECT * FROM entry WHERE id = ?", undef, $opt{entry_id});
         die("No entry")  unless $entry;
 
         my $feedme = $dbx->row("SELECT * FROM feedme WHERE feed_id = ? AND account_id = ?", undef, $opt{feed_id}, $self->account->id);
         die("No feedme") unless $feedme;
+
+        my $exists = $dbx->success("SELECT 1 FROM entry_read WHERE entry_read.entry_id = ?", undef, $$entry{entry_id});
+        die("Already read\n") if $exists;
 
         $dbx->do(
             "INSERT INTO entry_read (feed_title, feed_name, issued, title, entry_id, link, feedme_id) VALUES (?, ?, ?, ?, ?, ?, ?)", undef, 
@@ -87,7 +89,7 @@ sub markRead {
         $dbx->dbh->commit;
     };
     if ($@) {
-        $self->route->app->log->debug("SiteCoode::Feed::markRead: $@");
+        $self->route->app->log->debug("SiteCoode::Feed::markRead: $@") unless "Already read\n" eq $@;
         $dbx->dbh->rollback;
     }
 }
