@@ -115,28 +115,10 @@ while (1) {
         my $entries = $parse ? [$parse->entries()] : [];
 
         my $feed_path = "$html_dir/$$feed{id}";
+        if (!-d $feed_path) {
+            mkdir($feed_path);
+        }
         if (@{ $entries}) {
-            info("DELETE FROM entry (%s) :: %s", $$feed{url}, scalar(@{ $entries }) || 0);
-
-            eval {
-                $dbx->do("DELETE FROM entry WHERE feed_name = ?", undef, $$feed{url});
-            };
-            if ($@) {
-                info("DELETE FROM entry error(%s) :: %s", $$feed{url}, $@);
-            }
-            eval {
-                if (-d $feed_path && $feed_path =~ m#^/opt/infoservant.com/data/html_files/\d+$#) {
-                    info("remove_tree (%s) :: %s", $$feed{url}, $feed_path);
-                    File::Path::remove_tree($feed_path);
-                }
-                info("mkdir (%s) :: %s", $$feed{url}, $feed_path);
-                mkdir($feed_path) or die("mkdir :: $feed_path: $!");
-            };
-            if ($@) {
-                info("Feed path error: %s :: %s :: %s :: %s", $$feed{url}, $feed_path, $@, $!);
-            }
-            else {
-                $dbx->dbh->commit;
                 foreach my $entry (@{ $entries }) {
                     eval {
                         my $exists = $dbx->col("SELECT id FROM entry WHERE feed_name = ? and entry_id = ?", undef, $$feed{url}, $entry->id());
@@ -166,7 +148,7 @@ while (1) {
                 }
 
                 info("INSERT INTO entry :: %s :: %s", $$feed{url}, scalar(@{ $entries }));
-            }
+            # }
         }
 
         $dbx->dbh->commit;
