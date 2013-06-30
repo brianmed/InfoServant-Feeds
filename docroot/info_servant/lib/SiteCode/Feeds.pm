@@ -69,6 +69,7 @@ sub latest {
     my $feed = $opt{feed} ? " AND feed.id = ?" : "";
     my @vars = ($self->account()->id());
     push(@vars, $opt{feed}) if $feed;
+    push(@vars, $self->account()->id());
     my $data = $dbx->array(qq(
         SELECT
             feed.id as feed_id, entry.id as entry_id, entry.issued
@@ -76,6 +77,7 @@ sub latest {
             and feed.name = entry.feed_name 
             and feedme.feed_id = feed.id
             $feed
+            AND entry.id NOT IN (SELECT entry.id FROM entry, entry_read, feedme WHERE entry.entry_id = entry_read.entry_id AND feedme_id = feedme.id AND account_id = ?)
         order by entry.issued desc
         LIMIT $opt{limit}
         OFFSET $opt{offset}

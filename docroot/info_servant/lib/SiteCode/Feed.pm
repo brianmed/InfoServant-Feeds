@@ -66,6 +66,32 @@ sub subscribed {
     my $id = $dbx->col("SELECT id FROM feedme WHERE feed_id = ? and account_id = ?", undef, $self->id, $self->account->id);
 }
 
+sub markRead {
+    my $self = shift;
+    my %opt = @_;
+
+    my $dbx = SiteCode::DBX->new();
+
+    # Bad design?
+    eval {
+        my $entry = $dbx->row("SELECT * FROM entry WHERE id = ?", undef, $opt{entry_id});
+        die("No entry")  unless $entry;
+
+        my $feedme = $dbx->row("SELECT * FROM feedme WHERE feed_id = ? AND account_id = ?", undef, $opt{feed_id}, $self->account->id);
+        die("No feedme") unless $feedme;
+
+        $dbx->do(
+            "INSERT INTO entry_read (feed_title, feed_name, issued, title, entry_id, link, feedme_id) VALUES (?, ?, ?, ?, ?, ?, ?)", undef, 
+            $$entry{feed_title}, $$entry{feed_name}, $$entry{issued}, $$entry{title}, $$entry{entry_id}, $$entry{link}, $$feedme{id}
+        );
+        $dbx->dbh->commit;
+    };
+    if ($@) {
+        $self->route->app->log->debug("SiteCoode::Feed::markRead: $@");
+        $dbx->dbh->rollback;
+    }
+}
+
 sub entry {
     my $self = shift;
     my $entry_id = shift;

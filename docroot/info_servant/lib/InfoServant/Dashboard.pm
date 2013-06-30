@@ -76,8 +76,19 @@ sub show {
         return($self->redirect_to($url));
     }
 
+    my $stripe_id = $account->key("stripe_id");
+
     $self->stash(account_verified => $account->verified());
-    $self->stash(account_purchased => defined $account->key("stripe_id"));
+    $self->stash(account_purchased => defined $stripe_id);
+
+    unless ($stripe_id) {
+        my $count = SiteCode::DBX->new()->col("select count(entry_read.id) from entry_read, feedme where feedme_id = feedme.id and account_id = ?", undef, $account->id);
+
+        if (150 < $count) {
+            $self->stash(upgrade_message => 1);
+            return($self->render);
+        }
+    }
 
     my $have_feeds = SiteCode::Feeds->haveFeeds(account => $account);
     $self->stash(have_feeds => $have_feeds);
@@ -93,7 +104,6 @@ sub show {
     }
     my @entries = ();
     my $feeds = SiteCode::Feeds->new(account => $account);
-    my $stripe_id = $account->key("stripe_id");
     my $limit = $stripe_id ? 30 : 15;
     my $offset = $self->session("offset") ? $self->session("offset") : 0;
     $offset = 0 if !$stripe_id;
@@ -145,11 +155,13 @@ sub details {
     my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
     eval {
-        my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self);
+        my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self, account => $account);
         my $html = $feed->html(entry_id => $entry_id, account_id => $account->id);
         my $link = $feed->link(entry_id => $entry_id, account_id => $account->id);
         my $title = $feed->title(entry_id => $entry_id, account_id => $account->id);
         my $feed_title = $feed->key("title") || $feed->key("xml_url");
+
+        $feed->markRead(entry_id => $entry_id, feed_id => $feed_nbr);
 
         $self->stash(offset => $offset, feed_title => $feed_title, html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
     };

@@ -47,6 +47,20 @@
     </div><!-- /header -->
 
     <div data-role="content">
+        [% IF upgrade_message %]
+
+        [% UNLESS account_purchased %]
+            <ul data-role="listview">
+            <li><a data-rel=dialog href="/dashboard?method=purchase">
+                <h2>Upgrade</h2>
+                <p class="ui-li-desc" style="white-space: normal;">You have read over 150 articles.
+                If you like the experience, please upgrade.</p>
+            </a></li>
+            </ul>
+        [% END %]
+
+        [% ELSE %]
+
         [% IF c.session.cur_feed %]
             [% UNLESS have_entries %]
             Current feed has no entries.
@@ -55,6 +69,8 @@
             [% UNLESS have_entries %]
             Please upload an opml file or add a rss feed.
             [% END %]
+        [% END %]
+
         [% END %]
 
         [% IF have_entries %]
@@ -70,7 +86,7 @@
                         [% SET cur_date = entry.date %]
                         <li data-role="list-divider">[% cur_date %]</li>
                     [% END %]
-                <li><a data-rel=external href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]&offset=[% c.session.offset %]">
+                <li><a data-rel=external href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
                     [% IF c.session.cur_feed %]
                         <p class="ui-li-desc" style="white-space: normal;"><strong>[% entry.title %]</strong></p>
                     [% ELSE %]
