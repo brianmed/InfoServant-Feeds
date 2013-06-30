@@ -104,9 +104,9 @@ sub show {
     }
     my @entries = ();
     my $feeds = SiteCode::Feeds->new(account => $account);
-    my $limit = $stripe_id ? 30 : 15;
+    my $limit = 30; # $stripe_id ? 30 : 15;
     my $offset = $self->session("offset") ? $self->session("offset") : 0;
-    $offset = 0 if !$stripe_id;
+    # $offset = 0 if !$stripe_id;
 
     foreach my $l (@{ $feeds->latest(limit => $limit, offset => $offset, feed => $self->session("cur_feed")) }) {
         my $obj = SiteCode::Feed->new(id => $$l{feed_id}, route => $self);
@@ -169,9 +169,9 @@ sub details {
         $self->app->log->debug("Error: details: $@");
         my $html = qq(
             The following url didn't work:<br>
-            https://infoservant.com/details?entry_id=$entry_id&feed_id=$feed_nbr
+            http://infoservant.com/details?entry_id=$entry_id&feed_id=$feed_nbr
         );
-        my $link = "https://infoservant.com/dashboard";
+        my $link = "http://infoservant.com/dashboard";
         my $title = "Oops";
         $self->stash(offset => $offset, feed_title => "Error: $feed_nbr", html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
     }

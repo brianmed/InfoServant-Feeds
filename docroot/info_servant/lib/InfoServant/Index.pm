@@ -27,11 +27,13 @@ use Email::Valid;
 sub slash {
     my $self = shift;
 
+=for comment
     unless ($self->req->is_secure) {
         my $url = $self->url_for('/')->to_abs;
         $url->scheme('https');
         return($self->redirect_to($url));
     }
+=cut
 
     if ($self->session->{account_id}) {
         my $url = $self->url_for('/dashboard');

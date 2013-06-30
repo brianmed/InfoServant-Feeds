@@ -190,7 +190,6 @@
     <div data-role="footer" data-id="foo1" data-position="fixed">
     <div data-role="navbar">
         <ul>
-            [% IF account_purchased %]
             [% IF have_entries %]
                 [% IF c.session.offset %]
                     [% SET page_prev = c.session.offset - 30 %]
@@ -198,15 +197,12 @@
 
                     <li><a href="/dashboard?offset=[% page_prev %]" data-rel="external" data-ajax=false>Prev</a></li>
             [% END %]
-            [% END %]
             <li><a href="/dashboard" data-rel="external" data-ajax=false>Refresh</a></li>
             <!-- <li><a href="mailto:support@infoservant.com">Contact</a></li> -->
 
-            [% IF account_purchased %]
             [% IF have_entries %]
                 [% SET page_next = c.session.offset + 30 %]
                 <li><a href="/dashboard?offset=[% page_next %]" data-rel="external" data-ajax=false>Next</a></li>
-            [% END %]
             [% END %]
         </ul>
     </div><!-- /navbar -->
