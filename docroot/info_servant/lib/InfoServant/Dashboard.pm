@@ -91,7 +91,12 @@ sub show {
     }
     my @entries = ();
     my $feeds = SiteCode::Feeds->new(account => $account);
-    foreach my $l (@{ $feeds->latest(limit => 30, offset => $self->param("offset") || 0, feed => $self->session("cur_feed")) }) {
+    my $stripe_id = $account->key("stripe_id");
+    my $limit = $stripe_id ? 30 : 15;
+    my $offset = $self->param("offset") ? $self->param("offset") : 0;
+    $offset = 0 if !$stripe_id;
+
+    foreach my $l (@{ $feeds->latest(limit => $stripe_id, offset => $offset, feed => $self->session("cur_feed")) }) {
         my $obj = SiteCode::Feed->new(id => $$l{feed_id}, route => $self);
         my $entry = $obj->entry($$l{entry_id}, $account->id());
 
