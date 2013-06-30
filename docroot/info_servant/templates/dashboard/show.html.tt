@@ -151,13 +151,11 @@
                         <input value="Add" data-theme="b" type="submit">
                     </form>
 
-                    [% UNLESS c.is_mobile %]
                     <form action="/dashboard" data-ajax="false" enctype="multipart/form-data" method="post">
                         <input type=hidden name=method value=opml_file>
                         <input data-clear-btn="true" name="opml_file" type="file">
                         <input value="Upload" data-theme="b" type="submit">
                     </form>
-                    [% END %]
 
                     [% IF c.session.cur_feed %]
                     <form action="/dashboard" method=post>
