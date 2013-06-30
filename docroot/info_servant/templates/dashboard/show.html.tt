@@ -41,7 +41,7 @@
 <div data-role="page" class=ui-responsive-panel>
 
     <div data-role="header">
-        <h1>[% IF cur_title %] [% cur_title %] [% ELSE %] Entries [% END %]</h1>
+        <h1>[% IF cur_title %] [% cur_title %] [% ELSE %] Entries [% c.session.offset %] [% END %]</h1>
         <a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a>
         <a href="#profile-form" data-icon="plus" data-iconpos="notext">Proflie</a>
     </div><!-- /header -->
@@ -70,7 +70,7 @@
                         [% SET cur_date = entry.date %]
                         <li data-role="list-divider">[% cur_date %]</li>
                     [% END %]
-                <li><a data-rel=external href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]&offset=[% offset %]">
+                <li><a data-rel=external href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]&offset=[% c.session.offset %]">
                     [% IF c.session.cur_feed %]
                         <p class="ui-li-desc" style="white-space: normal;"><strong>[% entry.title %]</strong></p>
                     [% ELSE %]
@@ -125,7 +125,7 @@
                 </div><!-- /panel -->
 
                 <div data-role="panel" data-position="right" data-position-fixed="false" data-display="overlay" id="profile-form" data-theme="b">
-                    <h2>Profile</h2>
+                    <h2>Profile <font size=-1><a href="mailto:support@infoservant.com">Contact</font></a></h2>
 
                     <form action="/dashboard" method=post>
                         <input type=hidden name=method value=new_feed>
@@ -163,7 +163,9 @@
                     [% END %]
 
                     <hr>
+                    <a href="/logout" data-role="button" data-theme="a" data-rel="external">Logout</a>
 
+                    <hr>
                     <a href="#" data-rel="close" data-role="button" data-theme="c" data-mini="true">Back</a>
 
                     <!-- panel content goes here -->
@@ -172,24 +174,21 @@
     <div data-role="footer" data-id="foo1" data-position="fixed">
     <div data-role="navbar">
         <ul>
+            [% IF account_purchased %]
             [% IF have_entries %]
-                [% IF offset %]
-                    [% SET page_prev = offset - 30 %]
-
-                    [% IF page_prev > 0 %]
-                        <li><a style="pointer-events: none; cursor: default" href="/dashboard" data-rel="external" data-ajax=false>Prev</a></li>
-                    [% ELSE %]
-                        <li><a href="/dashboard?offset=[% page_prev %]" data-rel="external" data-ajax=false>Prev</a></li>
-                    [% END %]
+                [% IF c.session.offset %]
+                    [% SET page_prev = c.session.offset - 30 %]
                 [% END %]
+
+                    <li><a href="/dashboard?offset=[% page_prev %]" data-rel="external" data-ajax=false>Prev</a></li>
+            [% END %]
             [% END %]
             <li><a href="/dashboard" data-rel="external" data-ajax=false>Refresh</a></li>
-            <li><a href="/logout" data-rel="external">Logout</a></li>
             <!-- <li><a href="mailto:support@infoservant.com">Contact</a></li> -->
 
             [% IF account_purchased %]
             [% IF have_entries %]
-                [% SET page_next = offset + 30 %]
+                [% SET page_next = c.session.offset + 30 %]
                 <li><a href="/dashboard?offset=[% page_next %]" data-rel="external" data-ajax=false>Next</a></li>
             [% END %]
             [% END %]

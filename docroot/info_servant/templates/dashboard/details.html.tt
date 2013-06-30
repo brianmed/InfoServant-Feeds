@@ -13,7 +13,7 @@
         <div data-role="page" class=ui-responsive-panel>
 
             <div data-role="header">
-                <a href="/dashboard?offset=[% offset %]" data-rel="external" data-ajax=false data-icon="back">Back</a>
+                <a href="/dashboard" data-rel="external" data-ajax=false data-icon="back">Back</a>
                 <h4><a data-rel=external href="[% link %]" target=_article>[% title %]</a></h4>
             </div><!-- /header -->
 
@@ -25,9 +25,9 @@
     <div data-role="navbar">
         <ul>
             <li><a href="/logout" data-rel="external">Logout</a></li>
-            <li><a href="/dashboard?offset=[% offset %]" data-rel="external" data-ajax=false>Back</a></li>
-            <li><a href="/dashboard/details?entry_id=[% entry_id %]&feed_id=[% feed_id %]&offset=[% offset %]" data-rel="external" data-ajax=false>Refresh</a></li>
-            <li><a href="mailto:support@infoservant.com">Contact</a></li>
+            <li><a href="/dashboard" data-rel="external" data-ajax=false>Back</a></li>
+            <li><a href="/dashboard/details?entry_id=[% entry_id %]&feed_id=[% feed_id %]" data-rel="external" data-ajax=false>Refresh</a></li>
+            <!-- <li><a href="mailto:support@infoservant.com">Contact</a></li> -->
         </ul>
     </div><!-- /navbar -->
 </div><!-- /footer -->

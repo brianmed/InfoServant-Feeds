@@ -48,6 +48,7 @@ sub login {
     my $password = $self->param("password");
 
     $self->stash(login => $login);
+    $self->stash(hour_session => $self->param("hour_session"));
 
     if ($self->param("added")) {
         $self->stash(success => "Please see verificaiton email.");
@@ -109,7 +110,12 @@ sub login {
     else {
         $self->session(account_id => $account->id());
         $self->session(account_email => $account->email());
-        $self->session(expiration => 604800);
+        if ($self->param("hour_session")) {
+            $self->session(expiration => 3600);
+        }
+        else {
+            $self->session(expiration => 604800);
+        }
         my $url = $self->url_for('/dashboard');
         return($self->redirect_to($url));
     }

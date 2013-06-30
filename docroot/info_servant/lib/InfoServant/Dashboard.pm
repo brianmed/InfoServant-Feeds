@@ -61,6 +61,8 @@ sub show {
         return($self->redirect_to($url));
     }
 
+    $self->session(offset => $self->param("offset")) if defined $self->param("offset");
+
     my $account = undef;
 
     eval {
@@ -93,7 +95,7 @@ sub show {
     my $feeds = SiteCode::Feeds->new(account => $account);
     my $stripe_id = $account->key("stripe_id");
     my $limit = $stripe_id ? 30 : 15;
-    my $offset = $self->param("offset") ? $self->param("offset") : 0;
+    my $offset = $self->session("offset") ? $self->session("offset") : 0;
     $offset = 0 if !$stripe_id;
 
     foreach my $l (@{ $feeds->latest(limit => $limit, offset => $offset, feed => $self->session("cur_feed")) }) {
@@ -125,8 +127,6 @@ sub show {
         $self->stash(cur_title => $feed_title);
     }
 
-    $self->stash(offset => $self->param("offset")) if $self->param("offset");
-
     $self->render(entries => \@entries, feeds => \@feeds);
 }
 
@@ -140,7 +140,7 @@ sub details {
 
     my $entry_id = $self->param("entry_id");
     my $feed_nbr = $self->param("feed_id");
-    my $offset = $self->param("offset");
+    my $offset = $self->session("offset");
 
     my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
