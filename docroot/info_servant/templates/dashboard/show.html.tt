@@ -47,8 +47,14 @@
     </div><!-- /header -->
 
     <div data-role="content">
-        [% UNLESS have_entries %]
-        Please upload an opml file or add a rss feed.
+        [% IF c.session.cur_feed %]
+            [% UNLESS have_entries %]
+            Current feed has no entries.
+            [% END %]
+        [% ELSE %]
+            [% UNLESS have_entries %]
+            Please upload an opml file or add a rss feed.
+            [% END %]
         [% END %]
 
         [% IF have_entries %]
