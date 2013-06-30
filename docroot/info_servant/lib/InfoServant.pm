@@ -53,7 +53,7 @@ sub startup {
     # Increase limit to 10MB
     $ENV{MOJO_MAX_MESSAGE_SIZE} = 10485760;
 
-    $self->plugin(AccessLog => {log => '/opt/infoservant.com/docroot/info_servant/log/access.log'});
+    $self->plugin(AccessLog => {log => '/opt/infoservant.com/docroot/info_servant/log/access.log', format => '%h %l %u %t "%r" %>s %b %D "%{Referer}i" "%{User-Agent}i"'});
     $self->plugin(tt_renderer => {template_options => {CACHE_SIZE => 0, COMPILE_EXT => undef, COMPILE_DIR => undef}});
     $self->plugin('ParamCondition');
     $self->plugin('SaveRequest');
@@ -86,12 +86,6 @@ sub startup {
     $r->any('/dashboard')->over(params => {method => qr/^cancel$/})->to(controller => 'Dashboard', action => 'cancel');
     $r->any('/dashboard')->to(controller => 'Dashboard', action => 'show');
     $r->any('/dashboard/details')->to(controller => 'Dashboard', action => 'details');
-    # $r->any('/dashboard/html/:page')->over(save => "state")->to(controller => 'Dashboard', action => 'retrieve_html');
-    $r->any('/dashboard/html/:page')->to(controller => 'Dashboard', action => 'retrieve_html');
-    $r->any('/dashboard/javascript/:page')->to(controller => 'Dashboard', action => 'retrieve_js');
-    $r->get('/dashboard/feed/src/:feed_nbr')->to(controller => 'Dashboard', action => 'retrieve_feed_src');
-    $r->get('/dashboard/feed/link/:feed_nbr')->to(controller => 'Dashboard', action => 'retrieve_feed_link');
-    $r->get('/dashboard/feed/entries/:feed_nbr')->to(controller => 'Dashboard', action => 'retrieve_feed_entries');
 
     $r->any('/stripe/:mode')->to(controller => 'Stripe', action => 'save');
 
