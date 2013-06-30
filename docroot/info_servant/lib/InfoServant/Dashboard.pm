@@ -254,7 +254,7 @@ sub cancel {
     }
     else {
         my $ret = JSON::from_json($res->content());
-        $self->stash(errors => $ret->{error}{message});
+        $self->stash(error => $ret->{error}{message});
 
         return($self->render());
     }
@@ -273,7 +273,7 @@ sub purchase {
     my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
     if ("GET" eq $self->req->method) {
-        $self->stash(info => "Only \$1.50 a month!");
+        $self->stash(info => "Only \$1.50 a month!<br>Thirty day trial.");
         return($self->render());
     }
 
