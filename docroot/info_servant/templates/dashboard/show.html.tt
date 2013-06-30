@@ -41,7 +41,7 @@
 <div data-role="page" class=ui-responsive-panel>
 
     <div data-role="header">
-        <h1>[% IF cur_title %] [% cur_title %] [% ELSE %] Entries [% c.session.offset %] [% END %]</h1>
+        <h1>[% IF cur_title %] [% cur_title %] [% ELSE %] Entries [% END %]</h1>
         <a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a>
         <a href="#profile-form" data-icon="plus" data-iconpos="notext">Proflie</a>
     </div><!-- /header -->
