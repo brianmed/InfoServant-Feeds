@@ -140,6 +140,7 @@ sub details {
 
     my $entry_id = $self->param("entry_id");
     my $feed_nbr = $self->param("feed_id");
+    my $offset = $self->param("offset");
 
     my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
@@ -150,7 +151,7 @@ sub details {
         my $title = $feed->title(entry_id => $entry_id, account_id => $account->id);
         my $feed_title = $feed->key("title") || $feed->key("xml_url");
 
-        $self->stash(feed_title => $feed_title, html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
+        $self->stash(offset => $offset, feed_title => $feed_title, html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
     };
     if ($@) {
         $self->app->log->debug("Error: details: $@");
@@ -160,7 +161,7 @@ sub details {
         );
         my $link = "https://infoservant.com/dashboard";
         my $title = "Oops";
-        $self->stash(feed_title => "Error: $feed_nbr", html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
+        $self->stash(offset => $offset, feed_title => "Error: $feed_nbr", html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
     }
 
     return($self->render());

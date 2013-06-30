@@ -70,7 +70,7 @@
                         [% SET cur_date = entry.date %]
                         <li data-role="list-divider">[% cur_date %]</li>
                     [% END %]
-                <li><a data-rel=external href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
+                <li><a data-rel=external href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]&offset=[% offset %]">
                     [% IF c.session.cur_feed %]
                         <p class="ui-li-desc" style="white-space: normal;"><strong>[% entry.title %]</strong></p>
                     [% ELSE %]

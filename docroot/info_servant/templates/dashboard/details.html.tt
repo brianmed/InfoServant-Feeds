@@ -25,8 +25,8 @@
     <div data-role="navbar">
         <ul>
             <li><a href="/logout" data-rel="external">Logout</a></li>
-            <li><a href="/dashboard" data-rel="external" data-ajax=false>Back</a></li>
-            <li><a href="/dashboard/details?entry_id=[% entry_id %]&feed_id=[% feed_id %]" data-rel="external" data-ajax=false>Refresh</a></li>
+            <li><a href="/dashboard?offset=[% offset %]" data-rel="external" data-ajax=false>Back</a></li>
+            <li><a href="/dashboard/details?entry_id=[% entry_id %]&feed_id=[% feed_id %]&offset=[% offset %]" data-rel="external" data-ajax=false>Refresh</a></li>
             <li><a href="mailto:support@infoservant.com">Contact</a></li>
         </ul>
     </div><!-- /navbar -->

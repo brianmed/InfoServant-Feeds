@@ -92,6 +92,8 @@ sub startup {
     $r->get('/dashboard/feed/link/:feed_nbr')->to(controller => 'Dashboard', action => 'retrieve_feed_link');
     $r->get('/dashboard/feed/entries/:feed_nbr')->to(controller => 'Dashboard', action => 'retrieve_feed_entries');
 
+    $r->any('/stripe/:mode')->to(controller => 'Stripe', action => 'save');
+
     $r->any('/logout')->to(controller => 'Dashboard', action => 'logout');
 }
 
