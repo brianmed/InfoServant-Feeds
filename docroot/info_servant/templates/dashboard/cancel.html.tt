@@ -38,7 +38,7 @@
             </center>
             [% END %]
 
-            [% IF account_purchased %]
+            [% UNLESS success %]
                 <form action="/dashboard" method="post">
                     <input type=hidden name=method value=cancel>
                     <input type="text" autocapitalize="off" name=verify placeholder="Type CANCEL" value="[% verify %]">

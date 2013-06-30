@@ -58,13 +58,13 @@
         [% END %]
 
         [% IF have_entries %]
-            [% UNLESS account_purchased %]
-                <li><a data-rel=external href="/dashboard?method=purchase">
-                    <h1>Upgrade</h1>
-                </a></li>
-            [% END %]
-
             <ul data-role="listview">
+                [% UNLESS account_purchased %]
+                    <li><a data-rel=dialog href="/dashboard?method=purchase">
+                        <h1>Upgrade</h1>
+                    </a></li>
+                [% END %]
+
                 [% FOREACH entry IN entries %]
                     [% IF cur_date != entry.date %]
                         [% SET cur_date = entry.date %]
@@ -79,6 +79,12 @@
                     [% END %]
                     <!-- <p>More summary here</p> -->
                 </a></li>
+                [% END %]
+
+                [% UNLESS account_purchased %]
+                    <li><a data-rel=dialog href="/dashboard?method=purchase">
+                        <h1>Upgrade</h1>
+                    </a></li>
                 [% END %]
             </ul>
         [% END %]

@@ -216,9 +216,9 @@ sub cancel {
     }
 
     my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
+    $self->stash(account_purchased => defined $account->key("stripe_id"));
 
     if ("GET" eq $self->req->method) {
-        $self->stash(account_purchased => defined $account->key("stripe_id"));
         return($self->render());
     }
 
@@ -235,7 +235,7 @@ sub cancel {
     my $stripe_id = $account->key("stripe_id");
 
     my $req = &HTTP::Request::Common::DELETE(
-        "https://api.stripe.com/v1/customers/$stripe_id/subscription",
+        "https://api.stripe.com/v1/customers/$stripe_id",
     );
 
     my $site_config = SiteCode::Site->config();
@@ -254,10 +254,9 @@ sub cancel {
     else {
         my $ret = JSON::from_json($res->content());
         $self->stash(errors => $ret->{error}{message});
-    }
 
-    # Here last because the value could have changed
-    $self->stash(account_purchased => defined $account->key("stripe_id"));
+        return($self->render());
+    }
 
     $self->render();
 }
