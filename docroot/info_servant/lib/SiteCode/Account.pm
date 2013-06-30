@@ -138,6 +138,11 @@ sub addUser
     eval {
         my $dbx = SiteCode::DBX->new(route => $ops{route});
 
+        my $count = $dbx->col("select count(id) from account", undef);
+        if (10_000 < $count) {
+            die "Too many active accounts. Please come back soon.\n";
+        }
+
         my $taken = $dbx->success("SELECT 1 FROM account WHERE email = ?", undef, lc $email);
         if ($taken) {
             die "Email already taken.\n";

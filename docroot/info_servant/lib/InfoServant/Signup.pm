@@ -80,6 +80,12 @@ sub add {
         return $self->render("signup/start");
     }
 
+    if (length($username) < 3) {
+        $self->stash(error => "Username less than 3 characters.");
+
+        return $self->render("signup/start");
+    }
+
     if (length($password) < 5) {
         $self->stash(error => "Password less than 6 characters.");
 
