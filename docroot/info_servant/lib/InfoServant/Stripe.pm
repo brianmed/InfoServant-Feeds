@@ -34,7 +34,7 @@ sub save {
     my $dir = POSIX::strftime("/opt/infoservant.com/stripe/%F", localtime(time));
     mkdir $dir unless -d $dir;
     my ($fh, $filename) = File::Temp::tempfile("${mode}XXXXX", DIR => $dir, SUFFIX => '.txt', UNLINK => 0);
-    print($fh $self->req->content);
+    print($fh $self->req->body);
     close($fh);
 
     $self->render(data => '', status => 200);
