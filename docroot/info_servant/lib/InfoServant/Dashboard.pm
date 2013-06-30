@@ -124,7 +124,7 @@ sub details {
     my $entry_id = $self->param("entry_id");
     my $feed_nbr = $self->param("feed_id");
 
-    my $account = SiteCode::Account->new(id => $self->session("account_id"));
+    my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
     my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self);
     my $html = $feed->html(entry_id => $entry_id, account_id => $account->id);
     my $link = $feed->link(entry_id => $entry_id, account_id => $account->id);
