@@ -13,7 +13,7 @@
         <div data-role="page" class=ui-responsive-panel>
 
             <div data-role="header">
-                <a href="/dashboard" data-rel="external" data-ajax=false data-icon="back">Back</a>
+                <a href="/dashboard?offset=[% offset %]" data-rel="external" data-ajax=false data-icon="back">Back</a>
                 <h4><a data-rel=external href="[% link %]" target=_article>[% title %]</a></h4>
             </div><!-- /header -->
 
