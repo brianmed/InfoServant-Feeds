@@ -256,15 +256,16 @@ sub new_feed {
         my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
         my $exists = SiteCode::Feeds->new(account => $account, route => $self)->exists(name => $new_feed);
-        my $subscribed = $exists ? SiteCode::Feed->new(name => $new_feed, account => $account, route => $self)->subscribed : 0;
 
-        if ($exists && $subscribed) {
-            die("Feed exists already.\n");
+        if ($exists) {
+            $feed = SiteCode::Feed->new(id => $exists, route => $self, account => $account);
+            $feed->subscribe;
         }
-
-        $feed = SiteCode::Feeds->new(route => $self, account => $account)->addFeed(
-            url => $new_feed,
-        );
+        else {
+            $feed = SiteCode::Feeds->new(route => $self, account => $account)->addFeed(
+                url => $new_feed,
+            );
+        }
     };
     if ($@) {
         my $err = $@;
