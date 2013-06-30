@@ -61,7 +61,7 @@ sub show {
     my $account = undef;
 
     eval {
-        $account = SiteCode::Account->new(id => $self->session("account_id"));
+        $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
     };
     if ($@) {
         $self->app->log->debug("InfoServant::Dashboard::show: $@");
@@ -112,7 +112,7 @@ sub show {
 
     if ($self->session("cur_feed")) {
         my $feed = SiteCode::Feed->new(id => $self->session("cur_feed"), route => $self);
-        my $feed_title = $feed->key("title") || $feed->key("url");
+        my $feed_title = $feed->key("title") || $feed->key("xml_url");
         $self->stash(cur_title => $feed_title);
     }
 
@@ -139,7 +139,7 @@ sub details {
         my $html = $feed->html(entry_id => $entry_id, account_id => $account->id);
         my $link = $feed->link(entry_id => $entry_id, account_id => $account->id);
         my $title = $feed->title(entry_id => $entry_id, account_id => $account->id);
-        my $feed_title = $feed->key("title") || $feed->key("url");
+        my $feed_title = $feed->key("title") || $feed->key("xml_url");
 
         $self->stash(feed_title => $feed_title, html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
     };
@@ -172,7 +172,7 @@ sub verify {
         return($self->render("dashboard/dialog"));
     }
 
-    my $account = SiteCode::Account->new(id => $self->session("account_id"));
+    my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
     if ($account->verified()) {
         $self->stash(error => "Already verified.");
@@ -216,7 +216,7 @@ sub unsubscribe {
     my $feed = undef;
 
     eval {
-        my $account = SiteCode::Account->new(id => $self->session("account_id"));
+        my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
         SiteCode::Feed->new(id => $cur_feed, account => $account, route => $self)->unsubscribe;
     };
@@ -253,19 +253,17 @@ sub new_feed {
     eval {
         die("Does not look like a http URI\n") if $new_feed !~ $RE{URI}{HTTP};
 
-        my $account = SiteCode::Account->new(id => $self->session("account_id"));
+        my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
-        my $exists = SiteCode::Feeds->new->exists(name => $new_feed, account => $account);
+        my $exists = SiteCode::Feeds->new(account => $account, route => $self)->exists(name => $new_feed);
         my $subscribed = $exists ? SiteCode::Feed->new(name => $new_feed, account => $account, route => $self)->subscribed : 0;
 
         if ($exists && $subscribed) {
             die("Feed exists already.\n");
         }
 
-        $feed = SiteCode::Feeds->new->addFeed(
-            account => $account,
-            xml_urL => $new_feed,
-            route => $self,
+        $feed = SiteCode::Feeds->new(route => $self, account => $account)->addFeed(
+            url => $new_feed,
         );
     };
     if ($@) {
@@ -282,7 +280,7 @@ sub new_feed {
         }
     }
     else {
-        my $string = $feed->key("title") || $feed->key("url");
+        my $string = $feed->key("title") || $feed->key("xml_url");
         $self->stash(success => "Added: $string");
     }
 
@@ -326,7 +324,7 @@ sub opml_file {
             $tag = $outline->text;
         }
         
-        my $account = SiteCode::Account->new(id => $self->session("account_id"));
+        my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
         my $xml_url = $outline->xml_url;
         my $html_url = $outline->html_url;
@@ -411,7 +409,7 @@ sub profile {
         eval {
             die("Does not look like a http URI\n") if $new_feed !~ $RE{URI}{HTTP};
 
-            my $account = SiteCode::Account->new(id => $self->session("account_id"));
+            my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
             my $exists = SiteCode::Feeds->new->exists(name => $new_feed, account => $account);
             my $subscribed = $exists ? SiteCode::Feed->new(name => $new_feed, account => $account, route => $self)->subscribed : 0;
@@ -440,7 +438,7 @@ sub profile {
             }
         }
         else {
-            my $string = $feed->key("title") || $feed->key("url");
+            my $string = $feed->key("title") || $feed->key("xml_url");
             $self->stash(info => "Added: $string");
             $self->stash(reload => 1);
         }
@@ -491,7 +489,7 @@ sub profile {
                 $tag = $outline->text;
             }
             
-            my $account = SiteCode::Account->new(id => $self->session("account_id"));
+            my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
             my $xml_url = $outline->xml_url;
             my $html_url = $outline->html_url;
@@ -573,7 +571,7 @@ sub retrieve_feed_entries {
 
     my $feed_nbr = $self->param("feed_nbr");
 
-    my $account = SiteCode::Account->new(id => $self->session("account_id"));
+    my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
     my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self, account => $account);
     my $entries = $feed->entries();
 
@@ -595,7 +593,7 @@ sub retrieve_feed_link {
 
     my $feed_nbr = $self->param("feed_nbr");
 
-    my $account = SiteCode::Account->new(id => $self->session("account_id"));
+    my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
     my $feed = SiteCode::Feed->new(id => $feed_nbr);
     my $link = SiteCode::Feed->latest_link();
 
@@ -612,7 +610,7 @@ sub retrieve_feed_src {
     my $feed_nbr = $self->param("feed_nbr");
     my $entry_id = $self->param("entry_id");
 
-    my $account = SiteCode::Account->new(id => $self->session("account_id"));
+    my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
     my $feed = SiteCode::Feed->new(id => $feed_nbr, route => $self);
     my $html = $feed->html(entry_id => $entry_id, account_id => $account->id);
     my $link = $feed->link(entry_id => $entry_id, account_id => $account->id);
@@ -658,7 +656,7 @@ sub retrieve_html {
         $self->profile();
     }
 
-    my $account = SiteCode::Account->new(id => $self->session("account_id"));
+    my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
     $self->stash(account_verified => $account->verified());
 
     my $have_feeds = SiteCode::Feeds->haveFeeds(account => $account);
