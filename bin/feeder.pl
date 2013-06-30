@@ -33,7 +33,12 @@ while (1) {
     ));
 
     foreach my $feed (@{ $feeds }) {
-        $dbx->do("SELECT id FROM feed WHERE id = ? FOR UPDATE", undef, $$feed{id});
+        eval {
+            $dbx->do("SELECT id FROM feed WHERE id = ? FOR UPDATE NOWAIT", undef, $$feed{id});
+        };
+        if ($@) {
+            next;
+        }
 
         my $url_dir = Mojo::Util::url_escape($$feed{url});
 
