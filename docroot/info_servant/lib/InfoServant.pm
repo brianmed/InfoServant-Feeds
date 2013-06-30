@@ -43,7 +43,9 @@ sub startup {
 
     $self->log->level("debug");
 
-    $self->config(hypnotoad => {listen => ['http://64.91.226.192:80', 'https://64.91.226.192:443'], workers => 15, user => "bpm", group => "bpm", inactivity_timeout => 15, heartbeat_timeout => 15, heartbeat_interval => 15, accepts => 50});
+    my $site_config = SiteCode::Site->config();
+
+    $self->config(hypnotoad => {listen => ["http://$$site_config{hypnotoad_ip}:80", "https://$$site_config{hypnotoad_ip}:443"], workers => 30, user => "root", group => "root", inactivity_timeout => 15, heartbeat_timeout => 15, heartbeat_interval => 15, accepts => 50});
 
     $self->helper(mobile => \&mobile);
     $self->helper(is_mobile => \&is_mobile);
@@ -58,7 +60,6 @@ sub startup {
     
     $self->renderer->default_handler('tt');
 
-    my $site_config = SiteCode::Site->config();
     $self->secret($$site_config{site_secret});
     
     # Router
