@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>InfoServant: Purchase</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="/jquery-1.10.1.min.js"></script>
+    <link rel="stylesheet" href="/jmobile/jquery.mobile-1.3.1.min.css" />
+    <script src="/jmobile/jquery.mobile-1.3.1.min.js"></script>
+</head>
+<body>
+
+<div data-role="dialog">
+        <div data-role="header" data-theme="d">
+            <h1>Purchase</h1>
+        </div>
+
+        <div data-role="content">
+            [% IF error %]
+            <center>
+            <p><span> <a data-inline="true" data-iconpos="notext" data-icon="alert" data-role="button" class="ui-icon-alt ui-btn ui-shadow ui-btn-corner-all ui-btn-inline ui-btn-icon-notext ui-btn-up-e" href="index.html" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="e"><span class="ui-btn-inner"><span class="ui-btn-text">Alert</span><span class="ui-icon ui-icon-alert ui-icon-shadow"></span></span></a>
+            </span> [% error %] </p>
+            </center>
+            [% END %]
+
+            [% IF success %]
+            <center>
+            <p><span> <a data-inline="true" data-iconpos="notext" data-icon="check" data-role="button" class="ui-icon-alt ui-btn ui-shadow ui-btn-corner-all ui-btn-inline ui-btn-icon-notext ui-btn-up-e" href="index.html" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="e"><span class="ui-btn-inner"><span class="ui-btn-text">Success</span><span class="ui-icon ui-icon-check ui-icon-shadow"></span></span></a>
+            </span> [% success %] </p>
+            </center>
+            [% END %]
+
+            [% IF info %]
+            <center>
+                <p><span> <a data-inline="true" data-iconpos="notext" data-icon="info" data-role="button" class="ui-icon-alt ui-btn ui-shadow ui-btn-corner-all ui-btn-inline ui-btn-icon-notext ui-btn-up-e" href="index.html" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-theme="e"><span class="ui-btn-inner"><span class="ui-btn-text">Success</span><span class="ui-icon ui-icon-info ui-icon-shadow"></span></span></a>
+            </span> [% info %] </p>
+            </center>
+            [% END %]
+
+            [% IF account_purchased %]
+                <a href="/" data-role="button" data-theme="b" rel="external">Back</a>       
+            [% ELSE %]
+            <form action="/dashboard" method="post">
+                <input type=hidden name=method value=purchase>
+                <input type="text" name=name placeholder="Name on Card" value="[% name %]">
+                <input type="text" autocapitalize="off" name=number placeholder="CC Number" value="[% number %]">
+                <input type="text" autocapitalize="off" name=exp_month placeholder="Expiration month" value="[% exp_month %]">
+                <input type="text" autocapitalize="off" name=exp_year placeholder="Expiration year" value="[% exp_year %]">
+                <input type="text" autocapitalize="off" name=cvc placeholder="CVC" value="[% cvc %]">
+                <input autocapitalize="off" value="Purchase" data-theme="b" type="submit">
+            </form>
+            <a href="/" data-role="button" data-theme="b" rel="external">Back</a>       
+            [% END %]
+        </div>
+</div>
+
+</body>
+</html>
+

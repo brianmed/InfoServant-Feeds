@@ -20,7 +20,8 @@
     <div data-role="content">
         <p><center><h1>Your information: delivered.</h1></center></p>
             <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;RSS/Atom Reader<br>
-            <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;Optimized for Mobile
+            <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;Optimized for Mobile<br>
+            <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;Competive pricing: $1.50/mo
         </table>
     </div><!-- /content -->
 

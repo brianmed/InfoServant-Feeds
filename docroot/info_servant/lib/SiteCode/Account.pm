@@ -178,25 +178,37 @@ sub key
 {
     my $self = shift;
     my $key = shift;
-    my $value = shift;
 
     my $dbx = SiteCode::DBX->new();
 
-    if ($value) {
-        my $defined = $self->key($key);
+    if (scalar(@_)) {
+        if (defined $_[0]) {
+            my $value = shift;
+            my $defined = $self->key($key);
 
-        if ($defined) {
-            my $id = $dbx->col("SELECT id FROM account_key WHERE account_id = ? AND account_key = ?", undef, $self->id(), $key);
-            $dbx->do("UPDATE account_value SET account_value = ? WHERE account_key_id = ?", undef, $value, $id);
+            if ($defined) {
+                my $id = $dbx->col("SELECT id FROM account_key WHERE account_id = ? AND account_key = ?", undef, $self->id(), $key);
+                $dbx->do("UPDATE account_value SET account_value = ? WHERE account_key_id = ?", undef, $value, $id);
 
-            $dbx->dbh->commit;
+                $dbx->dbh->commit;
+            }
+            else {
+                $dbx->do("INSERT INTO account_key (account_id, account_key) VALUES (?, ?)", undef, $self->id(), $key);
+                my $id = $dbx->col("SELECT id FROM account_key WHERE account_id = ? AND account_key = ?", undef, $self->id(), $key);
+                $dbx->do("INSERT INTO account_value (account_key_id, account_value) VALUES (?, ?)", undef, $id, $value);
+
+                $dbx->dbh->commit;
+            }
         }
         else {
-            $dbx->do("INSERT INTO account_key (account_id, account_key) VALUES (?, ?)", undef, $self->id(), $key);
-            my $id = $dbx->col("SELECT id FROM account_key WHERE account_id = ? AND account_key = ?", undef, $self->id(), $key);
-            $dbx->do("INSERT INTO account_value (account_key_id, account_value) VALUES (?, ?)", undef, $id, $value);
+            my $defined = $self->key($key);
 
-            $dbx->dbh->commit;
+            if ($defined) {
+                my $id = $dbx->col("SELECT id FROM account_key WHERE account_id = ? AND account_key = ?", undef, $self->id(), $key);
+                $dbx->do("DELETE FROM account_key where id = ?", undef, $id);
+
+                $dbx->dbh->commit;
+            }
         }
     }
 
@@ -294,9 +306,6 @@ sub verified {
     my $self = shift;
 
     my $verified = $self->key("verified");
-    if ($self->route) {
-        $self->route->app->log->debug("verified: $verified");
-    }
     if ("SUCCESS" eq $verified) {
         return(1);
     }

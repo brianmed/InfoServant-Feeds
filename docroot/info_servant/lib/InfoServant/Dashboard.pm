@@ -32,6 +32,9 @@ use Regexp::Common qw(URI);
 use XML::OPML::LibXML;
 use File::Temp;
 use Time::Local;
+use LWP::UserAgent;
+use JSON;
+use HTTP::Request::Common;
 
 sub dateify {
     if ($_[0] =~ m/^(\d+)-(\d+)-(\d+)\s+(\d+).(\d+)/) {
@@ -72,6 +75,7 @@ sub show {
     }
 
     $self->stash(account_verified => $account->verified());
+    $self->stash(account_purchased => defined $account->key("stripe_id"));
 
     my $have_feeds = SiteCode::Feeds->haveFeeds(account => $account);
     $self->stash(have_feeds => $have_feeds);
@@ -198,6 +202,139 @@ sub verify {
     $self->render("dashboard/dialog");
 }
 
+sub cancel {
+    my $self = shift;
+
+    if (!$self->session("account_id")) {
+        my $url = $self->url_for('/');
+        return($self->redirect_to($url));
+    }
+
+    my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
+
+    if ("GET" eq $self->req->method) {
+        $self->stash(account_purchased => defined $account->key("stripe_id"));
+        return($self->render());
+    }
+
+    unless ($self->param("verify")) {
+        $self->stash(error => "Please enter CANCEL below.");
+        return($self->render());
+    }
+
+    if ("CANCEL" ne $self->param("verify")) {
+        $self->stash(error => "CANCEL not typed exactly.");
+        return($self->render());
+    }
+
+    my $stripe_id = $account->key("stripe_id");
+
+    my $req = &HTTP::Request::Common::DELETE(
+        "https://api.stripe.com/v1/customers/$stripe_id/subscription",
+    );
+
+    my $site_config = SiteCode::Site->config();
+    my $ver = $$site_config{stripe_version};
+    my $key = "stripe_key_$ver";
+    my $api_key = $$site_config{$key};
+
+    my $ua = LWP::UserAgent->new();
+    $ua->credentials("api.stripe.com:443", "Stripe", $api_key, "");
+    my $res = $ua->request($req);
+    if ($res->is_success()) {
+        $account->key("stripe_id", undef);
+
+        $self->stash(success => "Subscription cancelled.");
+    }
+    else {
+        my $ret = JSON::from_json($res->content());
+        $self->stash(errors => $ret->{error}{message});
+    }
+
+    # Here last because the value could have changed
+    $self->stash(account_purchased => defined $account->key("stripe_id"));
+
+    $self->render();
+}
+
+sub purchase {
+    my $self = shift;
+
+    if (!$self->session("account_id")) {
+        my $url = $self->url_for('/');
+        return($self->redirect_to($url));
+    }
+
+    my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
+
+    if ("GET" eq $self->req->method) {
+        $self->stash(info => "Only \$1.50 a month!");
+        return($self->render());
+    }
+
+    my %map = (
+        name => "Name on Card",
+        number => "Credit Card Number",
+        exp_month => "Expiration Month",
+        exp_year => "Expiration Year",
+        cvc => "Expiration Year",
+    );
+    foreach my $param (qw(name number exp_month exp_year cvc)) {
+        my $human = $map{$param};
+        unless ($self->param($param)) {
+            $self->stash(error => "$human not found.");
+            return($self->render());
+        }
+    }
+
+    my $name = $self->param("name");
+    my $number = $self->param("number");
+    my $exp_month = $self->param("exp_month");
+    my $exp_year = $self->param("exp_year");
+    my $cvc = $self->param("cvc");
+
+    my $site_config = SiteCode::Site->config();
+    my $ver = $$site_config{stripe_version};
+    my $key = "stripe_key_$ver";
+    my $api_key = $$site_config{$key};
+
+    my $req = &HTTP::Request::Common::POST(
+        'https://api.stripe.com/v1/customers',
+        Content => 
+        [ 
+            description => $self->session("account_id"),
+            "card[number]" => $number,
+            "card[exp_month]" => $exp_month,
+            "card[exp_year]" => $exp_year,
+            "card[cvc]" => $cvc,
+            "card[name]" => $name,
+            "email" => $account->email,
+            plan => $$site_config{stripe_plan},
+        ] 
+    );
+
+    my $ua = LWP::UserAgent->new();
+    $ua->credentials("api.stripe.com:443", "Stripe", $api_key, "");
+    my $res = $ua->request($req);
+
+    my $ret = JSON::from_json($res->content());
+
+    $self->app->log->debug("InfoServant::Dashboard::purchase: " . $self->dumper($ret));
+
+    if ($res->is_success()) {
+        my $id = $ret->{id};
+
+        $account->key("stripe_id", $id);
+        $self->stash(account_purchased => defined $account->key("stripe_id"));
+        $self->stash(success => "Purchased plan.  Thanks!");
+    }
+    else {
+        $self->stash(error => $ret->{error}{message});
+    }
+
+    $self->render();
+}
+
 sub unsubscribe {
     my $self = shift;
 
@@ -226,7 +363,7 @@ sub unsubscribe {
         $self->stash(error => "Unable to unsubscribe feed.");
     }
     else {
-        $self->stash(error => "Unsubscribed from feed.");
+        $self->stash(success => "Unsubscribed from feed.");
         delete $self->session->{cur_feed};
     }
 

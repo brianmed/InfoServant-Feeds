@@ -136,6 +136,18 @@
                     </form>
                     [% END %]
 
+                    [% IF account_purchased %]
+                    <form action="/dashboard" method=get>
+                        <input type=hidden name=method value=cancel>
+                        <input value="Cancel" data-theme="b" type="submit">
+                    </form>
+                    [% ELSE %]
+                    <form action="/dashboard" method=get>
+                        <input type=hidden name=method value=purchase>
+                        <input value="Purchase" data-theme="b" type="submit">
+                    </form>
+                    [% END %]
+
                     <a href="#" data-rel="close" data-role="button" data-theme="c" data-mini="true">Cancel</a>
 
                     <!-- panel content goes here -->
