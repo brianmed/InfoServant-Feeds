@@ -58,6 +58,12 @@
         [% END %]
 
         [% IF have_entries %]
+            [% UNLESS account_purchased %]
+                <li><a data-rel=external href="/dashboard?method=purchase">
+                    <h1>Upgrade</h1>
+                </a></li>
+            [% END %]
+
             <ul data-role="listview">
                 [% FOREACH entry IN entries %]
                     [% IF cur_date != entry.date %]
@@ -136,6 +142,8 @@
                     </form>
                     [% END %]
 
+                    <hr>
+
                     [% IF account_purchased %]
                     <form action="/dashboard" method=get>
                         <input type=hidden name=method value=cancel>
@@ -148,7 +156,9 @@
                     </form>
                     [% END %]
 
-                    <a href="#" data-rel="close" data-role="button" data-theme="c" data-mini="true">Cancel</a>
+                    <hr>
+
+                    <a href="#" data-rel="close" data-role="button" data-theme="c" data-mini="true">Back</a>
 
                     <!-- panel content goes here -->
                 </div><!-- /panel -->
@@ -181,164 +191,7 @@
     </div><!-- /navbar -->
 </div><!-- /footer -->
 </div><!-- /page -->
-
-</body>
-</html>
-
-[% STOP %]
-
-<!DOCTYPE HTML>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <link rel="stylesheet" href="bootstrap/css/bootstrap.css">
-    <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
-
-    <script src="jquery-1.10.1.min.js"></script>
-    <script src="bootstrap/js/bootstrap.min.js"></script>
-    [% UNLESS h.is_mobile %]
-	<script src="/viewer/tinymce/js/tinymce/tinymce.min.js"></script>
-    [% END %]
-</head>
-<body>
-
-  <div class="navbar navbar-inverse">
-    <div class="navbar-inner">
-      <div class="container">
-        <a class="brand visible-desktop hidden-phone hidden-tablet" href="/">InfoServant</a>
-          <ul class="nav pull-right visible-desktop hidden-phone hidden-tablet">
-            <li><a href="/logout">Logout</a></li>
-            <li><a href="mailto:support@infoservant.com">Contact</a></li>
-          </ul>
-          <ul class="nav hidden-desktop visible-phone visible-tablet">
-            <li><a href="/logout">Logout</a></li>
-            <li><a href="mailto:support@infoservant.com">Contact</a></li>
-          </ul>
-      </div>
-    </div><!-- /navbar-inner -->
-  </div><!-- /navbar -->
-
-
-    <div class="tabbable"> <!-- Only required for left/right tabs -->
-    <ul id="main_tab" class="nav nav-tabs">
-    <li class="active"><a href="#tab_entries" data-toggle="tab">Entries</a></li>
-    <li><a href="#tab_feeds" data-toggle="tab">Feeds</a></li>
-    <li><a href="#tab_profile" data-toggle="tab">Profile</a></li>
-    </ul>
-    <div class="tab-content">
-    <div class="tab-pane active" id="tab_entries">
-
-            <ul id=the_entries class="nav nav-list">
-              [% IF have_entries %]
-              [% FOREACH entry IN entries %]
-              <li><a href='javascript:void(0)' onClick="showEntry(this, [% entry.feed_id %],  '[% entry.entry_id %]');">[% entry.title | html %]</a></li>
-              [% END %]
-              [% END %]
-            </ul>
-
-            [% IF have_entries %]
-            [% UNLESS offset %]
-            <button class="btn btn-primary disabled">Prev</button>
-            [% END %]
-            [% IF offset %]
-            [% SET page_prev = offset - 30 %]
-            <button class="btn btn-primary" onClick="javascript:location.href = '/dashboard?offset=[% page_prev %]'; location.reload;">Prev</button>
-            [% END %]
-            [% SET page_next = offset + 30 %]
-            <button class="btn btn-primary" onClick="javascript:location.href = '/dashboard?offset=[% page_next %]'; location.reload;">Next</button>
-            [% END %]
-
-    </div>
-    <div class="tab-pane" id="tab_feeds">
-
-            <ul class="nav nav-list">
-              [% IF have_feeds %]
-              [% FOREACH feed IN feeds %]
-              <li id="li_feed[% feed.id %]"><a href="javascript:void(0)" onClick="showFeed([% feed.id %]);">[% feed.name | html %]</a></li>
-              [% END %]
-              [% END %]
-            </ul>
-
-    </div>
-    <div class="tab-pane" id="tab_profile">
-
-        <div class="well" id=profileBody></div>
-
-    </div>
-    </div>
-  </div>
-
-        <script>
-        $.ajaxSetup ({  
-            cache: false,
-            async: false
-        });
-
-        function loadHtml(link, script) {
-            var id = '#li_' + link;
-            $(".active").removeClass("active");
-            $(id).addClass("active");
-
-            $("#htmlBody").load("/dashboard/html/" + link);
-            $.getScript("/dashboard/javascript/" + link);
-            if (script) {
-                script = unescape(script);
-                eval(script);
-            }
-        }
-
-        function showProfile() {
-            $("#profileBody").load("/dashboard/html/profile");
-            $.getScript("/dashboard/javascript/profile");
-        }
-
-        function showEntry(link, feed_nbr, entry_id) {
-            $("#htmlBody").remove();
-            $(link.parentElement).append("<div id=htmlBody></div>");
-
-            $("#htmlBody").load("/dashboard/feed/src/" + feed_nbr + "?entry_id=" + entry_id);
-
-            [% UNLESS h.is_mobile %]
-            tinymce.init({selector:'textarea', readonly: 1, menubar: "false", plugins: "fullscreen", toolbar: "fullscreen"});
-            [% END %]
-        }
-
-        function showFeed(feed_nbr) {
-            var id = '#li_feed' + feed_nbr;
-
-            $("#feed_entries").remove();
-
-            if ("active" == $(id).attr("class")) {
-                $(id).removeClass("active");
-                return;
-            }
-
-            $("li.active").removeClass("active");
-            $(id).addClass("active");
-
-            $.ajax({
-                url: "/dashboard/feed/entries/" + feed_nbr,
-                success: function(data) { 
-                    $(id).append('<ol id=feed_entries>');
-                    for (var i=0; i<data.length; i++) {
-                        var entry = data[i];
-                        var link = "<li><a href='javascript:void(0)' onClick=\"showEntry(" + feed_nbr + ", '" + entry.entry_id + "');\">" + entry.title + "</a>";
-                        $('#feed_entries').append(link);
-                    }
-                    $(id).append('</ol>');
-                },
-            });
-        }
-
-        $('#main_tab a[href="#tab_profile"]').click(function (e) {
-            e.preventDefault();
-            $(this).tab('show');
-
-            showProfile();
-        })
-        </script>
-
 [% END %]
+
 </body>
 </html>
