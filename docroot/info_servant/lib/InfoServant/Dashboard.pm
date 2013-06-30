@@ -76,6 +76,7 @@ sub show {
     my $have_feeds = SiteCode::Feeds->haveFeeds(account => $account);
     $self->stash(have_feeds => $have_feeds);
 
+    # If the user selects all feeds
     if ($self->param("feed")) {
         if (-1 == $self->param("feed")) {
             delete $self->session->{cur_feed};
@@ -95,7 +96,13 @@ sub show {
         my $time = $dt->strftime("%H:%M");
         my $the_m = $dt->strftime("%p");
 
-        push(@entries, { id => $$entry{id}, date => $date, time => $time, the_m => $the_m, feed_title => $$entry{feed_title}, entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $$entry{title}, feed_id => $obj->id() });
+        my %html = ();
+        if ($self->session("cur_feed")) {
+            my $html = $obj->html(entry_id => $$l{entry_id}, account_id => $account->id);
+            # $html{html} = $html; # substr($html, 0, 256);
+        }
+
+        push(@entries, { %html, id => $$entry{id}, date => $date, time => $time, the_m => $the_m, feed_title => $$entry{feed_title}, entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $$entry{title}, feed_id => $obj->id() });
     }
     if (scalar @entries) {
         $self->stash(have_entries => 1);
@@ -107,6 +114,14 @@ sub show {
     }
     if (@feeds) {
         $self->stash(have_feeds => 1);
+    }
+
+    $self->app->log->debug("InfoServant::Dashboard::show:" . __LINE__);
+    if ($self->session("cur_feed")) {
+        $self->app->log->debug("InfoServant::Dashboard::show:" . __LINE__);
+        my $feed = SiteCode::Feed->new(id => $self->session("cur_feed"), route => $self);
+        my $feed_title = $feed->key("title") || $feed->key("url");
+        $self->stash(cur_title => $feed_title);
     }
 
     $self->stash(offset => $self->param("offset")) if $self->param("offset");
@@ -129,8 +144,9 @@ sub details {
     my $html = $feed->html(entry_id => $entry_id, account_id => $account->id);
     my $link = $feed->link(entry_id => $entry_id, account_id => $account->id);
     my $title = $feed->title(entry_id => $entry_id, account_id => $account->id);
+    my $feed_title = $feed->key("title") || $feed->key("url");
 
-    $self->stash(html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
+    $self->stash(feed_title => $feed_title, html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
 
     return($self->render());
 }

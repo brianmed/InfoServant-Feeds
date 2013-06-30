@@ -41,7 +41,7 @@
 <div data-role="page" class=ui-responsive-panel>
 
     <div data-role="header">
-        <h1>Entries</h1>
+        <h1>[% IF cur_title %] [% cur_title %] [% ELSE %] Entries [% END %]</h1>
         <a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a>
         <a href="#profile-form" data-icon="plus" data-iconpos="notext">Proflie</a>
     </div><!-- /header -->
@@ -59,8 +59,13 @@
                         <li data-role="list-divider">[% cur_date %]</li>
                     [% END %]
                 <li><a data-rel=external href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
-                    <h2>[% entry.feed_title %]</h2>
-                    <p><strong>[% entry.title %]</strong></p>
+                    [% IF c.session.cur_feed %]
+                        <h2>[% entry.title %]</h2>
+                        <p><strong>[% entry.html %]</strong></p>
+                    [% ELSE %]
+                        <h2>[% entry.feed_title %]</h2>
+                        <p><strong>[% entry.title %]</strong></p>
+                    [% END %]
                     <!-- <p>Hey Stephen, if you're available at 10am tomorrow, we've got a meeting with the jQuery team.</p>-->
                     <p class="ui-li-aside"><strong>[% entry.time %]</strong>[% entry.the_m %]</p>
                 </a></li>
