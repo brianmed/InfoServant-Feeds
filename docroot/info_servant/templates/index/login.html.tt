@@ -37,8 +37,8 @@
                 </div>
 
                 <div class="ui-grid-a">
-                    <div class="ui-block-a"><label><input type="checkbox" name="hour_session" [% IF hour_session %] checked [% END %]/> Public terminal </label></div>
-                    <div class="ui-block-b"><a href="/reset" data-role="button" data-theme="b" rel="dialog">Reset Password</a></div>
+                    <div class="ui-block-a"><label><input data-mini="true" type="checkbox" name="hour_session" [% IF hour_session %] checked [% END %]/>Public login</label></div>
+                    <div class="ui-block-b"><a href="/reset" data-role="button" data-theme="b" rel="dialog" data-mini="true">Reset</a></div>
                 </div>
                 <div class="ui-grid-solo">
                     <div class="ui-block-a"><input value="Login" data-theme="b" type="submit"></div>

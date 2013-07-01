@@ -18,11 +18,11 @@
     </div><!-- /header -->
 
     <div data-role="content">
-            <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;RSS/Atom Reader<br>
-            <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;Optimized for Mobile<br>
-            <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;Competive pricing: $1.50/mo<br>
-            <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;Thirty day trial<br>
-            <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;Simple interface
+        <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;RSS/Atom Reader<br>
+        <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;Optimized for Mobile<br>
+        <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;Competive pricing: $1.50/mo<br>
+        <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;Thirty day trial<br>
+        <a href="#" data-role="button" data-icon="check" data-iconpos="notext" data-theme="c" data-inline="true">Check</a>&nbsp;Simple interface
     </div><!-- /content -->
 
     <div data-role="footer" data-id="foo1" data-position="fixed">
