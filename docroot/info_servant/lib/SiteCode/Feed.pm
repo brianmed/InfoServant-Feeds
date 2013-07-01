@@ -42,8 +42,12 @@ sub unsubscribe {
     my $dbx = SiteCode::DBX->new();
 
     if ($self->subscribed) {
-        $dbx->do("DELETE FROM feedme WHERE feed_id = ? AND account_id = ?", undef, $self->id, $self->account->id);
-        $dbx->dbh->commit;
+        my $exists = $dbx->col("SELECT id FROM feedme WHERE feed_id = ? and account_id = ?", undef, $self->id, $self->account->id);
+        if ($exists) {
+            $dbx->do("DELETE FROM entry_read WHERE feedme_id = ?", undef, $exists);
+            $dbx->do("DELETE FROM feedme WHERE feed_id = ? AND account_id = ?", undef, $self->id, $self->account->id);
+            $dbx->dbh->commit;
+        }
     }
 }
 

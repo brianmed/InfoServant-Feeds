@@ -110,7 +110,7 @@ sub show {
         my $obj = SiteCode::Feed->new(id => $$l{feed_id}, route => $self);
         my $entry = $obj->entry($$l{entry_id}, $account->id());
 
-        my $dt = dateify($$entry{issued});
+        my $dt = dateify($$entry{inserted});
         my $date = $dt->strftime("%A, %B, %e, %Y");
         my $time = $dt->strftime("%H:%M");
         my $the_m = $dt->strftime("%p");

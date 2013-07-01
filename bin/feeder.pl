@@ -37,6 +37,7 @@ while (1) {
             $dbx->do("SELECT id FROM feed WHERE id = ? FOR UPDATE NOWAIT", undef, $$feed{id});
         };
         if ($@) {
+            $dbx->dbh->rollback();
             next;
         }
 

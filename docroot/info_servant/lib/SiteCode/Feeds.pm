@@ -72,13 +72,13 @@ sub latest {
     push(@vars, $self->account()->id());
     my $data = $dbx->array(qq(
         SELECT
-            feed.id as feed_id, entry.id as entry_id, entry.issued
+            feed.id as feed_id, entry.id as entry_id, entry.inserted
         FROM feedme, feed, entry where feedme.account_id = ? 
             and feed.name = entry.feed_name 
             and feedme.feed_id = feed.id
             $feed
             AND entry.id NOT IN (SELECT entry.id FROM entry, entry_read, feedme WHERE entry.entry_id = entry_read.entry_id AND feedme_id = feedme.id AND account_id = ?)
-        order by entry.issued desc
+        order by entry.inserted desc
         LIMIT $opt{limit}
         OFFSET $opt{offset}
     ), undef, @vars);
