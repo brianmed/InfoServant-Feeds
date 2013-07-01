@@ -8,6 +8,38 @@
     <link rel="stylesheet" href="/jmobile/jquery.mobile-1.3.1.min.css" />
     <script src="/jquery-1.10.1.min.js"></script>
     <script src="/jmobile/jquery.mobile-1.3.1.min.js"></script>
+
+    <script>
+        function swipey() {
+            [% IF have_entries %]
+                [% IF c.session.offset %]
+                    [% SET page_prev = c.session.offset - 30 %]
+
+                    $( document ).on( "swipeleft", function() {
+                        window.open("/dashboard?offset=[% page_prev %]", "_self");
+                    });
+                [% END %]
+            [% END %]
+
+            [% IF have_entries %]
+                [% SET page_next = c.session.offset + 30 %]
+                $( document ).on( "swiperight", function() {
+                        window.open("/dashboard?offset=[% page_next %]", "_self");
+                });
+            [% END %]
+        }
+    </script>
+
+    <script>
+        $(document).bind("pageinit", function() {
+            swipey();
+
+            $('#entryLnk').click(function(){ 
+                $.mobile.showPageLoadingMsg();
+                window.open("/dashboard?offset=0", "_self");
+            });
+        });
+    </script>
 </head>
 <body>
 
@@ -38,10 +70,10 @@
 [% END %]
 
 [% IF account_verified %]
-<div data-role="page" class=ui-responsive-panel>
+<div data-role="page" id=page class=ui-responsive-panel>
 
     <div data-role="header">
-        <h1>[% IF cur_title %] [% cur_title %] [% ELSE %] <a href=/dashboard?offset=0>Entries</a> [% END %]</h1>
+        <h1>[% IF cur_title %] [% cur_title %] [% ELSE %] <a id=entryLnk href="#">Entries</a> [% END %]</h1>
         <a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a>
         <a href="#profile-form" data-icon="plus" data-iconpos="notext">Proflie</a>
     </div><!-- /header -->
@@ -208,6 +240,7 @@
     </div><!-- /navbar -->
 </div><!-- /footer -->
 </div><!-- /page -->
+
 [% END %]
 
 </body>
