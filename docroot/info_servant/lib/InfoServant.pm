@@ -53,7 +53,7 @@ sub startup {
     # Increase limit to 10MB
     $ENV{MOJO_MAX_MESSAGE_SIZE} = 10485760;
 
-    $self->plugin(AccessLog => {log => '/opt/infoservant.com/docroot/info_servant/log/access.log', format => '%h %l %u %t "%r" %>s %b %D "%{Referer}i" "%{User-Agent}i"'});
+    $self->plugin(AccessLog => {uname_helper => 'set_username', log => '/opt/infoservant.com/docroot/info_servant/log/access.log', format => '%h %l %u %t "%r" %>s %b %D "%{Referer}i" "%{User-Agent}i"'});
     $self->plugin(tt_renderer => {template_options => {CACHE_SIZE => 0, COMPILE_EXT => undef, COMPILE_DIR => undef}});
     $self->plugin('ParamCondition');
     $self->plugin('SaveRequest');
@@ -64,6 +64,18 @@ sub startup {
     
     # Router
     my $r = $self->routes;
+
+    my $logged_in = $r->under (sub {
+        my $self = shift;
+
+        if (!$self->session("account_id")) {
+            my $url = $self->url_for('/');
+            return($self->redirect_to($url));
+        }
+        else {
+             $self->set_username($self->session("account_id"));
+        }
+    });
     
     $r->get('/')->to(controller => 'Index', action => 'slash');
 
@@ -82,14 +94,14 @@ sub startup {
     $r->any('/reset')->to(controller => 'Signup', action => 'reset');
 
     # $r->any('/dashboard')->over(save => "state")->to(controller => 'Dashboard', action => 'show');
-    $r->any('/dashboard')->over(params => {method => qr/^verify$/})->to(controller => 'Dashboard', action => 'verify');
-    $r->any('/dashboard')->over(params => {method => qr/^new_feed$/})->to(controller => 'Dashboard', action => 'new_feed');
-    $r->any('/dashboard')->over(params => {method => qr/^opml_file$/})->to(controller => 'Dashboard', action => 'opml_file');
-    $r->any('/dashboard')->over(params => {method => qr/^unsubscribe$/})->to(controller => 'Dashboard', action => 'unsubscribe');
-    $r->any('/dashboard')->over(params => {method => qr/^purchase$/})->to(controller => 'Dashboard', action => 'purchase');
-    $r->any('/dashboard')->over(params => {method => qr/^cancel$/})->to(controller => 'Dashboard', action => 'cancel');
-    $r->any('/dashboard')->to(controller => 'Dashboard', action => 'show');
-    $r->any('/dashboard/details')->to(controller => 'Dashboard', action => 'details');
+    $logged_in->any('/dashboard')->over(params => {method => qr/^verify$/})->to(controller => 'Dashboard', action => 'verify');
+    $logged_in->any('/dashboard')->over(params => {method => qr/^new_feed$/})->to(controller => 'Dashboard', action => 'new_feed');
+    $logged_in->any('/dashboard')->over(params => {method => qr/^opml_file$/})->to(controller => 'Dashboard', action => 'opml_file');
+    $logged_in->any('/dashboard')->over(params => {method => qr/^unsubscribe$/})->to(controller => 'Dashboard', action => 'unsubscribe');
+    $logged_in->any('/dashboard')->over(params => {method => qr/^purchase$/})->to(controller => 'Dashboard', action => 'purchase');
+    $logged_in->any('/dashboard')->over(params => {method => qr/^cancel$/})->to(controller => 'Dashboard', action => 'cancel');
+    $logged_in->any('/dashboard')->to(controller => 'Dashboard', action => 'show');
+    $logged_in->any('/dashboard/details')->to(controller => 'Dashboard', action => 'details');
 
     $r->any('/stripe/:mode')->to(controller => 'Stripe', action => 'save');
 

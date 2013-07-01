@@ -56,11 +56,6 @@ sub dateify {
 sub show {
     my $self = shift;
 
-    if (!$self->session("account_id")) {
-        my $url = $self->url_for('/');
-        return($self->redirect_to($url));
-    }
-
     $self->session(offset => $self->param("offset")) if defined $self->param("offset");
 
     my $account = undef;
@@ -146,11 +141,6 @@ sub show {
 sub details {
     my $self = shift;
 
-    if (!$self->session("account_id")) {
-        my $url = $self->url_for('/');
-        return($self->redirect_to($url));
-    }
-
     my $entry_id = $self->param("entry_id");
     my $feed_nbr = $self->param("feed_id");
     my $offset = $self->session("offset");
@@ -184,11 +174,6 @@ sub details {
 
 sub verify {
     my $self = shift;
-
-    if (!$self->session("account_id")) {
-        my $url = $self->url_for('/');
-        return($self->redirect_to($url));
-    }
 
     my $verify = $self->param("verify") || $self->session("verify");
 
@@ -225,11 +210,6 @@ sub verify {
 
 sub cancel {
     my $self = shift;
-
-    if (!$self->session("account_id")) {
-        my $url = $self->url_for('/');
-        return($self->redirect_to($url));
-    }
 
     my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
     $self->stash(account_purchased => defined $account->key("stripe_id"));
@@ -279,11 +259,6 @@ sub cancel {
 
 sub purchase {
     my $self = shift;
-
-    if (!$self->session("account_id")) {
-        my $url = $self->url_for('/');
-        return($self->redirect_to($url));
-    }
 
     my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
 
@@ -358,11 +333,6 @@ sub purchase {
 sub unsubscribe {
     my $self = shift;
 
-    if (!$self->session("account_id")) {
-        my $url = $self->url_for('/');
-        return($self->redirect_to($url));
-    }
-
     my $cur_feed = $self->session("cur_feed");
 
     unless ($cur_feed) {
@@ -392,11 +362,6 @@ sub unsubscribe {
 
 sub new_feed {
     my $self = shift;
-
-    if (!$self->session("account_id")) {
-        my $url = $self->url_for('/');
-        return($self->redirect_to($url));
-    }
 
     my $new_feed = $self->param("new_feed");
 
@@ -447,11 +412,6 @@ sub new_feed {
 
 sub opml_file {
     my $self = shift;
-
-    if (!$self->session("account_id")) {
-        my $url = $self->url_for('/');
-        return($self->redirect_to($url));
-    }
 
     my $tmp = File::Temp->new( TEMPLATE => "opml_import.$$.XXXXXX", UNLINK => 0, SUFFIX => '.opml', TMPDIR => 1 );
     my $filename = $tmp->filename;
