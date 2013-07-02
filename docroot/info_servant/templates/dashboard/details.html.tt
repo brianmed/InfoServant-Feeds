@@ -35,10 +35,7 @@
 
     <script>
         $("#page_details").off("pageshow").on("pageshow", function(e, ui) {
-            console.log("pageshow: " + "[% link %]");
-
             if(typeof(Storage) !== "undefined") {
-                console.log("link: details");
                 localStorage["swiperight.details.one"] = "/dashboard";
                 localStorage["swiperight.details.two"] = "_self";
                 localStorage["swipeleft.details.one"] = "[% link %]";
