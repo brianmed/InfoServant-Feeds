@@ -12,10 +12,12 @@
     <script>
         function swipey() {
             $( document ).on( "swipeleft", function() {
+                console.log("left");
                 window.open("/dashboard", "_self");
             });
 
             $( document ).on( "swiperight", function() {
+                console.log("right");
                 window.open("[% link %]", "article");
             });
         }
@@ -23,6 +25,7 @@
 
     <script>
         $(document).bind("pageinit", function() {
+            console.log("swipey");
             swipey();
         });
 
@@ -63,9 +66,9 @@
     <div data-role="footer" data-id="foo1" data-position="fixed">
     <div data-role="navbar">
         <ul>
-            <li><a href="/logout" data-rel="external">Logout</a></li>
             <li><a href="/dashboard" data-rel="external" data-ajax=false>Back</a></li>
             <li><a href="/dashboard/details?entry_id=[% entry_id %]&feed_id=[% feed_id %]" data-rel="external" data-ajax=false>Refresh</a></li>
+            <li><a href="/logout" data-rel="external">Logout</a></li>
             <!-- <li><a href="mailto:support@infoservant.com">Contact</a></li> -->
         </ul>
     </div><!-- /navbar -->
