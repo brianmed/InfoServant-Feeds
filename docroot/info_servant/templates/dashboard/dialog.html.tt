@@ -14,7 +14,7 @@
 <div data-role="dialog">
     
         <div data-role="header" data-theme="d">
-            <h1>Login</h1>
+            <h1>[% IF title %] [% title %] [% ELSE %] Login [% END %]</h1>
         </div>
 
         <div data-role="content">

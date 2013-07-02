@@ -407,7 +407,7 @@ sub new_feed {
         $self->stash(success => "Added: $string");
     }
 
-    $self->render("dashboard/dialog");
+    $self->render("dashboard/dialog", title => "Add");
 }
 
 sub opml_file {

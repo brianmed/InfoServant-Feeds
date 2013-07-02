@@ -23,10 +23,9 @@ sub addFeed {
     my $dbx = SiteCode::DBX->new();
     eval {
         $dbx->do("INSERT INTO feed (name) VALUES (?)", undef, $url);
-
         my $id = $dbx->last_insert_id(undef,undef,undef,undef,{sequence=>'feed_id_seq'});
+        $dbx->dbh->commit;
 
-        $self->route->app->log->debug("SiteCode::Feeds::addFeed: $id");
         $feed = SiteCode::Feed->new(id => $id, account => $self->account);
         $feed->key("xml_url", $url);
         $feed->subscribe();
@@ -35,7 +34,9 @@ sub addFeed {
         $dbx->dbh->rollback;
         die($@);
     }
-    $dbx->dbh->commit;
+    else {
+        $dbx->dbh->commit;
+    }
 
     return($feed);
 }
