@@ -22,6 +22,7 @@ use Mojo::Base 'Mojolicious';
 
 use SiteCode::Site;
 use HTTP::BrowserDetect;
+use IO::Compress::Gzip 'gzip';
 
 sub is_mobile {
     my $self = shift;
@@ -37,6 +38,22 @@ sub mobile {
     return($browser->device());
 }
 
+sub compress {
+    my ($c, $output, $format) = @_;
+
+    # Check if "gzip => 1" has been set in the stash
+    return unless $c->stash->{_gzip};
+
+    # Check if user agent accepts GZip compression
+    return unless ($c->req->headers->accept_encoding // '') =~ /gzip/i;
+    $c->res->headers->append(Vary => 'Accept-Encoding');
+
+    # Compress content with GZip
+    $c->res->headers->content_encoding('gzip');
+    gzip $output, \my $compressed;
+    $$output = $compressed;
+}
+
 # This method will run once at server start
 sub startup {
     my $self = shift;
@@ -49,6 +66,8 @@ sub startup {
 
     $self->helper(mobile => \&mobile);
     $self->helper(is_mobile => \&is_mobile);
+
+    $self->hook(after_render => \&compress);
 
     # Increase limit to 10MB
     $ENV{MOJO_MAX_MESSAGE_SIZE} = 10485760;
@@ -100,8 +119,8 @@ sub startup {
     $logged_in->any('/dashboard')->over(params => {method => qr/^unsubscribe$/})->to(controller => 'Dashboard', action => 'unsubscribe');
     $logged_in->any('/dashboard')->over(params => {method => qr/^purchase$/})->to(controller => 'Dashboard', action => 'purchase');
     $logged_in->any('/dashboard')->over(params => {method => qr/^cancel$/})->to(controller => 'Dashboard', action => 'cancel');
-    $logged_in->any('/dashboard')->to(controller => 'Dashboard', action => 'show');
-    $logged_in->any('/dashboard/details')->to(controller => 'Dashboard', action => 'details');
+    $logged_in->any('/dashboard')->to(controller => 'Dashboard', action => 'show', _gzip => 1);
+    $logged_in->any('/dashboard/details')->to(controller => 'Dashboard', action => 'details', _gzip => 1);
 
     $r->any('/stripe/:mode')->to(controller => 'Stripe', action => 'save');
 

@@ -8,43 +8,11 @@
     <link rel="stylesheet" href="/jmobile/jquery.mobile-1.3.1.min.css" />
     <script src="/jquery-1.9.1.min.js"></script>
     <script src="/jmobile/jquery.mobile-1.3.1.min.js"></script>
-
-    <script>
-        function swipey() {
-            [% IF have_entries %]
-                [% IF c.session.offset %]
-                    [% SET page_prev = c.session.offset - 30 %]
-
-                    $( document ).on( "swipeleft", function() {
-                        window.open("/dashboard?offset=[% page_prev %]", "_self");
-                    });
-                [% END %]
-            [% END %]
-
-            [% IF have_entries %]
-                [% SET page_next = c.session.offset + 30 %]
-                $( document ).on( "swiperight", function() {
-                        window.open("/dashboard?offset=[% page_next %]", "_self");
-                });
-            [% END %]
-        }
-    </script>
-
-    <script>
-        $(document).bind("pageinit", function() {
-            swipey();
-
-            $('#entryLnk').click(function(){ 
-                $.mobile.showPageLoadingMsg();
-                window.open("/dashboard?offset=0", "_self");
-            });
-        });
-    </script>
 </head>
 <body>
 
 [% UNLESS account_verified %]
-<div data-role="page">
+<div data-role="page" id=page_show>
 
     <div data-role="header">
         <h1>InfoServant</h1>
@@ -70,10 +38,37 @@
 [% END %]
 
 [% IF account_verified %]
-<div data-role="page" id=page class=ui-responsive-panel>
+<div data-role="page" id=page_show class=ui-responsive-panel>
+
+    [% SET page_prev = 0 %]
+    [% SET page_next = 0 %]
+
+    [% SET page_prev = c.session.offset - 30 %]
+    [% SET page_next = c.session.offset + 30 %]
+
+    <script>
+        if(typeof(Storage) !== "undefined") {
+            localStorage["swiperight.one"] = "/dashboard?offset=[% IF page_prev >= 0 %][% page_prev %][% ELSE %]0[% END %]";
+            localStorage["swiperight.two"] = "_self";
+            localStorage["swipeleft.one"] = "[% IF page_next %]/dashboard?offset=[% page_next %][% END %]";
+            localStorage["swipeleft.two"] = "_self";
+        }
+    </script>
+
+    <script>
+        $("#page_show").off("pageshow").on("pageshow", function(e, ui) {
+            $( "#page_show" ).on( "swiperight", function(e) {
+                window.open(localStorage["swiperight.one"], localStorage["swiperight.two"]);
+            });
+
+            $( "#page_show" ).on( "swipeleft", function(e) {
+                window.open(localStorage["swipeleft.one"], localStorage["swipeleft.two"]);
+            });
+        });
+    </script>
 
     <div data-role="header">
-        <h1>[% IF cur_title %] [% cur_title %] [% ELSE %] <a id=entryLnk href="#">Entries</a> [% END %]</h1>
+        <h1>[% IF cur_title %] [% cur_title %] [% ELSE %] <a data-ajax=false href="/dashboard?offset=0">Entries</a> [% END %]</h1>
         <a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a>
         <a href="#profile-form" data-icon="plus" data-iconpos="notext">Proflie</a>
     </div><!-- /header -->
@@ -119,7 +114,7 @@
                         [% SET cur_date = entry.date %]
                         <li data-role="list-divider">[% cur_date %]</li>
                     [% END %]
-                <li><a data-rel=external href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
+                <li><a data-ajax=false href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
                     [% IF c.session.cur_feed %]
                         <p class="ui-li-desc" style="white-space: normal;"><strong>[% entry.title %]</strong></p>
                     [% ELSE %]
@@ -223,18 +218,13 @@
     <div data-role="navbar">
         <ul>
             [% IF have_entries %]
-                [% IF c.session.offset %]
-                    [% SET page_prev = c.session.offset - 30 %]
-                [% END %]
-
-                    <li><a href="/dashboard?offset=[% page_prev %]" data-rel="external" data-ajax=false>Prev</a></li>
+                <li><a data-ajax=false href="/dashboard?offset=[% IF page_prev >= 0 %][% page_prev %][% ELSE %]0[% END %]">Prev</a></li>
             [% END %]
             <li><a href="/dashboard" data-rel="external" data-ajax=false>Refresh</a></li>
             <!-- <li><a href="mailto:support@infoservant.com">Contact</a></li> -->
 
             [% IF have_entries %]
-                [% SET page_next = c.session.offset + 30 %]
-                <li><a href="/dashboard?offset=[% page_next %]" data-rel="external" data-ajax=false>Next</a></li>
+                <li><a data-ajax=false href="/dashboard?offset=[% page_next %]">Next</a></li>
             [% END %]
         </ul>
     </div><!-- /navbar -->
