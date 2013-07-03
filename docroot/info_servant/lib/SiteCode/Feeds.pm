@@ -94,12 +94,12 @@ sub feeds {
     my $dbx = $self->dbx();
 
     my $feeds = $dbx->array(qq(
-        SELECT feed.id, coalesce(feed_value.feed_value, feed.name) as name
+        SELECT feed.id, (SELECT count(entry.id) FROM feed as f, entry where f.id = feed.id and entry.feed_name = f.name) as count, coalesce(feed_value.feed_value, feed.name) as name
         FROM feedme, feed 
             LEFT JOIN feed_key ON (feed_key.feed_id = feed.id AND feed_key.feed_key = 'title') 
             LEFT JOIN feed_value ON (feed_value.feed_key_id = feed_key.id)
         WHERE feedme.account_id = ? and feed.id = feedme.feed_id
-        ORDER BY 2
+        ORDER BY 3,2
     ), undef, $self->account()->id());
 
     return($feeds);

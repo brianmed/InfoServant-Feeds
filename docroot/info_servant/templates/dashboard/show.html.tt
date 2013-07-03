@@ -90,7 +90,11 @@
 
         [% IF c.session.cur_feed %]
             [% UNLESS have_entries %]
-            Current feed has no entries.
+            <ul data-role="listview">
+            <li>
+                <p class="ui-li-desc" style="white-space: normal;"><font size=+1>Current feed has no entries: Last check: [% last_check %] and Last modified: [% last_modified %].</font></p>
+            </li>
+            </ul>
             [% END %]
         [% ELSE %]
             [% UNLESS have_entries %]
@@ -162,11 +166,25 @@
                         </li>
                         [% END %]
                         [% IF have_feeds %]
+
                         [% FOREACH feed IN feeds %]
+                        [% IF 0 != feed.count %]
                         <li data-filtertext="wai-aria voiceover accessibility screen reader">
                             <a href="/dashboard?feed=[% feed.id %]">[% feed.name | html %]</a>
                         </li>
                         [% END %]
+                        [% END %]
+
+                        <li data-role="list-divider">No entries</li>
+
+                        [% FOREACH feed IN feeds %]
+                        [% IF 0 == feed.count %]
+                        <li data-filtertext="wai-aria voiceover accessibility screen reader">
+                            <a href="/dashboard?feed=[% feed.id %]">[% feed.name | html %]</a>
+                        </li>
+                        [% END %]
+                        [% END %]
+
                         [% END %]
                     </ul>
 

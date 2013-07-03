@@ -120,10 +120,19 @@ sub show {
     if (scalar @entries) {
         $self->stash(have_entries => 1);
     }
+    elsif ($self->session("cur_feed")) {
+        my $obj = SiteCode::Feed->new(id => $self->session("cur_feed"), route => $self);
+        my $last_check = $obj->key("last_check");
+        my $last_modified = $obj->key("last_modified");
+        $last_check = $last_check ? scalar(localtime($last_check)) : "Unknown";
+        $last_modified = $last_modified ? $last_modified : "Unknown";
+        $self->stash(last_check => $last_check);
+        $self->stash(last_modified => $last_modified);
+    }
 
     my @feeds = ();
     foreach my $f (@{ $feeds->feeds() }) {
-        push(@feeds, { id => $$f{id}, name => $$f{name}});
+        push(@feeds, { count => $$f{count}, id => $$f{id}, name => $$f{name}});
     }
     if (@feeds) {
         $self->stash(have_feeds => 1);
