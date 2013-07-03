@@ -122,15 +122,27 @@
                         [% SET cur_date = entry.date %]
                         <li data-role="list-divider">[% cur_date %]</li>
                     [% END %]
-                <li><a data-ajax=false href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
-                    [% IF c.session.cur_feed %]
-                        <p class="ui-li-desc" style="white-space: normal;"><strong>[% entry.title %]</strong></p>
+
+                    [% IF h.is_mobile %]
+                    <li><a data-ajax=false href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
+                        [% IF c.session.cur_feed %]
+                            <p class="ui-li-desc" style="white-space: normal;"><strong>[% entry.title %]</strong></p>
+                        [% ELSE %]
+                            <h2>[% entry.feed_title %]</h2>
+                            <p><strong>[% entry.title %]</strong></p>
+                        [% END %]
+                    </a></li>
                     [% ELSE %]
+                    <li><a data-ajax=false href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
+                        [% UNLESS c.session.cur_feed %]
                         <h2>[% entry.feed_title %]</h2>
-                        <p><strong>[% entry.title %]</strong></p>
+                        <p>[% entry.title %]</p>
+                        [% ELSE %]
+                            <h1>[% entry.title %]</h1>
+                        [% END %]
+                        <p class="ui-li-aside" style="width: 25%"><strong>[% entry.time %]</strong>[% entry.the_m %]</p>
+                    </a></li>
                     [% END %]
-                    <!-- <p>More summary here</p> -->
-                </a></li>
                 [% END %]
 
                 [% UNLESS account_purchased %]
@@ -156,12 +168,12 @@
 
                 <div data-role="panel" data-position="left" data-position-fixed="false" data-display="reveal" id="nav-panel" data-theme="a">
 
-                    <ul data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
+                    <ul data-filter="true" data-role="listview" data-theme="a" data-divider-theme="a" style="margin-top:-16px;" class="nav-search">
                         <li data-icon="delete" style="background-color:#111;">
                             <a href="#" data-rel="close">Close menu</a>
                         </li>
                         [% IF c.session.cur_feed %]
-                        <li data-filtertext="wai-aria voiceover accessibility screen reader">
+                        <li>
                             <a href="/dashboard?feed=-1">All Feeds</a>
                         </li>
                         [% END %]
@@ -169,7 +181,8 @@
 
                         [% FOREACH feed IN feeds %]
                         [% IF 0 != feed.count %]
-                        <li data-filtertext="wai-aria voiceover accessibility screen reader">
+                        <li>
+                            [% IF 0 %] <span class="ui-li-count">[% feed.count %]</span> [% END %]
                             <a href="/dashboard?feed=[% feed.id %]">[% feed.name | html %]</a>
                         </li>
                         [% END %]
@@ -179,7 +192,7 @@
 
                         [% FOREACH feed IN feeds %]
                         [% IF 0 == feed.count %]
-                        <li data-filtertext="wai-aria voiceover accessibility screen reader">
+                        <li>
                             <a href="/dashboard?feed=[% feed.id %]">[% feed.name | html %]</a>
                         </li>
                         [% END %]
