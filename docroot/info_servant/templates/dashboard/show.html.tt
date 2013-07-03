@@ -94,7 +94,11 @@
             [% END %]
         [% ELSE %]
             [% UNLESS have_entries %]
-            Please upload an opml file or add a rss feed.
+            <ul data-role="listview">
+            <li><a data-rel=dialog href="#profile-form">
+                <p class="ui-li-desc" style="white-space: normal;"><font size=+1>Please upload an opml file or add a rss feed.</font></p>
+            </a></li>
+            </ul>
             [% END %]
         [% END %]
 

@@ -70,19 +70,19 @@ while (1) {
             my $last_modified = $tx->res->headers->last_modified || "";
             my $prev_modified = $obj->key("last_modified") || "";
 
-            if ($last_modified eq $prev_modified) {
-                next;
-            }
+            unless ("" eq $last_modified && "" eq $prev_modified) {
+                if ($last_modified eq $prev_modified) {
+                    next;
+                }
 
-            $obj->key("last_modified", $last_modified);
+                $obj->key("last_modified", $last_modified);
+            }
         }
         else {
             my ($err, $code) = $tx->error;
             my $string =  $code ? "$code response: $err" : "Connection error: $err";
 
             info("head error(%s) :: %s", $$feed{url}, $string);
-
-            system("/bin/touch", $the_dir);
 
             next;
         }
@@ -100,8 +100,6 @@ while (1) {
 
             info("get error(%s) :: %s", $$feed{url}, $string);
         }
-
-        system("/bin/touch", $the_dir);
 
         my $parse;
         eval {
