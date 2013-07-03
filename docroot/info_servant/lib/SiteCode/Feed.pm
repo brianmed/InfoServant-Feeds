@@ -70,7 +70,7 @@ sub subscribed {
     my $id = $dbx->col("SELECT id FROM feedme WHERE feed_id = ? and account_id = ?", undef, $self->id, $self->account->id);
 }
 
-sub markRead {
+sub mark_read {
     my $self = shift;
     my %opt = @_;
 

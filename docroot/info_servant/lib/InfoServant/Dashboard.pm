@@ -163,7 +163,7 @@ sub details {
         my $title = $feed->title(entry_id => $entry_id, account_id => $account->id);
         my $feed_title = $feed->key("title") || $feed->key("xml_url");
 
-        $feed->markRead(entry_id => $entry_id, feed_id => $feed_nbr);
+        $feed->mark_read(entry_id => $entry_id, feed_id => $feed_nbr);
 
         $self->stash(offset => $offset, feed_title => $feed_title, html => $html, link => $link, title => $title, entry_id => $entry_id, feed_id => $feed_nbr);
     };
@@ -337,6 +337,31 @@ sub purchase {
     }
 
     $self->render();
+}
+
+sub mark_read {
+    my $self = shift;
+
+    my $entry_id = $self->param("entry_id");
+    my $feed_id = $self->param("feed_id");
+
+    my $link = "";
+
+    eval {
+        my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
+
+        my $feed = SiteCode::Feed->new(id => $feed_id, account => $account, route => $self);
+        $feed->mark_read(entry_id => $entry_id, feed_id => $feed_id);
+        $link = $feed->link(entry_id => $entry_id, account_id => $account->id);
+        
+    };
+    if ($@) {
+        my $err = $@;
+        $self->app->log->debug("InfoServant::Dashboard::mark_read: $err");
+        $self->stash(error => "Unable to mark entry read.");
+    }
+
+    $self->render(json => { link => $link });
 }
 
 sub unsubscribe {

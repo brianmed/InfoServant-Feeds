@@ -58,11 +58,11 @@
     <script>
         $("#page_show").off("pageshow").on("pageshow", function(e, ui) {
             $( "#page_show" ).on( "swiperight", function(e) {
-                window.open(localStorage["swiperight.one"], localStorage["swiperight.two"]);
+                window.open(localstorage["swiperight.one"], localstorage["swiperight.two"]);
             });
 
             $( "#page_show" ).on( "swipeleft", function(e) {
-                window.open(localStorage["swipeleft.one"], localStorage["swipeleft.two"]);
+                window.open(localstorage["swipeleft.one"], localstorage["swipeleft.two"]);
             });
         });
     </script>
@@ -109,7 +109,7 @@
         [% END %]
 
         [% IF have_entries %]
-            <ul data-role="listview">
+            <ul class="info-taphold" data-role="listview">
                 [% UNLESS account_purchased %]
                     <li><a data-rel=dialog href="/dashboard?method=purchase">
                         <h1>Upgrade</h1>
@@ -124,7 +124,7 @@
                     [% END %]
 
                     [% IF h.is_mobile %]
-                    <li><a data-ajax=false href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
+                    <li data-infourl='{"entry_id":"[% entry.id %]", "feed_id":"[% entry.feed_id %]"}'><a data-ajax=false href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
                         [% IF c.session.cur_feed %]
                             <p class="ui-li-desc" style="white-space: normal;"><strong>[% entry.title %]</strong></p>
                         [% ELSE %]
@@ -136,7 +136,7 @@
                     <li><a data-ajax=false href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
                         [% UNLESS c.session.cur_feed %]
                         <h2>[% entry.feed_title %]</h2>
-                        <p>[% entry.title %]</p>
+                        <p><font size=+1>[% entry.title %]</font></p>
                         [% ELSE %]
                             <h1>[% entry.title %]</h1>
                         [% END %]
@@ -154,6 +154,28 @@
             </ul>
         [% END %]
     </div><!-- /content -->
+
+    <script>
+        $( "ul.info-taphold" ).off("taphold").on("taphold", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            var myItem = $(e.target).closest('li');
+            var data = $(myItem).data("infourl");
+            console.log(data);
+
+            $.ajax({
+                url: "/dashboard?method=mark_read",
+                async: false,
+                success: function(data, textStatus, jqXHR) {
+                    myItem.remove();
+                    link = data.link;
+                    window.open(data.link, "_article");
+                },
+                data: data,
+            });
+        });
+    </script>
 
             <style>
                 .nav-search .ui-btn-up-a {

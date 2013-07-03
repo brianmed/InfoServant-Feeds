@@ -119,6 +119,7 @@ sub startup {
     $logged_in->any('/dashboard')->over(params => {method => qr/^unsubscribe$/})->to(controller => 'Dashboard', action => 'unsubscribe');
     $logged_in->any('/dashboard')->over(params => {method => qr/^purchase$/})->to(controller => 'Dashboard', action => 'purchase');
     $logged_in->any('/dashboard')->over(params => {method => qr/^cancel$/})->to(controller => 'Dashboard', action => 'cancel');
+    $logged_in->any('/dashboard')->over(params => {method => qr/^mark_read$/})->to(controller => 'Dashboard', action => 'mark_read');
     $logged_in->any('/dashboard')->over(save => "state")->to(controller => 'Dashboard', action => 'show', _gzip => 1);
     $logged_in->any('/dashboard/details')->to(controller => 'Dashboard', action => 'details', _gzip => 1);
 
