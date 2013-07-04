@@ -58,11 +58,11 @@
     <script>
         $("#page_show").off("pageshow").on("pageshow", function(e, ui) {
             $( "#page_show" ).on( "swiperight", function(e) {
-                window.open(localstorage["swiperight.one"], localstorage["swiperight.two"]);
+                window.open(localStorage["swiperight.one"], localStorage["swiperight.two"]);
             });
 
             $( "#page_show" ).on( "swipeleft", function(e) {
-                window.open(localstorage["swipeleft.one"], localstorage["swipeleft.two"]);
+                window.open(localStorage["swipeleft.one"], localStorage["swipeleft.two"]);
             });
         });
     </script>
