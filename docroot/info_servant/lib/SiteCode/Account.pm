@@ -256,7 +256,8 @@ sub sendVerifyEmail
         body => "Thank you for signing up with InfoServant.\nPlease follow the link below to verify your email address:\n\nEmail: $email\nVerification number: $md5\n\nhttp://infoservant.com/verify/$email/$md5\n",
     );
 
-    my $dir = POSIX::strftime("/opt/infoservant.com/emails/%F", localtime(time));
+    my $site_config = SiteCode::Site->config();
+    my $dir = POSIX::strftime("$$site_config{site_dir}/emails/%F", localtime(time));
     mkdir $dir unless -d $dir;
     my ($fh, $filename) = File::Temp::tempfile("verifyXXXXX", DIR => $dir, SUFFIX => '.txt', UNLINK => 0);
     print($fh $mail->as_string);

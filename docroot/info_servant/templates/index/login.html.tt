@@ -44,7 +44,7 @@
                     <div class="ui-block-a"><input value="Login" data-theme="b" type="submit"></div>
                 </div>
             </form>
-            <a href="/" data-role="button" data-theme="b">Cancel</a>       
+            <a href="/" data-ajax="false" data-role="button" data-theme="b">Cancel</a>       
         </div>
 </div>
 

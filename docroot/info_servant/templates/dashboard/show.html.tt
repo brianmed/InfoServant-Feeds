@@ -53,6 +53,17 @@
             localStorage["swipeleft.one"] = "[% IF page_next %]/dashboard?offset=[% page_next %][% END %]";
             localStorage["swipeleft.two"] = "_self";
         }
+
+        function isOnScreen(elem)
+        {
+            var docViewTop = $(window).scrollTop();
+            var docViewBottom = docViewTop + $(window).height();
+
+            var elemTop = $(elem).offset().top;
+            var elemBottom = elemTop + $(elem).height();
+
+            return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
+        }
     </script>
 
     <script>
@@ -162,7 +173,6 @@
 
             var myItem = $(e.target).closest('li');
             var data = $(myItem).data("infourl");
-            console.log(data);
 
             $.ajax({
                 url: "/dashboard?method=mark_read",
@@ -174,6 +184,49 @@
                 },
                 data: data,
             });
+        });
+
+        $("ul.info-taphold").off("scrollstart").on("scrollstart", function(e, ui) {
+            return;
+
+            var begin = $(e.target).parentsUntil('.info-taphold').siblings('li').slice(0, 3);
+            var end = $(e.target).parentsUntil('.info-taphold').siblings('li').slice(-4, -1);
+
+            $(begin).each(function (i) {
+            });
+
+            $(end).each(function (i) {
+            });
+        });
+
+        $("ul.info-taphold").off("scrollstop").on("scrollstop", function(e, ui) {
+            return;
+
+            var begin = $(e.target).parentsUntil('.info-taphold').siblings('li').slice(0, 3);
+            var end = $(e.target).parentsUntil('.info-taphold').siblings('li').slice(-4, -1);
+
+            var onScreen[2] = [1, 1];
+
+            $(begin).each(function (i) {
+                if (!isOnScreen(this)) {
+                    onScreen[0] = 0;
+                }
+            });
+
+            $(end).each(function (i) {
+                if (!isOnScreen(this)) {
+                    onScreen[1] = 0;
+                }
+            });
+
+            // Too few elements for paging?
+            if (onScreen[0] && onScreen[1]) {
+                return;
+            }
+
+            // need more elements up top
+            if (onScreen[0]) {
+            }
         });
     </script>
 

@@ -22,6 +22,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use SiteCode::Account;
 use SiteCode::DBX;
+use SiteCode::Site;
 use Digest::MD5;
 
 sub start {
@@ -291,7 +292,8 @@ sub reset {
             body => "Thank you for using InfoServant.\nPlease follow the link below to change your password:\n\nhttp://infoservant.com/reset/$email/$md5\n",
         );
 
-        my $dir = POSIX::strftime("/opt/infoservant.com/emails/%F", localtime(time));
+        my $site_config = SiteCode::Site->config();
+        my $dir = POSIX::strftime("$$site_config{site_dir}/emails/%F", localtime(time));
         mkdir $dir unless -d $dir;
         my ($fh, $filename) = File::Temp::tempfile("forgotXXXXX", DIR => $dir, SUFFIX => '.txt', UNLINK => 0);
         print($fh $mail->as_string);

@@ -21,6 +21,7 @@ package InfoServant::Stripe;
 use Mojo::Base 'Mojolicious::Controller';
 
 use SiteCode::DBX;
+use SiteCode::Site;
 use POSIX;
 use File::Temp;
 
@@ -31,7 +32,8 @@ sub save {
 
     my $mode = $self->param("mode");
 
-    my $dir = POSIX::strftime("/opt/infoservant.com/stripe/%F", localtime(time));
+    my $site_config = SiteCode::Site->config();
+    my $dir = POSIX::strftime("$$site_config{site_dir}/stripe/%F", localtime(time));
     mkdir $dir unless -d $dir;
     my ($fh, $filename) = File::Temp::tempfile("${mode}XXXXX", DIR => $dir, SUFFIX => '.txt', UNLINK => 0);
     print($fh $self->req->body);

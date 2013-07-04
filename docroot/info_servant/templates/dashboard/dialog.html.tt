@@ -35,7 +35,7 @@
 
             [% content %]
 
-            <form action="/dashboard" method="post">
+            <form data-ajax="false" action="/dashboard" method="post">
                 [% IF method %]
                 <input type=hidden name=method value=[% method %]>
                 [% END %]

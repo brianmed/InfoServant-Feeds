@@ -24,17 +24,18 @@ use Moose;
 use namespace::autoclean;
 
 use SiteCode::DBX;
+use SiteCode::Site;
 
 use XML::Feed;
 use HTML::Entities;
 use Mojo::Util;
 
-has 'dbx' => ( isa => 'SiteCode::DBX', is => 'ro', default => sub { SiteCode::DBX->new() } );
+has 'dbx' => ( isa => 'SiteCode::DBX', is => 'ro', lazy => 1, default => sub { SiteCode::DBX->new() } );
 has 'account' => ( isa => 'SiteCode::Account', is => 'ro' );
 has 'id' => ( isa => 'Int', is => 'rw' );
 has 'name' => ( isa => 'Str', is => 'rw' );
 has 'route' => ( isa => 'Mojolicious::Controller', is => 'ro' );
-has 'data_dir' => ( isa => 'Str', is => 'ro', default => "/opt/infoservant.com/data/feed_files" );
+has 'data_dir' => ( isa => 'Str', is => 'ro', lazy => 1, default => sub { my $site_config = SiteCode::Site->config(); "$$site_config{site_dir}/data/feed_files" } );
 
 sub unsubscribe {
     my $self = shift;
@@ -193,7 +194,8 @@ sub html {
     my $entry_id = $opt{entry_id};
     my $account_id = $opt{account_id};
 
-    my $html_file = "/opt/infoservant.com/data/html_files/" . $self->id . "/$entry_id.html";
+    my $site_config = SiteCode::Site->config();
+    my $html_file = "$$site_config{site_dir}/data/html_files/" . $self->id . "/$entry_id.html";
 
     return(Mojo::Util::slurp($html_file));
 }

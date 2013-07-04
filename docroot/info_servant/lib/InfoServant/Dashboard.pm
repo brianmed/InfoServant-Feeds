@@ -205,7 +205,7 @@ sub verify {
                 delete $self->session->{verify};
             }
             elsif ("VERIFIED" eq $status) {
-                $self->stash(success => "Sucessfully verified.");
+                $self->stash(success => "Successfully verified.");
                 delete $self->session->{verify};
             }
         }

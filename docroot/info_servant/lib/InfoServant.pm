@@ -72,7 +72,7 @@ sub startup {
     # Increase limit to 10MB
     $ENV{MOJO_MAX_MESSAGE_SIZE} = 10485760;
 
-    $self->plugin(AccessLog => {uname_helper => 'set_username', log => '/opt/infoservant.com/docroot/info_servant/log/access.log', format => '%h %l %u %t "%r" %>s %b %D "%{Referer}i" "%{User-Agent}i"'});
+    $self->plugin(AccessLog => {uname_helper => 'set_username', log => "$$site_config{site_dir}/docroot/info_servant/log/access.log", format => '%h %l %u %t "%r" %>s %b %D "%{Referer}i" "%{User-Agent}i"'});
     $self->plugin(tt_renderer => {template_options => {CACHE_SIZE => 0, COMPILE_EXT => undef, COMPILE_DIR => undef}});
     $self->plugin('ParamCondition');
     $self->plugin('SaveRequest');
