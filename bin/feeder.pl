@@ -165,7 +165,8 @@ while (1) {
 }
 
 sub info {
-    openlog("feeder", 'cons,pid', 'user');
+    my $dev = $ENV{FEEDER_DEV} ? "_dev" : "";
+    openlog("feeder$dev", 'cons,pid', 'user');
     syslog('info', @_);
     closelog();
 }

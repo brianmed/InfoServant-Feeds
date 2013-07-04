@@ -27,7 +27,7 @@ use DBI;
 use Carp;
 use DBIx::Connector
 
-has 'dbdsn' => ( isa => 'Str', is => 'ro', default => sub { $ENV{DBI_DSN} || 'dbi:Pg:dbname=scotch_egg' } );
+has 'dbdsn' => ( isa => 'Str', is => 'ro', default => sub { $ENV{DBI_DSN} || die("Need to set DBI_DSN"); } );
 has 'dbh' => ( isa => 'DBI::db', is => 'ro', lazy => 1, builder => '_build_dbh' );
 has 'route' => ( isa => 'Mojolicious::Controller', is => 'ro' );
 has 'dbix' => ( isa => 'DBIx::Connector', is => 'ro', lazy => 1, builder => '_build_dbix' );
