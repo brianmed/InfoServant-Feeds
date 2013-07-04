@@ -1,6 +1,7 @@
 #!/opt/perl
 
-use lib qw(/opt/infoservant.com/docroot/info_servant/lib);
+use FindBin;
+BEGIN { unshift @INC, "$FindBin::Bin/../docroot/info_servant/lib" }
 
 use SiteCode::Modern;
 
@@ -21,9 +22,10 @@ use SiteCode::Feed;
 use SiteCode::Feeds;
 use DateTime;
 
-my $data_dir = "/opt/infoservant.com/data/feed_files";
-my $html_dir = "/opt/infoservant.com/data/html_files";
-Mojo::Util::spurt($$, "/tmp/feeder.pl.pid");
+my $site_config = SiteCode::Site->config();
+
+my $data_dir = "$$site_config{site_dir}/data/feed_files";
+my $html_dir = "$$site_config{site_dir}/data/html_files";
 
 while (1) {
     my $dbx = SiteCode::DBX->new();
@@ -156,6 +158,8 @@ while (1) {
     info("COMPLETE full scan");
 
     mem_usage();
+
+    exit(0) if $ENV{FEEDER_ONCE};
 
     sleep(10);
 }

@@ -62,7 +62,11 @@ sub startup {
 
     my $site_config = SiteCode::Site->config();
 
-    $self->config(hypnotoad => {listen => ["http://$$site_config{hypnotoad_ip}:80", "https://$$site_config{hypnotoad_ip}:443"], workers => 4, user => "root", group => "root", inactivity_timeout => 15, heartbeat_timeout => 15, heartbeat_interval => 15, accepts => 100});
+    my $listen = [];
+    push(@{ $listen }, "http://$$site_config{hypnotoad_ip}:$$site_config{hypnotoad_port}");
+    push(@{ $listen }, "https://$$site_config{hypnotoad_ip}:$$site_config{hypnotoad_tls}");
+
+    $self->config(hypnotoad => {listen => $listen, workers => $$site_config{hypnotoad_workers}, user => "root", group => "root", inactivity_timeout => 15, heartbeat_timeout => 15, heartbeat_interval => 15, accepts => 100});
 
     $self->helper(mobile => \&mobile);
     $self->helper(is_mobile => \&is_mobile);

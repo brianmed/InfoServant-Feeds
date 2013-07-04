@@ -1,0 +1,6 @@
+/var/log/feeder
+{
+    missingok
+    daily
+    compress
+}

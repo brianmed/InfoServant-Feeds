@@ -1,0 +1,111 @@
+#!/bin/bash
+#
+# hypnotoad-dev   Startup script for the Hypnotoad HTTP Server
+#
+# chkconfig: - 85 15
+# description: Hypnotoad is a full featured, UNIX optimized, preforking \
+#   non-blocking I/O HTTP and WebSocket server.
+# processname: hypnotoad
+# pidfile: /opt/infoservant.net/docroot/info_servant/script/hypnotoad.pid
+#
+### BEGIN INIT INFO
+# Provides: hypnotoad
+# Required-Start: $local_fs $remote_fs $network $named
+# Required-Stop: $local_fs $remote_fs $network
+# Should-Start: distcache
+# Short-Description: start and stop Hypnotoad HTTP Server
+# Description: Hypnotoad is a full featured, UNIX optimized, preforking 
+#   non-blocking I/O HTTP and WebSocket server.
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+export DBI_DSN="dbi:Pg:dbname=scotch_dev"
+
+prog=hypnotoad-dev
+hypnotoad=${HYPNOTOAD_EXE-/opt/perl-5.16.3/bin/hypnotoad}
+app_dir=${APP_DIR-/opt/infoservant.net/docroot/info_servant}
+app=${HYPNOTOAD_APP-script/info_servant}
+pidfile=${PIDFILE-/opt/infoservant.net/docroot/info_servant/script/hypnotoad.pid}
+lockfile=${LOCKFILE-/var/lock/subsys/hypnotoad-dev}
+RETVAL=0
+
+start() {
+        echo -n $"Starting $prog: "
+        cd $app_dir
+        OUTPUT=$($hypnotoad $app 2>&1)
+        RETVAL=$?
+	[ "$RETVAL" -eq 0 ] && success || failure
+        echo
+	echo $OUTPUT
+
+        [ $RETVAL = 0 ] && touch ${lockfile}
+        return $RETVAL
+}
+
+stop() {
+        echo -n $"Stopping $prog: "
+        cd $app_dir
+        OUTPUT=$($hypnotoad -s $app 2>&1)
+        RETVAL=$?
+	[ "$RETVAL" -eq 0 ] && success || failure
+        echo
+	echo $OUTPUT
+
+        [ $RETVAL = 0 ] && rm -f ${lockfile} ${pidfile}
+}
+
+graceful() {
+        echo -n $"Graceful restart $prog: "
+        cd $app_dir
+        OUTPUT=$($hypnotoad $app 2>&1)
+        RETVAL=$?
+	[ "$RETVAL" -eq 0 ] && success || failure
+        echo
+	echo $OUTPUT
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	if status -p ${pidfile} $hypnotoad >&/dev/null; then
+		RETVAL=$?
+		echo -n $"$prog is already running."
+		warning
+		echo
+	else
+		start
+	fi
+	;;
+  stop)
+	if status -p ${pidfile} $hypnotoad >&/dev/null; then
+		stop
+	else
+		RETVAL=$?
+		echo -n $"$prog is not running."
+		warning
+		echo
+	fi
+	;;
+  status)
+    status -p ${pidfile} $hypnotoad
+	RETVAL=$?
+	;;
+  condrestart|try-restart|restart|graceful)
+	if status -p ${pidfile} $hypnotoad >&/dev/null; then
+		RETVAL=$?
+		graceful
+	else
+		RETVAL=$?
+		echo -n $"$prog is not running."
+		warning
+		echo
+	fi
+	;;
+  *)
+	echo $"Usage: $prog {start|stop|restart|condrestart|try-restart|graceful}"
+	RETVAL=2
+esac
+
+exit $RETVAL
