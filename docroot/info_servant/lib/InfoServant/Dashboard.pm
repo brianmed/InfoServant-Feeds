@@ -586,7 +586,11 @@ sub websocket {
         state $whence = time();
         state $count = 0;
 
-        # $self->app->log->debug("Recurring: $whence: $count");
+        if (30 <= $count) {
+            return($self->finish());
+        }
+
+        $self->app->log->debug("Recurring: $whence: $count");
 
         my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
         my $feeds = SiteCode::Feeds->new(account => $account);
