@@ -71,18 +71,6 @@
         }
     </script>
 
-    <script>
-        $("#page_show").off("pageshow").on("pageshow", function(e, ui) {
-            $( "#page_show" ).on( "swiperight", function(e) {
-                window.open(localStorage["swiperight.one"], localStorage["swiperight.two"]);
-            });
-
-            $( "#page_show" ).on( "swipeleft", function(e) {
-                window.open(localStorage["swipeleft.one"], localStorage["swipeleft.two"]);
-            });
-        });
-    </script>
-
     <div data-role="header">
         <h1>[% IF cur_title %] [% cur_title %] [% ELSE %] <a data-ajax=false href="/dashboard?offset=0">Entries</a> [% END %]</h1>
         <a href="#nav-panel" data-icon="bars" data-iconpos="notext">Menu</a>
@@ -172,66 +160,69 @@
     </div><!-- /content -->
 
     <script>
-        $( "ul.info-taphold" ).off("taphold").on("taphold", function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+//         $("#page_show").off("pageshow").on("pageshow", function(e, ui) {
+//             $( "#page_show" ).on( "swiperight", function(e) {
+//                 window.open(localStorage["swiperight.one"], localStorage["swiperight.two"]);
+//             });
+// 
+//             $( "#page_show" ).on( "swipeleft", function(e) {
+//                 window.open(localStorage["swipeleft.one"], localStorage["swipeleft.two"]);
+//             });
+//         });
 
-            var myItem = $(e.target).closest('li');
-            var data = $(myItem).data("infourl");
+        //var events ="taphold scrollend";
+        var events ="taphold";
 
-            $.ajax({
-                url: "/dashboard?method=mark_read",
-                async: false,
-                success: function(data, textStatus, jqXHR) {
-                    myItem.remove();
-                    link = data.link;
-                    window.open(data.link, "_article");
-                },
-                data: data,
-            });
-        });
+        $("ul.info-taphold").off(events).on({
+            taphold: function(e, ui) {
+                e.preventDefault();
+                e.stopPropagation();
 
-        $("ul.info-taphold").off("scrollstart").on("scrollstart", function(e, ui) {
-            return;
+                console.log("here");
 
-            var begin = $(e.target).parentsUntil('.info-taphold').siblings('li').slice(0, 3);
-            var end = $(e.target).parentsUntil('.info-taphold').siblings('li').slice(-4, -1);
+                var myItem = $(e.target).closest('li');
+                var data = $(myItem).data("infourl");
 
-            $(begin).each(function (i) {
-            });
-
-            $(end).each(function (i) {
-            });
-        });
-
-        $("ul.info-taphold").off("scrollstop").on("scrollstop", function(e, ui) {
-            return;
-
-            var begin = $(e.target).parentsUntil('.info-taphold').siblings('li').slice(0, 3);
-            var end = $(e.target).parentsUntil('.info-taphold').siblings('li').slice(-4, -1);
-
-            var onScreen[2] = [1, 1];
-
-            $(begin).each(function (i) {
-                if (!isOnScreen(this)) {
-                    onScreen[0] = 0;
-                }
-            });
-
-            $(end).each(function (i) {
-                if (!isOnScreen(this)) {
-                    onScreen[1] = 0;
-                }
-            });
-
-            // Too few elements for paging?
-            if (onScreen[0] && onScreen[1]) {
+                $.ajax({
+                    url: "/dashboard?method=mark_read",
+                    async: false,
+                    success: function(data, textStatus, jqXHR) {
+                        myItem.remove();
+                        link = data.link;
+                        window.open(data.link, "_article");
+                    },
+                    data: data,
+                });
+            },
+            scrollstop: function(e, ui) {
                 return;
-            }
 
-            // need more elements up top
-            if (onScreen[0]) {
-            }
+                var begin = $(e.target).parentsUntil('.info-taphold').siblings('li').slice(0, 3);
+                var end = $(e.target).parentsUntil('.info-taphold').siblings('li').slice(-4, -1);
+
+                var onScreen = new Array('1', '1');
+
+                $(begin).each(function (i) {
+                    if (!isOnScreen(this)) {
+                        onScreen[0] = 0;
+                    }
+                });
+
+                $(end).each(function (i) {
+                    if (!isOnScreen(this)) {
+                        onScreen[1] = 0;
+                    }
+                });
+
+                // Too few elements for paging?
+                if (onScreen[0] && onScreen[1]) {
+                    return;
+                }
+
+                // need more elements up top
+                if (onScreen[0]) {
+                }
+            },
         });
     </script>
 
