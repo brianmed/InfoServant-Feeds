@@ -71,6 +71,7 @@ while (1) {
         my $obj = SiteCode::Feed->new(id => $$feed{id});
         $obj->key("last_check", time());
         $dbx->dbh->commit;
+        info('FEED :: %s', $$feed{url});
 
         my $url_dir = Mojo::Util::url_escape($$feed{url});
         my $the_dir = "$data_dir/$url_dir";
