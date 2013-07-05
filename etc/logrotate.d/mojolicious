@@ -6,6 +6,6 @@
     sharedscripts
     maxage 100
     postrotate
-        sudo -u root sh -c "cd /opt/infoservant.com/docroot/info_servant && /opt/perl /opt/perl-5.16.3/bin/hypnotoad script/info_servant"
+        sudo service hypnotoad-prod restart
     endscript
 }
