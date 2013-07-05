@@ -35,32 +35,48 @@ while (1) {
     ));
 
     foreach my $feed (@{ $feeds }) {
+        my $id = 0;
         eval {
-            $dbx->do("SELECT id FROM feed WHERE id = ? FOR UPDATE NOWAIT", undef, $$feed{id});
+            $dbx->do("SELECT id FROM feed WHERE id = ? FOR UPDATE", undef, $$feed{id});
+
+            my $sql = qq(
+                WITH last_check as (
+                    SELECT feed.id, feed_key, feed_value
+                    FROM  feed, feed_key, feed_value
+                    WHERE feed_key = 'last_check'
+                        AND feed_key_id = feed_key.id
+                        AND feed.id = feed_id
+                        AND feed.id = ?
+                )
+
+                SELECT last_check.id
+                FROM  last_check
+                WHERE age(NOW(), to_timestamp(last_check.feed_value::integer)) > (900 * interval '1 second')
+            );
+            $id = $dbx->col($sql, undef, $$feed{id});
         };
         if ($@) {
             $dbx->dbh->rollback();
             next;
         }
-
-        my $url_dir = Mojo::Util::url_escape($$feed{url});
-
-        my $the_dir = "$data_dir/$url_dir";
-
-        my $obj = SiteCode::Feed->new(id => $$feed{id});
-
-        if (!-d $the_dir) {
-            mkdir($the_dir);
-        }
-
-        my $last_check = $obj->key("last_check") || 0;
-        my $diff = time() - $last_check;
-        if (900 > $diff) {
+        elsif (!$id) {
             $dbx->dbh->rollback();
             next;
         }
+        elsif ($id != $$feed{id}) {
+            $dbx->dbh->rollback();
+            next;
+        }
+
+        my $obj = SiteCode::Feed->new(id => $$feed{id});
         $obj->key("last_check", time());
         $dbx->dbh->commit;
+
+        my $url_dir = Mojo::Util::url_escape($$feed{url});
+        my $the_dir = "$data_dir/$url_dir";
+        if (!-d $the_dir) {
+            mkdir($the_dir);
+        }
 
         my $ua = Mojo::UserAgent->new;
         $ua->max_redirects(10);

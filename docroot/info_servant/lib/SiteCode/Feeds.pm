@@ -28,6 +28,7 @@ sub addFeed {
 
         $feed = SiteCode::Feed->new(id => $id, account => $self->account);
         $feed->key("xml_url", $url);
+        $feed->key("last_check", time() - 1_000);
         $feed->subscribe();
     };
     if ($@) {
