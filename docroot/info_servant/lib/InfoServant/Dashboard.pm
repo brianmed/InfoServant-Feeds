@@ -547,6 +547,76 @@ sub opml_file {
     $self->render("dashboard/dialog");
 }
 
+sub websocket {
+    my $self = shift;
+    my $w;
+    
+    return if $self->session("cur_feed");
+    
+    # Opened
+    $self->app->log->debug('WebSocket opened.');
+    
+    # Increase inactivity timeout for connection a bit
+    my $id = Mojo::IOLoop->stream($self->tx->connection)->timeout(300);
+    
+    # Incoming message
+    $self->on(message => sub {
+        my ($self, $msg) = @_;
+
+        # Do we need to do this?
+        if ("Ping" eq $msg) {
+            return;
+        }
+
+        return;
+
+        # $self->send("echo: $msg");
+    });
+    
+    # Closed
+    $self->on(finish => sub {
+        my ($self, $code, $reason) = @_;
+
+        Mojo::IOLoop->remove($w);
+
+        $self->app->log->debug("WebSocket closed with status $code.");
+    });
+
+    $w = Mojo::IOLoop->recurring(60 => sub{
+        state $whence = time();
+        state $count = 0;
+
+        # $self->app->log->debug("Recurring: $whence: $count");
+
+        my $account = SiteCode::Account->new(id => $self->session("account_id"), route => $self);
+        my $feeds = SiteCode::Feeds->new(account => $account);
+
+        my @entries = ();
+
+        foreach my $l (@{ $feeds->latest(whence => $whence, limit => 15, offset => 0 )}) {
+            my $obj = SiteCode::Feed->new(id => $$l{feed_id}, route => $self);
+            my $entry = $obj->entry($$l{entry_id}, $account->id());
+
+            my $dt = dateify($$entry{inserted});
+            my $date = $dt->strftime("%A, %B, %e, %Y");
+            my $time = $dt->strftime("%H:%M");
+            my $the_m = $dt->strftime("%p");
+
+            my $feed_title = Mojo::Util::xml_escape($$entry{feed_title});
+            my $title = Mojo::Util::xml_escape($$entry{title});
+
+            push(@entries, { id => $$entry{id}, date => $date, time => $time, the_m => $the_m, feed_title => $feed_title, entry_id => $$l{entry_id}, issued => $$entry{issued}, title => $title, feed_id => $obj->id() });
+        }
+
+        if (scalar @entries) {
+            $whence = time();
+        }
+
+        ++$count;
+        $self->send({ json => \@entries });
+    });
+}
+
 sub logout {
     my $self = shift;
 

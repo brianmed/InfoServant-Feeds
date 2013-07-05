@@ -128,7 +128,7 @@
                     [% END %]
 
                     [% IF h.is_mobile %]
-                    <li data-infourl='{"entry_id":"[% entry.id %]", "feed_id":"[% entry.feed_id %]"}'><a data-ajax=false href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
+                    <li class="info-entry" data-infourl='{"entry_id":"[% entry.id %]", "feed_id":"[% entry.feed_id %]"}'><a data-ajax=false href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
                         [% IF c.session.cur_feed %]
                             <p class="ui-li-desc" style="white-space: normal;"><strong>[% entry.title %]</strong></p>
                         [% ELSE %]
@@ -137,7 +137,7 @@
                         [% END %]
                     </a></li>
                     [% ELSE %]
-                    <li><a data-ajax=false href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
+                    <li class="info-entry"><a data-ajax=false href="/dashboard/details?entry_id=[% entry.id %]&feed_id=[% entry.feed_id %]">
                         [% UNLESS c.session.cur_feed %]
                         <h2>[% entry.feed_title %]</h2>
                         <p><font size=+1>[% entry.title %]</font></p>
@@ -170,8 +170,7 @@
 //             });
 //         });
 
-        //var events ="taphold scrollend";
-        var events ="taphold";
+        var events ="taphold scrollstop";
 
         $("ul.info-taphold").off(events).on({
             taphold: function(e, ui) {
@@ -220,10 +219,43 @@
                 }
 
                 // need more elements up top
-                if (onScreen[0]) {
+                if (onScreen[1]) {
+                    $(begin).each(function (i) {
+                        // this.remove();
+                    });
                 }
             },
         });
+    </script>
+
+    <script>
+        function createEntry(entry) {
+            var li = "<li class=\"info-entry\" data-infourl='{\"entry_id\":\"" + entry.id + "\", \"feed_id\":\"" + entry.feed_id + "\"}'><a data-ajax=false href=\"/dashboard/details?entry_id=" + entry.id + "&feed_id=" + entry.feed_id + "\">";
+            li += '<h2>' + entry.feed_title +'</h2>';
+            li += '<p><strong>' + entry.title + '</strong></p>';
+            li += '</a></li>';
+            console.log(li);
+            return(li);
+        }
+
+        var ws = new WebSocket("[% h.url_for('/dashboard/ws').to_abs().scheme('ws') %]");
+
+        // Incoming messages
+        ws.onmessage = function(event) {
+            var entries = eval(event.data);
+            
+            $(entries).each(function (i) {
+                console.log("Replacing: " + i);
+                $('.info-entry:last').remove();
+                $('.info-entry:first').before(createEntry(this));
+                $('ul.info-taphold').listview('refresh');
+            });
+        };
+
+        // Outgoing messages
+        window.setInterval(function() {
+            ws.send('Ping');
+        }, 10000);
     </script>
 
             <style>
