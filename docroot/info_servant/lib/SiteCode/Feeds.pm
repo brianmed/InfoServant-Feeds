@@ -69,12 +69,12 @@ sub latest {
     my $dbx = $self->dbx();
 
     my $feed = $opt{feed} ? " AND feed.id = ?" : "";
-    my @vars = ($self->account()->id());
-    push(@vars, $opt{feed}) if $feed;
-    push(@vars, $self->account()->id());
-    push(@vars, $opt{whence}) if $opt{whence};
-
     my $whence = $opt{whence} ? "AND entry.inserted > to_timestamp(?)" : "";
+
+    my @vars = ($self->account()->id());
+    push(@vars, $self->account()->id());
+    push(@vars, $opt{feed}) if $feed;
+    push(@vars, $opt{whence}) if $opt{whence};
 
     my $data = $dbx->array(qq(
         SELECT
@@ -82,8 +82,8 @@ sub latest {
         FROM feedme, feed, entry where feedme.account_id = ? 
             and feed.name = entry.feed_name 
             and feedme.feed_id = feed.id
-            $feed
             AND entry.id NOT IN (SELECT entry.id FROM entry, entry_read, feedme WHERE entry.entry_id = entry_read.entry_id AND feedme_id = feedme.id AND account_id = ?)
+            $feed
             $whence
         order by entry.inserted desc
         LIMIT $opt{limit}
