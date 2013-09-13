@@ -6,7 +6,7 @@
 # description: Hypnotoad is a full featured, UNIX optimized, preforking \
 #   non-blocking I/O HTTP and WebSocket server.
 # processname: hypnotoad
-# pidfile: /opt/infoservant.com/docroot/info_servant/script/hypnotoad.pid
+# pidfile: /opt/localbargains.us/docroot/local_bargains/script/hypnotoad.pid
 #
 ### BEGIN INIT INFO
 # Provides: hypnotoad
@@ -21,13 +21,13 @@
 # Source function library.
 . /etc/rc.d/init.d/functions
 
-export DBI_DSN="dbi:Pg:dbname=scotch_egg"
+export DBI_DSN="dbi:Pg:dbname=shop_till_drop"
 
 prog=hypnotoad-prod
 hypnotoad=${HYPNOTOAD_EXE-/opt/perl-5.16.3/bin/hypnotoad}
-app_dir=${APP_DIR-/opt/infoservant.com/docroot/info_servant}
-app=${HYPNOTOAD_APP-script/info_servant}
-pidfile=${PIDFILE-/opt/infoservant.com/docroot/info_servant/script/hypnotoad.pid}
+app_dir=${APP_DIR-/opt/localbargains.us/docroot/local_bargains}
+app=${HYPNOTOAD_APP-script/local_bargains}
+pidfile=${PIDFILE-/opt/localbargains.us/docroot/local_bargains/script/hypnotoad.pid}
 lockfile=${LOCKFILE-/var/lock/subsys/hypnotoad-prod}
 RETVAL=0
 

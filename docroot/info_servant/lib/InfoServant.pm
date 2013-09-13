@@ -79,7 +79,7 @@ sub startup {
     $self->plugin(AccessLog => {uname_helper => 'set_username', log => "$$site_config{site_dir}/docroot/info_servant/log/access.log", format => '%h %l %u %t "%r" %>s %b %D "%{Referer}i" "%{User-Agent}i"'});
     $self->plugin(tt_renderer => {template_options => {CACHE_SIZE => 0, COMPILE_EXT => undef, COMPILE_DIR => undef}});
     $self->plugin('ParamCondition');
-    $self->plugin('SaveRequest');
+    # $self->plugin('SaveRequest');
     
     $self->renderer->default_handler('tt');
 
@@ -124,7 +124,7 @@ sub startup {
     $logged_in->any('/dashboard')->over(params => {method => qr/^purchase$/})->to(controller => 'Dashboard', action => 'purchase');
     $logged_in->any('/dashboard')->over(params => {method => qr/^cancel$/})->to(controller => 'Dashboard', action => 'cancel');
     $logged_in->any('/dashboard')->over(params => {method => qr/^mark_read$/})->to(controller => 'Dashboard', action => 'mark_read');
-    $logged_in->any('/dashboard')->over(save => "state")->to(controller => 'Dashboard', action => 'show', _gzip => 1);
+    $logged_in->any('/dashboard')->to(controller => 'Dashboard', action => 'show', _gzip => 1);
     $logged_in->any('/dashboard/details')->to(controller => 'Dashboard', action => 'details', _gzip => 1);
     $logged_in->websocket('/dashboard/ws')->to(controller => 'Dashboard', action =>'websocket');
 
