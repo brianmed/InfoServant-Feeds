@@ -5,7 +5,5 @@
     compress
     sharedscripts
     maxage 100
-    postrotate
-        sudo service hypnotoad-prod restart
-    endscript
+    copytruncate
 }
