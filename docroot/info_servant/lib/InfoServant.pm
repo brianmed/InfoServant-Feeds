@@ -93,10 +93,15 @@ sub startup {
 
         if (!$self->session("account_id")) {
             my $url = $self->url_for('/');
-            return($self->redirect_to($url));
+
+            $self->redirect_to($url);
+
+            return undef;
         }
         else {
              $self->set_username($self->session("account_id"));
+
+             return 1;
         }
     });
     
